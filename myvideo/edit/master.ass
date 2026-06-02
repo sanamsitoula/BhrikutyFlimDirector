@@ -1,0 +1,26 @@
+[Script Info]
+Title: Docker DevOps Ep.1
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Top,Arial,28,-1,65535,0,-2130706433,-1,0,0,0,100,100,0,0,4,0,0,8,30,30,22,0
+Style: Hook,Arial,38,-1,65535,0,-2130706433,-1,0,0,0,100,100,0,0,4,0,0,8,60,60,30,0
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:12.50,0:00:18.00,Hook,,0,0,0,,{\b1\c&HFFFFFF&}IT WORKS ON MY MACHINE!
+Dialogue: 0,0:00:18.50,0:00:24.50,Hook,,0,0,0,,{\b0\c&HB8A394&}The 4 most dangerous words in software
+Dialogue: 0,0:00:24.80,0:00:27.80,Hook,,0,0,0,,{\b1\c&HF6823B&}Docker solves this.
+Dialogue: 0,0:00:29.50,0:00:39.00,Top,,0,0,0,,{\b1\c&HF6823B&}WALL OF CONFUSION  {\b0\c&HB8A394&}Dev vs Ops — two teams, one broken pipeline
+Dialogue: 0,0:00:39.50,0:00:51.00,Top,,0,0,0,,{\b1\c&HF6823B&}DEVOPS  {\b0\c&HB8A394&}= Dev + Ops | One team, one environment
+Dialogue: 0,0:00:51.50,0:01:02.00,Top,,0,0,0,,{\b1\c&HF6823B&}DOCKER  {\b0\c&HB8A394&}Step-by-step install on Windows
+Dialogue: 0,0:01:02.50,0:01:14.00,Top,,0,0,0,,{\b1\c&HF6823B&}STEP 1  {\b0\c&HFFFFFF&}— Enable WSL2 + Virtual Machine Platform
+Dialogue: 0,0:01:14.50,0:01:27.00,Top,,0,0,0,,{\b1\c&HF6823B&}STEP 2  {\b0\c&HFFFFFF&}— wsl --set-default-version 2
+Dialogue: 0,0:01:27.50,0:01:42.00,Top,,0,0,0,,{\b1\c&HF6823B&}STEP 3  {\b0\c&HFFFFFF&}— docker.com  ->  Download Docker Desktop
+Dialogue: 0,0:01:42.50,0:01:57.00,Top,,0,0,0,,{\b1\c&HF6823B&}STEP 4  {\b0\c&HFFFFFF&}— Run installer  ->  Use WSL 2 option
+Dialogue: 0,0:01:57.50,0:02:14.00,Top,,0,0,0,,{\b1\c&HF6823B&}STEP 5  {\b0\c&HFFFFFF&}— docker --version  [OK]
+Dialogue: 0,0:02:14.50,0:02:29.00,Top,,0,0,0,,{\b1\c&HF6823B&}STEP 6  {\b0\c&HFFFFFF&}— docker run hello-world  ->  Hello from Docker!

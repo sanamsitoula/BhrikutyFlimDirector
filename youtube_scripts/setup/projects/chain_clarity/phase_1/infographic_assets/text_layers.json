@@ -1,0 +1,279 @@
+{
+  "brand_slug": "chain_clarity",
+  "phase": 1,
+  "export_note": "Import into Premiere Pro, Final Cut Pro, or DaVinci Resolve as text overlays. All timecodes reference the long-form video.",
+  "layers": [
+    {
+      "card": "card_01",
+      "title": "WHAT IS A BLOCK?",
+      "timecode_in": "02:30:00",
+      "timecode_out": "04:55:00",
+      "layers": [
+        {
+          "id": "c01_headline",
+          "text": "WHAT IS A BLOCK?",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 96,
+          "color_hex": "#00D4AA",
+          "position": { "x": "7.4%", "y": "24%" },
+          "animation": "typewriter",
+          "animation_delay_ms": 600,
+          "animation_duration_ms": 640
+        },
+        {
+          "id": "c01_subdeck",
+          "text": "One sealed ledger page. Three critical parts.",
+          "font": "Inter",
+          "weight": 400,
+          "size_px": 28,
+          "color_hex": "#8B9BB4",
+          "position": { "x": "7.4%", "y": "34%" },
+          "animation": "slide-up",
+          "animation_delay_ms": 1400,
+          "animation_duration_ms": 400
+        },
+        {
+          "id": "c01_label_data",
+          "text": "① DATA",
+          "font": "Space Grotesk",
+          "weight": 600,
+          "size_px": 48,
+          "color_hex": "#FFFFFF",
+          "position": { "x": "16%", "y": "50%" },
+          "animation": "slide-up",
+          "animation_delay_ms": 1800,
+          "animation_duration_ms": 400
+        },
+        {
+          "id": "c01_desc_data",
+          "text": "Transaction records inside",
+          "font": "Inter",
+          "weight": 400,
+          "size_px": 28,
+          "color_hex": "#8B9BB4",
+          "position": { "x": "16%", "y": "57%" },
+          "animation": "slide-up",
+          "animation_delay_ms": 1800,
+          "animation_duration_ms": 400
+        },
+        {
+          "id": "c01_label_timestamp",
+          "text": "② TIMESTAMP",
+          "font": "Space Grotesk",
+          "weight": 600,
+          "size_px": 48,
+          "color_hex": "#FFFFFF",
+          "position": { "x": "16%", "y": "63%" },
+          "animation": "slide-up",
+          "animation_delay_ms": 1950,
+          "animation_duration_ms": 400
+        },
+        {
+          "id": "c01_desc_timestamp",
+          "text": "Exact sealing moment",
+          "font": "Inter",
+          "weight": 400,
+          "size_px": 28,
+          "color_hex": "#8B9BB4",
+          "position": { "x": "16%", "y": "70%" },
+          "animation": "slide-up",
+          "animation_delay_ms": 1950,
+          "animation_duration_ms": 400
+        },
+        {
+          "id": "c01_label_hash",
+          "text": "③ HASH",
+          "font": "Space Grotesk",
+          "weight": 600,
+          "size_px": 48,
+          "color_hex": "#FFFFFF",
+          "position": { "x": "16%", "y": "76%" },
+          "animation": "slide-up",
+          "animation_delay_ms": 2100,
+          "animation_duration_ms": 400
+        },
+        {
+          "id": "c01_desc_hash",
+          "text": "A digital fingerprint",
+          "font": "Inter",
+          "weight": 400,
+          "size_px": 28,
+          "color_hex": "#8B9BB4",
+          "position": { "x": "16%", "y": "83%" },
+          "animation": "slide-up",
+          "animation_delay_ms": 2100,
+          "animation_duration_ms": 400
+        },
+        {
+          "id": "c01_stat",
+          "text": "~2,000 transactions per Bitcoin block",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 36,
+          "color_hex": "#F5A623",
+          "position": { "x": "7.4%", "y": "90%" },
+          "animation": "bounce",
+          "animation_delay_ms": 2400,
+          "animation_duration_ms": 300
+        }
+      ]
+    },
+    {
+      "card": "card_02",
+      "title": "THE HASH FINGERPRINT",
+      "timecode_in": "05:00:00",
+      "timecode_out": "07:10:00",
+      "layers": [
+        {
+          "id": "c02_headline",
+          "text": "THE HASH FINGERPRINT",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 88,
+          "color_hex": "#00D4AA",
+          "position": { "x": "7.4%", "y": "24%" },
+          "animation": "typewriter",
+          "animation_delay_ms": 600,
+          "animation_duration_ms": 480
+        },
+        {
+          "id": "c02_input1",
+          "text": "\"Hello\"",
+          "font": "JetBrains Mono",
+          "weight": 500,
+          "size_px": 52,
+          "color_hex": "#FFFFFF",
+          "position": { "x": "7.4%", "y": "45%" },
+          "animation": "slide-right",
+          "animation_delay_ms": 1800,
+          "animation_duration_ms": 400
+        },
+        {
+          "id": "c02_output1",
+          "text": "185f8db32921bd46d35cc96953e114e6...",
+          "font": "JetBrains Mono",
+          "weight": 400,
+          "size_px": 28,
+          "color_hex": "#F5A623",
+          "position": { "x": "55%", "y": "45%" },
+          "animation": "slide-right",
+          "animation_delay_ms": 2000,
+          "animation_duration_ms": 400
+        },
+        {
+          "id": "c02_input2",
+          "text": "\"Hello!\"",
+          "font": "JetBrains Mono",
+          "weight": 500,
+          "size_px": 52,
+          "color_hex": "#FFFFFF",
+          "position": { "x": "7.4%", "y": "60%" },
+          "animation": "slide-right",
+          "animation_delay_ms": 2200,
+          "animation_duration_ms": 400
+        },
+        {
+          "id": "c02_output2",
+          "text": "334d016f755cd6dc58c53a86e183882f...",
+          "font": "JetBrains Mono",
+          "weight": 400,
+          "size_px": 28,
+          "color_hex": "#00D4AA",
+          "position": { "x": "55%", "y": "60%" },
+          "animation": "slide-right",
+          "animation_delay_ms": 2400,
+          "animation_duration_ms": 400
+        },
+        {
+          "id": "c02_insight",
+          "text": "1 CHARACTER CHANGE → 100% DIFFERENT FINGERPRINT",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 52,
+          "color_hex": "#7B5CF0",
+          "position": { "x": "7.4%", "y": "76%" },
+          "animation": "bounce",
+          "animation_delay_ms": 2800,
+          "animation_duration_ms": 350
+        }
+      ]
+    },
+    {
+      "card": "card_03",
+      "title": "THE CHAIN LINK",
+      "timecode_in": "07:15:00",
+      "timecode_out": "08:55:00",
+      "layers": [
+        {
+          "id": "c03_headline",
+          "text": "THE CHAIN LINK",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 96,
+          "color_hex": "#00D4AA",
+          "position": { "x": "7.4%", "y": "24%" },
+          "animation": "typewriter",
+          "animation_delay_ms": 600,
+          "animation_duration_ms": 480
+        },
+        {
+          "id": "c03_callout",
+          "text": "PREV_HASH IS THE CHAIN",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 48,
+          "color_hex": "#7B5CF0",
+          "position": { "x": "7.4%", "y": "88%" },
+          "animation": "bounce",
+          "animation_delay_ms": 2500,
+          "animation_duration_ms": 350
+        }
+      ]
+    },
+    {
+      "card": "card_04",
+      "title": "TAMPER WITH ONE. BREAK THE CHAIN.",
+      "timecode_in": "07:30:00",
+      "timecode_out": "09:00:00",
+      "layers": [
+        {
+          "id": "c04_h1",
+          "text": "TAMPER WITH ONE.",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 92,
+          "color_hex": "#FFFFFF",
+          "position": { "x": "7.4%", "y": "24%" },
+          "animation": "typewriter",
+          "animation_delay_ms": 600,
+          "animation_duration_ms": 480
+        },
+        {
+          "id": "c04_h2",
+          "text": "BREAK THE CHAIN.",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 92,
+          "color_hex": "#00D4AA",
+          "position": { "x": "7.4%", "y": "35%" },
+          "animation": "typewriter",
+          "animation_delay_ms": 1200,
+          "animation_duration_ms": 480
+        },
+        {
+          "id": "c04_conclusion",
+          "text": "THE PAST CANNOT BE REWRITTEN.",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 52,
+          "color_hex": "#7B5CF0",
+          "position": { "x": "7.4%", "y": "88%" },
+          "animation": "bounce",
+          "animation_delay_ms": 2900,
+          "animation_duration_ms": 350
+        }
+      ]
+    }
+  ]
+}

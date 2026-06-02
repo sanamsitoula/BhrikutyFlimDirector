@@ -1,0 +1,5 @@
+file 'D:/bhrikuty/myvideo/edit/animations/slot_1/render.mp4'
+file 'D:/bhrikuty/myvideo/edit/clips_graded/seg_clip2.mp4'
+file 'D:/bhrikuty/myvideo/edit/animations/slot_2/render.mp4'
+file 'D:/bhrikuty/myvideo/edit/clips_graded/seg_clip1.mp4'
+file 'D:/bhrikuty/myvideo/edit/animations/slot_3/render.mp4'

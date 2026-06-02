@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chain Clarity — Project Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --teal:   #00D4AA;
+      --gold:   #F5A623;
+      --slate:  #8B9BB4;
+      --navy:   #0A0E1A;
+      --navy2:  #111827;
+      --navy3:  #1A2235;
+      --violet: #7B5CF0;
+      --white:  #FFFFFF;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body { background: var(--navy); color: var(--white); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.6; }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,14,26,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(139,155,180,0.12);
+      display: flex; align-items: center;
+      padding: 0 2rem; height: 60px; gap: 2rem;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-brand-text { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--white); }
+    .nav-brand-text span { font-weight: 300; color: var(--teal); }
+    nav a { font-size: 13px; color: var(--slate); text-decoration: none; transition: color 0.2s; }
+    nav a:hover { color: var(--teal); }
+    .nav-status { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--teal); }
+
+    /* ── Layout ── */
+    .page { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem 8rem; }
+    section { margin-bottom: 5rem; }
+    .section-tag { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--violet); margin-bottom: 0.4rem; }
+    h2 { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .section-desc { color: var(--slate); margin-bottom: 2rem; max-width: 580px; }
+
+    /* ── Cards ── */
+    .card { background: var(--navy3); border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); padding: 1.5rem; }
+    .card-sm { padding: 1.2rem; }
+
+    /* ── Grid helpers ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
+
+    /* ── SECTION 1: Brand ── */
+    .brand-hero { display: flex; align-items: center; gap: 2rem; margin-bottom: 2.5rem; }
+    .brand-wordmark h1 { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; line-height: 1; letter-spacing: -1.5px; }
+    .brand-wordmark h1 span { font-weight: 300; color: var(--teal); }
+    .brand-tagline { font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase; color: var(--slate); margin-top: 0.5rem; }
+
+    .swatch-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; }
+    .swatch { border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.06); }
+    .swatch:hover { transform: translateY(-2px); }
+    .swatch-color { height: 60px; }
+    .swatch-body { padding: 0.6rem 0.8rem; background: var(--navy3); }
+    .swatch-name { font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 600; }
+    .swatch-hex { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--teal); }
+    .copied-msg { font-size: 0.65rem; color: var(--teal); font-weight: 600; display: none; margin-top: 2px; }
+
+    .type-row { display: flex; flex-direction: column; gap: 1rem; }
+    .type-item { background: var(--navy3); border-radius: 10px; padding: 1.2rem 1.5rem; border: 1px solid rgba(255,255,255,0.06); }
+    .type-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--slate); margin-bottom: 0.5rem; }
+    .type-sample-h { font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700; color: var(--white); }
+    .type-sample-b { font-family: 'Inter', sans-serif; font-size: 1rem; color: var(--slate); }
+    .type-sample-c { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--gold); }
+
+    .tone-before { background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 1rem 1.2rem; }
+    .tone-after  { background: rgba(0,212,170,0.05); border: 1px solid rgba(0,212,170,0.2); border-radius: 10px; padding: 1rem 1.2rem; }
+    .tone-badge  { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem; }
+    .tone-before .tone-badge { color: #F87171; }
+    .tone-after  .tone-badge { color: var(--teal); }
+    .tone-text { font-size: 0.9rem; line-height: 1.6; color: var(--white); }
+    .tone-before .tone-text { text-decoration: line-through; opacity: 0.5; }
+
+    .forbidden-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; }
+    .fchip { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #F87171; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 5px; padding: 0.2rem 0.5rem; }
+
+    .sound-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .schip { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; background: rgba(123,92,240,0.1); color: var(--violet); border: 1px solid rgba(123,92,240,0.25); border-radius: 5px; padding: 0.2rem 0.55rem; cursor: pointer; }
+    .mchip { font-size: 0.78rem; background: rgba(0,212,170,0.08); color: var(--teal); border: 1px solid rgba(0,212,170,0.2); border-radius: 20px; padding: 0.25rem 0.7rem; }
+    .bpm-big { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: var(--teal); line-height: 1; }
+
+    /* ── SECTION 2: Roadmap ── */
+    .phase-list { display: flex; flex-direction: column; gap: 1rem; }
+    .phase-row {
+      background: var(--navy3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden; cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .phase-row:hover { border-color: rgba(0,212,170,0.3); }
+    .phase-header { display: flex; align-items: center; gap: 1rem; padding: 1.2rem 1.5rem; }
+    .phase-num { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--teal); background: rgba(0,212,170,0.1); border-radius: 6px; padding: 0.2rem 0.5rem; flex-shrink: 0; }
+    .phase-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 600; }
+    .phase-subtitle { font-size: 0.85rem; color: var(--slate); }
+    .phase-status { margin-left: auto; }
+    .badge { font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 5px; }
+    .badge-done { background: rgba(0,212,170,0.12); color: var(--teal); border: 1px solid rgba(0,212,170,0.3); }
+    .badge-pending { background: rgba(139,155,180,0.1); color: var(--slate); border: 1px solid rgba(139,155,180,0.2); }
+    .phase-body { display: none; padding: 0 1.5rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.06); }
+    .phase-body.open { display: block; }
+    .goal-list { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .goal-item { font-size: 0.875rem; color: var(--slate); padding-left: 1rem; border-left: 2px solid rgba(0,212,170,0.3); }
+
+    /* ── SECTION 3: Scripts ── */
+    .script-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .stab { font-size: 0.8rem; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); color: var(--slate); background: transparent; transition: all 0.2s; }
+    .stab.active { background: rgba(0,212,170,0.1); border-color: var(--teal); color: var(--teal); }
+    .script-panel { display: none; }
+    .script-panel.active { display: block; }
+    .script-section { margin-bottom: 1.5rem; }
+    .script-section-head { font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--teal); margin-bottom: 0.5rem; }
+    .script-spoken { background: var(--navy3); border-radius: 10px; padding: 1.2rem; border-left: 3px solid var(--teal); font-size: 0.875rem; color: var(--white); line-height: 1.7; }
+    .script-onscreen { font-size: 0.8rem; color: var(--gold); font-family: 'JetBrains Mono', monospace; margin-top: 0.5rem; padding: 0.6rem 0.8rem; background: rgba(245,166,35,0.06); border-radius: 6px; }
+
+    /* ── SECTION 4: Infographic Cards ── */
+    .card-selector { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .card-btn { font-size: 0.8rem; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); color: var(--slate); background: transparent; transition: all 0.2s; font-family: 'Space Grotesk', sans-serif; }
+    .card-btn.active { background: rgba(0,212,170,0.1); border-color: var(--teal); color: var(--teal); }
+    .card-preview { width: 100%; aspect-ratio: 1/1; max-width: 600px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+    .card-preview iframe { width: 1080px; height: 1080px; border: none; transform-origin: top left; }
+    .record-btn {
+      margin-top: 1rem; display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 1.2rem; border-radius: 8px;
+      background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3);
+      color: var(--gold); font-size: 0.82rem; cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+      transition: background 0.2s;
+    }
+    .record-btn:hover { background: rgba(245,166,35,0.2); }
+
+    /* Screen-record overlay */
+    #srOverlay {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: var(--navy); align-items: center; justify-content: center;
+      flex-direction: column;
+    }
+    #srOverlay.active { display: flex; }
+    #srCountdown { font-family: 'Space Grotesk', sans-serif; font-size: 15rem; font-weight: 700; color: var(--teal); line-height: 1; }
+    #srFrame { display: none; width: 1080px; height: 1080px; border: none; }
+    .sr-exit { position: fixed; top: 1.5rem; right: 1.5rem; font-size: 0.8rem; color: var(--slate); cursor: pointer; background: rgba(255,255,255,0.06); border-radius: 6px; padding: 0.4rem 0.8rem; border: 1px solid rgba(255,255,255,0.1); }
+
+    /* ── SECTION 5: Production Briefs ── */
+    .brief-accordion { display: flex; flex-direction: column; gap: 0.75rem; }
+    .brief-item { background: var(--navy3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); overflow: hidden; }
+    .brief-head { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.2rem; cursor: pointer; transition: background 0.2s; }
+    .brief-head:hover { background: rgba(255,255,255,0.03); }
+    .brief-icon { font-size: 1.1rem; }
+    .brief-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 600; }
+    .brief-toggle { margin-left: auto; font-size: 0.8rem; color: var(--slate); }
+    .brief-body { display: none; padding: 0 1.2rem 1.2rem; }
+    .brief-body.open { display: block; }
+    .brief-content { font-size: 0.85rem; color: var(--slate); line-height: 1.7; white-space: pre-line; }
+    .music-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+    .mtag { font-size: 0.72rem; background: rgba(0,212,170,0.08); color: var(--teal); border: 1px solid rgba(0,212,170,0.2); border-radius: 20px; padding: 0.2rem 0.6rem; }
+    .srt-dl { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.75rem; padding: 0.5rem 1rem; background: rgba(123,92,240,0.1); border: 1px solid rgba(123,92,240,0.25); border-radius: 6px; color: var(--violet); font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+
+    /* ── SECTION 6: Export ── */
+    .export-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .export-card { background: var(--navy3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); padding: 1.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+    .export-card:hover { border-color: rgba(0,212,170,0.3); transform: translateY(-2px); }
+    .export-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+    .export-label { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .export-desc { font-size: 0.8rem; color: var(--slate); }
+
+    /* ── Footer ── */
+    footer { border-top: 1px solid rgba(139,155,180,0.12); padding: 2rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: var(--slate); }
+    footer strong { color: var(--teal); }
+
+    @media(max-width:768px) {
+      .grid-2,.grid-3,.grid-5,.swatch-grid { grid-template-columns:1fr; }
+      nav { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-brand" href="#brand">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 62" width="36" height="31">
+      <polygon points="42,30 32,47 12,47 2,30 12,13 32,13" fill="#00D4AA"/>
+      <polygon points="68,30 58,47 38,47 28,30 38,13 58,13" fill="#0A0E1A" stroke="#7B5CF0" stroke-width="2.5"/>
+      <polygon points="35,18 42,30 35,42 28,30" fill="#F5A623"/>
+    </svg>
+    <span class="nav-brand-text">Chain <span>Clarity</span></span>
+  </a>
+  <a href="#brand">Brand</a>
+  <a href="#roadmap">Roadmap</a>
+  <a href="#scripts">Scripts</a>
+  <a href="#cards">Cards</a>
+  <a href="#briefs">Briefs</a>
+  <a href="#export">Export</a>
+  <a href="#scripts2">Phase 2</a>
+  <a href="#scripts3">Phase 3</a>
+  <span class="nav-status">Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅</span>
+</nav>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 1 — BRAND IDENTITY               -->
+<!-- ══════════════════════════════════════════ -->
+<section id="brand">
+  <p class="section-tag">01 — Brand Identity</p>
+  <h2>Chain Clarity</h2>
+  <p class="section-desc">The single source of truth for all brand decisions.</p>
+
+  <div class="brand-hero">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 62" width="80" height="69">
+      <polygon points="42,30 32,47 12,47 2,30 12,13 32,13" fill="#00D4AA"/>
+      <polygon points="68,30 58,47 38,47 28,30 38,13 58,13" fill="#0A0E1A" stroke="#7B5CF0" stroke-width="2.5"/>
+      <polygon points="35,18 42,30 35,42 28,30" fill="#F5A623"/>
+    </svg>
+    <div class="brand-wordmark">
+      <h1>Chain <span>Clarity</span></h1>
+      <p class="brand-tagline">Blockchain, without the noise.</p>
+    </div>
+  </div>
+
+  <!-- Color swatches -->
+  <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1rem;margin-bottom:1rem;color:var(--slate);letter-spacing:2px;text-transform:uppercase;font-size:0.7rem;">Color Palette — Click to copy HEX</h3>
+  <div class="swatch-grid" style="margin-bottom:2.5rem;">
+    <div class="swatch" onclick="copyColor('#00D4AA',this)">
+      <div class="swatch-color" style="background:#00D4AA;"></div>
+      <div class="swatch-body"><div class="swatch-name">Electric Teal</div><div class="swatch-hex">#00D4AA</div><div class="copied-msg">✓ Copied!</div></div>
+    </div>
+    <div class="swatch" onclick="copyColor('#F5A623',this)">
+      <div class="swatch-color" style="background:#F5A623;"></div>
+      <div class="swatch-body"><div class="swatch-name">Deep Gold</div><div class="swatch-hex">#F5A623</div><div class="copied-msg">✓ Copied!</div></div>
+    </div>
+    <div class="swatch" onclick="copyColor('#8B9BB4',this)">
+      <div class="swatch-color" style="background:#8B9BB4;"></div>
+      <div class="swatch-body"><div class="swatch-name">Slate</div><div class="swatch-hex">#8B9BB4</div><div class="copied-msg">✓ Copied!</div></div>
+    </div>
+    <div class="swatch" onclick="copyColor('#0A0E1A',this)" style="border-color:rgba(255,255,255,0.12);">
+      <div class="swatch-color" style="background:#0A0E1A;border-bottom:1px solid rgba(255,255,255,0.08);"></div>
+      <div class="swatch-body"><div class="swatch-name">Deep Navy</div><div class="swatch-hex">#0A0E1A</div><div class="copied-msg">✓ Copied!</div></div>
+    </div>
+    <div class="swatch" onclick="copyColor('#7B5CF0',this)">
+      <div class="swatch-color" style="background:#7B5CF0;"></div>
+      <div class="swatch-body"><div class="swatch-name">Electric Violet</div><div class="swatch-hex">#7B5CF0</div><div class="copied-msg">✓ Copied!</div></div>
+    </div>
+  </div>
+
+  <!-- Typography -->
+  <h3 style="font-family:'Space Grotesk',sans-serif;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--slate);margin-bottom:1rem;">Typography</h3>
+  <div class="type-row" style="margin-bottom:2.5rem;">
+    <div class="type-item">
+      <div class="type-label">Heading — Space Grotesk 700</div>
+      <div class="type-sample-h">Blockchain is a <span style="color:var(--teal);">shared ledger</span> nobody owns.</div>
+    </div>
+    <div class="type-item">
+      <div class="type-label">Body — Inter 400</div>
+      <div class="type-sample-b">Every node in the network holds an identical copy of the chain. When someone proposes a new block, every node independently validates it before it is accepted.</div>
+    </div>
+    <div class="type-item">
+      <div class="type-label">Code — JetBrains Mono 400</div>
+      <div class="type-sample-c">SHA-256("Hello") → 185f8db32921bd46d35cc96953e114e6...</div>
+    </div>
+  </div>
+
+  <!-- Tone examples -->
+  <h3 style="font-family:'Space Grotesk',sans-serif;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--slate);margin-bottom:1rem;">Tone of Voice</h3>
+  <div class="grid-2" style="margin-bottom:1.5rem;">
+    <div class="tone-before">
+      <div class="tone-badge">✗ Wrong</div>
+      <div class="tone-text">"Blockchain is simply a distributed ledger — basically a chain of blocks connected through cryptographic hashes. It's easy once you get the basics."</div>
+    </div>
+    <div class="tone-after">
+      <div class="tone-badge">✓ Right</div>
+      <div class="tone-text">"A blockchain is an append-only ledger. Imagine a shared notebook where everyone has a copy — and adding a page notifies every single person in the room."</div>
+    </div>
+  </div>
+  <div class="forbidden-chips">
+    <span style="font-size:0.7rem;color:var(--slate);margin-right:0.25rem;">Forbidden:</span>
+    <span class="fchip">moon</span><span class="fchip">lambo</span><span class="fchip">HODL</span><span class="fchip">simply</span><span class="fchip">just</span><span class="fchip">obviously</span><span class="fchip">easy</span><span class="fchip">basic</span><span class="fchip">pump</span><span class="fchip">dump</span><span class="fchip">guaranteed</span><span class="fchip">rich</span><span class="fchip">explosive</span>
+  </div>
+
+  <!-- Sound identity -->
+  <div class="grid-2" style="margin-top:2.5rem;">
+    <div class="card">
+      <div class="section-tag" style="margin-bottom:0.75rem;">Sound Identity · BPM Range</div>
+      <div class="bpm-big">88–112</div>
+      <p style="font-size:0.82rem;color:var(--slate);margin-top:0.3rem;">Electronic ambient / lo-fi tech</p>
+      <div class="sound-chips" style="margin-top:1rem;">
+        <span class="mchip">Focused</span><span class="mchip">Curious</span><span class="mchip">Empowering</span><span class="mchip">Intelligent</span><span class="mchip">Grounded</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-tag" style="margin-bottom:0.75rem;">Search Terms (click to copy)</div>
+      <div class="sound-chips">
+        <span class="schip" onclick="copyText('lo-fi electronic focused',this)">lo-fi electronic focused</span>
+        <span class="schip" onclick="copyText('ambient tech background',this)">ambient tech background</span>
+        <span class="schip" onclick="copyText('minimal electronic study',this)">minimal electronic study</span>
+        <span class="schip" onclick="copyText('calm tech beat',this)">calm tech beat</span>
+        <span class="schip" onclick="copyText('intelligent electronic chill',this)">intelligent electronic chill</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 2 — ROADMAP                      -->
+<!-- ══════════════════════════════════════════ -->
+<section id="roadmap">
+  <p class="section-tag">02 — Project Roadmap</p>
+  <h2>5 Phases · 10 Videos</h2>
+  <p class="section-desc">Click any phase to expand goals and content breakdown.</p>
+
+  <div class="phase-list">
+
+    <div class="phase-row" onclick="togglePhase(this)">
+      <div class="phase-header">
+        <span class="phase-num">Phase 1</span>
+        <div><div class="phase-title">The Chain Explained</div><div class="phase-subtitle">What blockchain is and why it exists</div></div>
+        <span class="phase-status"><span class="badge badge-done">✅ Complete</span></span>
+      </div>
+      <div class="phase-body">
+        <div class="goal-list">
+          <div class="goal-item">Understand why trust-without-middlemen is a hard computer science problem</div>
+          <div class="goal-item">Explain what a blockchain is using non-financial analogies</div>
+          <div class="goal-item">Describe the role of nodes, blocks, hashes, and consensus</div>
+          <div class="goal-item">Understand immutability — why altering a block breaks the chain</div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <span class="badge badge-done">Long-form script ✅</span>
+          <span class="badge badge-done">Short-form script ✅</span>
+          <span class="badge badge-done">4 Infographic cards ✅</span>
+          <span class="badge badge-done">Voiceover brief ✅</span>
+          <span class="badge badge-done">Music brief ✅</span>
+          <span class="badge badge-done">115 subtitle cues ✅</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row" onclick="togglePhase(this)">
+      <div class="phase-header">
+        <span class="phase-num">Phase 2</span>
+        <div><div class="phase-title">Bitcoin & Ethereum Deep Dive</div><div class="phase-subtitle">The two protocols that built the industry</div></div>
+        <span class="phase-status"><span class="badge badge-done">✅ Complete</span></span>
+      </div>
+      <div class="phase-body">
+        <div class="goal-list">
+          <div class="goal-item">Contrast Proof of Work vs Proof of Stake mechanically</div>
+          <div class="goal-item">Explain Bitcoin's fixed supply model — halvings, 21M cap, miners</div>
+          <div class="goal-item">Understand what Ethereum adds: smart contracts and programmable money</div>
+          <div class="goal-item">Walk through a transaction end-to-end: wallets, keys, gas, confirmation</div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <span class="badge badge-done">Long-form script ✅</span>
+          <span class="badge badge-done">Short-form script ✅</span>
+          <span class="badge badge-done">3 Infographic cards ✅</span>
+          <span class="badge badge-done">Voiceover brief ✅</span>
+          <span class="badge badge-done">Music brief ✅</span>
+          <span class="badge badge-done">161 subtitle cues ✅</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row" onclick="togglePhase(this)">
+      <div class="phase-header">
+        <span class="phase-num">Phase 3</span>
+        <div><div class="phase-title">DeFi & Smart Contracts</div><div class="phase-subtitle">How finance works without banks</div></div>
+        <span class="phase-status"><span class="badge badge-done">✅ Complete</span></span>
+      </div>
+      <div class="phase-body">
+        <div class="goal-list">
+          <div class="goal-item">Explain smart contracts using the vending machine analogy</div>
+          <div class="goal-item">Understand how DeFi lending and borrowing protocols work step by step</div>
+          <div class="goal-item">Explain liquidity pools and AMMs plainly — no finance background required</div>
+          <div class="goal-item">Identify real risks: smart contract bugs, rug pulls, impermanent loss</div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <span class="badge badge-done">Long-form script ✅</span>
+          <span class="badge badge-done">Short-form script ✅</span>
+          <span class="badge badge-done">3 Infographic cards ✅</span>
+          <span class="badge badge-done">Voiceover brief ✅</span>
+          <span class="badge badge-done">Music brief ✅</span>
+          <span class="badge badge-done">174 subtitle cues ✅</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row" onclick="togglePhase(this)">
+      <div class="phase-header">
+        <span class="phase-num">Phase 4</span>
+        <div><div class="phase-title">Security & Self-Custody</div><div class="phase-subtitle">How to actually keep crypto safe</div></div>
+        <span class="phase-status"><span class="badge badge-pending">Pending</span></span>
+      </div>
+      <div class="phase-body">
+        <div class="goal-list">
+          <div class="goal-item">Distinguish hot wallets from cold wallets with real tradeoffs</div>
+          <div class="goal-item">Understand the seed phrase fully — what it is, why it is everything</div>
+          <div class="goal-item">Identify the top 5 attack vectors used against crypto holders</div>
+          <div class="goal-item">Build and apply a personal security checklist</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row" onclick="togglePhase(this)">
+      <div class="phase-header">
+        <span class="phase-num">Phase 5</span>
+        <div><div class="phase-title">Blockchain Beyond Crypto</div><div class="phase-subtitle">Real-world applications that aren't about trading</div></div>
+        <span class="phase-status"><span class="badge badge-pending">Pending</span></span>
+      </div>
+      <div class="phase-body">
+        <div class="goal-list">
+          <div class="goal-item">Map blockchain use cases across supply chain, identity, and health records</div>
+          <div class="goal-item">Apply a decision framework: when does blockchain actually solve a problem?</div>
+          <div class="goal-item">Explain NFTs accurately — as ownership records, not speculative assets</div>
+          <div class="goal-item">Understand Layer 2 solutions and why they are necessary for mass adoption</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 3 — SCRIPTS                      -->
+<!-- ══════════════════════════════════════════ -->
+<section id="scripts">
+  <p class="section-tag">03 — Scripts · Phase 1</p>
+  <h2>How Blockchain Works</h2>
+  <p class="section-desc">Long-form (12 min) and short-form (65s) for Phase 1.</p>
+
+  <div class="script-tabs">
+    <button class="stab active" onclick="switchScript('long',this)">Long-Form · YouTube 12min</button>
+    <button class="stab" onclick="switchScript('short',this)">Short-Form · Reels 65s</button>
+  </div>
+
+  <div id="script-long" class="script-panel active">
+    <div class="script-section">
+      <div class="script-section-head">HOOK (0:00–0:12)</div>
+      <div class="script-spoken">"In 2022, a crypto exchange called FTX collapsed in 72 hours. Eight billion dollars in customer funds — gone. No warning. No recourse. No refunds. That same week, the Bitcoin blockchain processed over 200,000 transactions. Zero errors. Zero downtime. Same industry. Completely different result. Today, we are going to understand exactly why."</div>
+      <div class="script-onscreen">ON-SCREEN: "FTX: $8B lost in 72 hours" · "Bitcoin network: 0 errors that week"</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTION 1 — THE TRUST PROBLEM (0:12–2:30)</div>
+      <div class="script-spoken">"Every financial system has the same design flaw. It requires you to trust someone else. [...]  Computer scientists called this the Byzantine Generals Problem. [...] Then in 2008, an anonymous developer named Satoshi Nakamoto published a 9-page paper. The solution: a chain of blocks."</div>
+      <div class="script-onscreen">ON-SCREEN: Byzantine Generals diagram · "Satoshi Nakamoto · 2008"</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTIONS 2–5 + CTA</div>
+      <div class="script-spoken" style="color:var(--slate);">Full script in phase_1/script.md — covers What Is a Block, The Hash, The Chain, The Network, and CTA with exact on-screen cues and infographic timing references.</div>
+    </div>
+  </div>
+
+  <div id="script-short" class="script-panel">
+    <div class="script-section">
+      <div class="script-section-head">HOOK (0:00–0:04)</div>
+      <div class="script-spoken">"Here is why Bitcoin's history can never be secretly changed."</div>
+      <div class="script-onscreen">ON-SCREEN: "Bitcoin: 14 years. Never rewritten."</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">MAIN (0:04–0:52)</div>
+      <div class="script-spoken">"A block is a sealed container. It holds three things. ONE: the transaction data. TWO: the timestamp. THREE: the hash — a digital fingerprint of everything inside. Change one byte of that data — the fingerprint changes completely. [...] If someone alters a block from six months ago — its fingerprint changes. The next block no longer matches. The chain breaks forward. And thousands of computers around the world notice immediately."</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">CTA (0:52–1:05)</div>
+      <div class="script-spoken">"That is immutability. Full 12-minute breakdown at the link. Chain Clarity — blockchain, without the noise. Subscribe for Phase 2."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 4 — INFOGRAPHIC CARDS            -->
+<!-- ══════════════════════════════════════════ -->
+<section id="cards">
+  <p class="section-tag">04 — Infographic Assets</p>
+  <h2>Animated Cards</h2>
+  <p class="section-desc">Live previews — each card is screen-record ready. Click "Screen Record Mode" to go fullscreen with a 3-2-1 countdown.</p>
+
+  <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+    <button class="stab active" onclick="switchPhaseCards(1,this)">Phase 1 · 4 Cards</button>
+    <button class="stab" onclick="switchPhaseCards(2,this)">Phase 2 · 3 Cards</button>
+    <button class="stab" onclick="switchPhaseCards(3,this)">Phase 3 · 3 Cards</button>
+  </div>
+
+  <div id="phase1-cards">
+    <div class="card-selector">
+      <button class="card-btn active" onclick="selectCard(0,this,'p1')">Card 01 · What Is a Block?</button>
+      <button class="card-btn" onclick="selectCard(1,this,'p1')">Card 02 · Hash Fingerprint</button>
+      <button class="card-btn" onclick="selectCard(2,this,'p1')">Card 03 · Chain Link</button>
+      <button class="card-btn" onclick="selectCard(3,this,'p1')">Card 04 · Tamper = Break</button>
+    </div>
+  </div>
+
+  <div id="phase2-cards" style="display:none;">
+    <div class="card-selector">
+      <button class="card-btn active" onclick="selectCard(0,this,'p2')">Card 01 · PoW vs PoS</button>
+      <button class="card-btn" onclick="selectCard(1,this,'p2')">Card 02 · 21M Hard Cap</button>
+      <button class="card-btn" onclick="selectCard(2,this,'p2')">Card 03 · BTC vs ETH</button>
+    </div>
+  </div>
+
+  <div id="phase3-cards" style="display:none;">
+    <div class="card-selector">
+      <button class="card-btn active" onclick="selectCard(0,this,'p3')">Card 01 · Smart Contract IF/THEN</button>
+      <button class="card-btn" onclick="selectCard(1,this,'p3')">Card 02 · DeFi Lending Flow</button>
+      <button class="card-btn" onclick="selectCard(2,this,'p3')">Card 03 · AMM x × y = k</button>
+    </div>
+  </div>
+
+  <div class="card-preview" id="cardPreview">
+    <iframe id="cardFrame" src="phase_1/infographic_assets/card_01.html" style="transform:scale(0.5556);transform-origin:top left;"></iframe>
+  </div>
+
+  <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;">
+    <button class="record-btn" onclick="enterScreenRecord()">⏺ Screen Record Mode (3-2-1 Countdown)</button>
+    <button class="record-btn" style="background:rgba(123,92,240,0.1);border-color:rgba(123,92,240,0.3);color:var(--violet);" onclick="replayCard()">↺ Replay Animation</button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 3b — SCRIPTS PHASE 2             -->
+<!-- ══════════════════════════════════════════ -->
+<section id="scripts2">
+  <p class="section-tag">03b — Scripts · Phase 2</p>
+  <h2>Bitcoin vs Ethereum — What's Actually Different</h2>
+  <p class="section-desc">Long-form (14 min) and short-form (65s) for Phase 2.</p>
+
+  <div class="script-tabs">
+    <button class="stab active" onclick="switchScript2('long2',this)">Long-Form · YouTube 14min</button>
+    <button class="stab" onclick="switchScript2('short2',this)">Short-Form · Reels 65s</button>
+  </div>
+
+  <div id="script-long2" class="script-panel active">
+    <div class="script-section">
+      <div class="script-section-head">HOOK (0:00–0:15)</div>
+      <div class="script-spoken">"What if your money had a hard limit? Not a soft limit. Not a government policy. Not a promise. A mathematical guarantee, enforced by code. 21 million. No more. Ever."</div>
+      <div class="script-onscreen">ON-SCREEN: "21,000,000 BTC — hard maximum. Forever." [#00D4AA · counter] · "No vote. No exception. No override." [#8B9BB4]</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTION 1 — WHAT MAKES BITCOIN DIFFERENT (0:15–2:30)</div>
+      <div class="script-spoken">"Digital money is not new. PayPal launched in 1998. [...] So what did Bitcoin actually change? Three things. First: no issuer. [...] Third: a fixed supply. No entity can create more Bitcoin. The total supply is 21 million — written into the code in 2009. [...] Bitcoin's rules are set by math. The code IS the policy."</div>
+      <div class="script-onscreen">ON-SCREEN: "NO ISSUER · NO GATEKEEPER · FIXED SUPPLY" [#00D4AA] · "Bitcoin's rules: set by math, not committee" [#8B9BB4]</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTION 2 — PROOF OF WORK (2:30–5:00) · INFOGRAPHIC: card_01</div>
+      <div class="script-spoken">"Every 10 minutes, miners compete to solve a puzzle. The puzzle: find a number — called a nonce — such that when you combine it with the block's data and hash the result, the output starts with a specific number of zeros. There is no shortcut. There is no formula. [...] This mechanism is called Proof of Work."</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTION 3 — BITCOIN'S SUPPLY (5:00–7:30) · INFOGRAPHIC: card_02</div>
+      <div class="script-spoken">"2009: 50 BTC per block. 2012: 25 BTC. 2016: 12.5 BTC. 2020: 6.25 BTC. 2024: 3.125 BTC. [...] Total supply: 21 million. Final. As of 2024, about 19.7 million Bitcoin have already been mined. Only 1.3 million remain."</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTION 4 — ETHEREUM (7:30–9:30) · INFOGRAPHIC: card_03</div>
+      <div class="script-spoken">"In 2013, a 19-year-old named Vitalik Buterin asked a different question. What if we could run code without a server? His insight: a blockchain is not a ledger. It is a shared, unstoppable computer. [...] Bitcoin is a vending machine. Ethereum is a general-purpose computer."</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTIONS 5–6 + CTA (9:30–14:00)</div>
+      <div class="script-spoken" style="color:var(--slate);">Section 5: Proof of Stake / The Merge (Sept 15 2022) — 32 ETH staking, slashing, −99.9% energy. Section 6: Private key → public key → address, mailbox analogy. CTA: Phase 3 DeFi tease. Full script in phase_2/script.md</div>
+    </div>
+  </div>
+
+  <div id="script-short2" class="script-panel">
+    <div class="script-section">
+      <div class="script-section-head">HOOK (0:00–0:04)</div>
+      <div class="script-spoken">"Your crypto is not actually inside your wallet."</div>
+      <div class="script-onscreen">TITLE CARD: "YOUR BITCOIN ISN'T IN YOUR WALLET." · "Common misconception: fixed." [#00D4AA]</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">MAIN (0:04–0:52)</div>
+      <div class="script-spoken">"Your Bitcoin lives on the blockchain. What the wallet holds is the key that proves you own it. There are three layers. ONE: the private key. A 256-bit random number. Whoever holds this owns the coins. Lose it — gone forever. [...] TWO: the public key. Derived from the private key through one-way math. [...] THREE: your address. This is what you share. Like a mailbox number."</div>
+      <div class="script-onscreen">ON-SCREEN: "1 · PRIVATE KEY → proves ownership" [#F5A623] · "2 · PUBLIC KEY → one-way derived" [#8B9BB4] · "3 · ADDRESS → your shareable mailbox" [#00D4AA] · "Lose private key → coins gone. Forever." [#7B5CF0]</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">CTA (0:52–1:05)</div>
+      <div class="script-spoken">"Full 14-minute breakdown: Bitcoin vs Ethereum. Chain Clarity — blockchain, without the noise. Subscribe for Phase 3: DeFi."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 3c — SCRIPTS PHASE 3             -->
+<!-- ══════════════════════════════════════════ -->
+<section id="scripts3">
+  <p class="section-tag">03c — Scripts · Phase 3</p>
+  <h2>DeFi & Smart Contracts — How Finance Works Without Banks</h2>
+  <p class="section-desc">Long-form (14 min) and short-form (65s) for Phase 3.</p>
+
+  <div class="script-tabs">
+    <button class="stab active" onclick="switchScript3('long3',this)">Long-Form · YouTube 14min</button>
+    <button class="stab" onclick="switchScript3('short3',this)">Short-Form · Reels 65s</button>
+  </div>
+
+  <div id="script-long3" class="script-panel active">
+    <div class="script-section">
+      <div class="script-section-head">HOOK (0:00–0:15)</div>
+      <div class="script-spoken">"In 2010, getting a bank loan meant paperwork, credit checks, meetings. In 2024, a protocol lent someone $10 million in seconds. No meeting. No signature. No banker. The code processes the loan. Instantly."</div>
+      <div class="script-onscreen">ON-SCREEN: "THE CODE PROCESSES THE LOAN." [#00D4AA · 72px]</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTION 1 — SMART CONTRACTS (0:15–2:30) · INFOGRAPHIC: card_01</div>
+      <div class="script-spoken">"A smart contract is a program that runs on a blockchain. When conditions are met, it executes automatically. No one needs to approve it. No one can stop it. Think of a vending machine. You insert money. The machine checks the amount. If correct, it releases the snack. No human involvement. That's a smart contract. [...] The code is the bank."</div>
+      <div class="script-onscreen">ON-SCREEN: IF/THEN flow — "IF: Deposit 150 USD ETH" → "THEN: Release 100 USD loan" → "IF: Collateral &lt; 120 USD" → "THEN: Auto-liquidate" · "THE CODE IS THE BANK." [#00D4AA · 80px]</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTION 2 — DEFI LENDING (2:30–5:00) · INFOGRAPHIC: card_02</div>
+      <div class="script-spoken">"The two biggest DeFi lending protocols are Aave and Compound. [...] To borrow 100 dollars of USDC, you post 150 dollars of ETH. That's 150% collateralization. [...] Think of it like a pawn shop with no pawnbroker. [...] Automatic. Instant. Unstoppable."</div>
+      <div class="script-onscreen">ON-SCREEN: LENDER [#00D4AA] ⇌ POOL ⇌ BORROWER [#F5A623] · "OVERCOLLATERALIZED: 150%+" [#F5A623]</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTION 3 — AMMs (5:00–7:30) · INFOGRAPHIC: card_03</div>
+      <div class="script-spoken">"There's no order book. Instead: a liquidity pool. Two assets sit in a smart contract. The price is set by a formula: x times y equals k. [...] No one sets the price. The math does. Protocols like Uniswap, Curve, and Balancer use this model."</div>
+      <div class="script-onscreen">ON-SCREEN: "x × y = k" [JetBrains Mono · #F5A623 · 72px] · "NO ONE SETS THE PRICE. THE MATH DOES." [#00D4AA]</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTION 4 — YIELD + RISKS (7:30–9:30)</div>
+      <div class="script-spoken">"Two yield sources: trading fees and protocol incentives. [...] But there's a catch: impermanent loss. [...] In 2020, Harvest Finance lost $34 million in a single transaction. [...] If you don't understand where the yield comes from — walk away."</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTION 5 — STABLECOINS (9:30–11:30)</div>
+      <div class="script-spoken">"Three types: fiat-backed (USDC/USDT), crypto-backed (DAI), algorithmic. In May 2022, Terra's UST lost its peg. Forty billion dollars in value — destroyed in four days. The mechanism failed. The peg broke."</div>
+      <div class="script-onscreen">ON-SCREEN: "$40 BILLION" [#F5A623 · 96px] · "Destroyed in 4 days." [#FFFFFF · 48px]</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">SECTION 6 — RISKS + CTA (11:30–14:00)</div>
+      <div class="script-spoken" style="color:var(--slate);">Smart contract risk · Protocol risk · Liquidation risk · Rug pulls ("This is fraud.") · Oracle risk · Regulatory risk. CTA: Phase 4 tease — Security &amp; Self-Custody. Full script in phase_3/script.md</div>
+    </div>
+  </div>
+
+  <div id="script-short3" class="script-panel">
+    <div class="script-section">
+      <div class="script-section-head">HOOK (0:00–0:04)</div>
+      <div class="script-spoken">"A smart contract does something no bank can. It cannot lie."</div>
+      <div class="script-onscreen">TITLE: "SMART CONTRACT" · "Cannot lie. Cannot delay. Cannot deny." [#00D4AA]</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">MAIN (0:04–0:52)</div>
+      <div class="script-spoken">"A smart contract is a program that runs on a blockchain. No human controls it. No company owns it. Once deployed, it executes exactly as coded. Three rules: ONE — conditions are in the code. TWO — when met, execution is automatic. THREE — nobody can stop it."</div>
+      <div class="script-onscreen">ON-SCREEN: "1 · CONDITIONS IN CODE" [#F5A623] · "2 · EXECUTION IS AUTOMATIC" [#00D4AA] · "3 · NOBODY CAN STOP IT" [#7B5CF0]</div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">CTA (0:52–1:05)</div>
+      <div class="script-spoken">"Full 14-minute breakdown: DeFi, lending, AMMs, stablecoins. Chain Clarity — blockchain, without the noise."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 5 — PRODUCTION BRIEFS            -->
+<!-- ══════════════════════════════════════════ -->
+<section id="briefs">
+  <p class="section-tag">05 — Production Briefs</p>
+  <h2>Creator Toolkit</h2>
+  <p class="section-desc">Everything the editor, VO artist, and music supervisor need for both phases.</p>
+
+  <div style="margin-bottom:1.5rem;">
+    <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:0.75rem;">Phase 1 Briefs</div>
+  </div>
+
+  <div class="brief-accordion">
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">🎙️</span>
+        <span class="brief-title">Voiceover Brief — Tone, Pace & Emphasis Markers</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">Key delivery rules for this video:
+
+• Hook: Matter-of-fact. No sensationalism. One beat between sentences.
+• "Eight billion dollars in customer funds — gone." → [PAUSE 0.8s after "gone."]
+• "No warning. No recourse. No refunds." → Staccato. Each word hits.
+• Byzantine Generals analogy → Storytelling voice. Slightly slower. Vivid.
+• "But one general is a traitor." → [DRAMATIC PAUSE 0.5s before.] Slow.
+• "The solution: a chain of blocks." → [PAUSE 0.5s before.] Quiet revelation.
+• Hash section: Technical but accessible. Demo-mode pace.
+• Cascade section: SPEED UP through "block 501... 502... all the way to present"
+• "The past is locked." → SLOW DOWN. Let it land.
+
+Full line-by-line brief in: phase_1/voiceover_brief.md</div>
+      </div>
+    </div>
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">🎵</span>
+        <span class="brief-title">Music Brief — BPM, Energy & Search Terms by Section</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">Section-by-section music map:</div>
+        <div class="music-tags">
+          <span class="mtag">Hook: 105–110 BPM · dramatic tension · sparse piano/sub-bass</span>
+          <span class="mtag">Section 1: 90–95 BPM · curious, building · lo-fi background</span>
+          <span class="mtag">Section 2: 92–98 BPM · methodical · steady lo-fi beat</span>
+          <span class="mtag">Section 3: 98–105 BPM · technical curiosity · arpeggios</span>
+          <span class="mtag">Section 4: 100–108 BPM · escalating tension · cascade moment</span>
+          <span class="mtag">Section 5: 98–105 BPM · empowering, resolved · warm pads</span>
+          <span class="mtag">CTA: 105–110 BPM · optimistic, forward-looking · melodic hook</span>
+        </div>
+        <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--slate);">Full brief in: phase_1/music_brief.md</div>
+      </div>
+    </div>
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">🎬</span>
+        <span class="brief-title">Clip Assembly Brief — Shot-by-Shot Timeline</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">36 shots across 12 minutes. Key moments:
+
+00:00–00:12 · HOOK: FTX headlines b-roll → Bitcoin network visual contrast
+02:30–05:00 · SECTION 2: card_01.html screen-record + ledger b-roll
+05:00–07:15 · SECTION 3: card_02.html screen-record (hash demo live)
+07:15–09:00 · SECTION 4: card_03 + card_04 cascade animation
+09:00–11:00 · SECTION 5: Node network motion graphic + stat counter
+11:00–12:00 · CTA: End screen with Chain Clarity logo + subscribe chip
+
+Transitions: hard cuts (energy beats) · cross-dissolve (b-roll↔infographics) · swipe-left (section changes)
+Color grade: desaturate b-roll 20%, no warm LUT.
+
+Full 36-shot list in: phase_1/clip_brief.md</div>
+      </div>
+    </div>
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">💬</span>
+        <span class="brief-title">Subtitles — 115 Cues · Download .SRT</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">115 subtitle cues · max 7 words per line · max 2 lines per cue · 1.5–4.5s duration each. Ready for import into Premiere Pro, DaVinci Resolve, CapCut, or YouTube Studio.</div>
+        <div class="srt-dl" onclick="downloadSRT(1)">⬇ Download subtitles.srt (Phase 1)</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Phase 2 Briefs -->
+  <div style="margin-top:2.5rem;margin-bottom:0.75rem;">
+    <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--violet);margin-bottom:0.75rem;">Phase 2 Briefs — Bitcoin &amp; Ethereum Deep Dive</div>
+  </div>
+
+  <div class="brief-accordion">
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">🎙️</span>
+        <span class="brief-title">Voiceover Brief — Phase 2 · Tone, Pace &amp; Emphasis Markers</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">Key delivery rules for Phase 2:
+
+• Hook: Weight and wonder. "21 million. No more. Ever." → [PAUSE 0.8s before.] Let each word land separately.
+• "The code IS the policy." → [EMPHASIZE IS.] Slight pause before. This is the section's peak line.
+• Proof of Work section: Methodical pace. You are explaining a mechanical process.
+• Halving countdown (50 → 25 → 12.5...) → [SPEED UP slightly.] Momentum building.
+• "Total supply: 21 million. Final." → [SLOW DOWN dramatically.] Pause 1s after.
+• "What if we could run code without a server?" → [PAUSE 0.5s before.] Revelation tone.
+• Wallet/keys section: Slowest pace in the video. High practical stakes.
+• "Lose it — the coins are inaccessible. Forever." → [PAUSE 0.5s after "inaccessible."] Very deliberate.
+
+Full line-by-line brief in: phase_2/voiceover_brief.md</div>
+      </div>
+    </div>
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">🎵</span>
+        <span class="brief-title">Music Brief — Phase 2 · BPM, Energy &amp; Search Terms by Section</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">Phase 2 is slightly more confident and revelatory than Phase 1. Music should feel like momentum, not just explanation.</div>
+        <div class="music-tags">
+          <span class="mtag">Hook: 105–110 BPM · weight + wonder · deep bass pulse, sparse piano</span>
+          <span class="mtag">Section 1: 92–96 BPM · intellectual curiosity · minimal lo-fi</span>
+          <span class="mtag">Section 2: 96–102 BPM · mechanical precision · rhythmic pulse, arpeggio</span>
+          <span class="mtag">Section 3: 98–105 BPM · building reverence · warm pad, rhythmic pulse</span>
+          <span class="mtag">Section 4: 100–108 BPM · revelation + possibility · brighter synth, more harmonic richness</span>
+          <span class="mtag">Section 5: 98–105 BPM · analytical, resolved · cleaner harmonics vs PoW</span>
+          <span class="mtag">Section 6: 92–98 BPM · precise + practical · back to minimal, soft pad</span>
+          <span class="mtag">CTA: 105–110 BPM · satisfying, forward · fade up 20% → 35%</span>
+        </div>
+        <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--slate);">Full brief in: phase_2/music_brief.md</div>
+      </div>
+    </div>
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">🎬</span>
+        <span class="brief-title">Clip Assembly Brief — Phase 2 · 52-Shot Timeline</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">52 shots across 14 minutes. Key infographic insert moments:
+
+03:05–03:25 · SECTION 2: card_01.html (PoW vs PoS) — full-screen, dissolve 0.4s
+05:20–05:40 · SECTION 3: card_02.html (21M halving timeline) — hold 8s for counter animation
+07:55–08:10 · SECTION 4: card_03.html (BTC vs ETH) — cut on "run code without a server?"
+09:50–10:10 · SECTION 5: card_01.html right column (PoS side highlight)
+
+Color grade: Base #0A0E1A · teal in shadows · gold pull on mining shots · violet/teal on Ethereum sections
+Key moment: "Total supply: 21 million. Final." — hold stat card + music pause 1s
+
+Full 52-shot list in: phase_2/clip_brief.md</div>
+      </div>
+    </div>
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">💬</span>
+        <span class="brief-title">Subtitles — Phase 2 · 161 Cues · Download .SRT</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">161 subtitle cues covering the full 14-minute script · max 7 words per line · max 2 lines per cue · 1.5–4.5s duration each. Ready for import into Premiere Pro, DaVinci Resolve, CapCut, or YouTube Studio.</div>
+        <div class="srt-dl" onclick="downloadSRT(2)">⬇ Download subtitles.srt (Phase 2)</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+  <!-- Phase 3 Briefs -->
+  <div style="margin-top:2.5rem;margin-bottom:0.75rem;">
+    <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:0.75rem;">Phase 3 Briefs — DeFi &amp; Smart Contracts</div>
+  </div>
+
+  <div class="brief-accordion">
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">🎙️</span>
+        <span class="brief-title">Voiceover Brief — Phase 3 · Tone, Pace &amp; Emphasis Markers</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">Key delivery rules for Phase 3:
+
+• Hook: "The code processes the loan. Instantly." → Crisp. Each word stands alone.
+• "The mechanism is the rule." → [SLOW DOWN.] 4-word sentence. Pause 0.5s after.
+• "The code is the bank." → [PAUSE 0.8s before.] Section 1 peak line. Quiet authority.
+• Risk section: Deliberate, not alarmist. Safety briefing tone.
+• "walk away" → [PAUSE before.] Direct advice tone. Not dramatic.
+• "$40B destroyed in 4 days" → [Let number land.] No inflation in delivery.
+• "This is fraud." → Flat. Matter-of-fact. No theatre.
+
+Full line-by-line brief in: phase_3/voiceover_brief.md</div>
+      </div>
+    </div>
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">🎵</span>
+        <span class="brief-title">Music Brief — Phase 3 · BPM, Energy &amp; Search Terms by Section</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">Phase 3 is the most emotionally varied: opens with precision, closes with gravity.</div>
+        <div class="music-tags">
+          <span class="mtag">Hook: 108–112 BPM · institutional piano chord → clean electronic pulse</span>
+          <span class="mtag">Section 1: 96–102 BPM · mechanical clockwork · brief filter close on "The code is the bank."</span>
+          <span class="mtag">Section 2: 98–104 BPM · slightly fuller · accent hits on "Automatic. Instant. Unstoppable."</span>
+          <span class="mtag">Section 3: 96–102 BPM · meditative · two-voice arrangement (balance concept)</span>
+          <span class="mtag">Section 4: 92–98 BPM · cautious/honest · near-silence on "walk away"</span>
+          <span class="mtag">Section 5: 94–100 BPM · near-silence on "$40B destroyed"</span>
+          <span class="mtag">Section 6: 90–96 BPM · minimal · music nearly inaudible</span>
+          <span class="mtag">CTA: 106–112 BPM · warm/resolved · full color return</span>
+        </div>
+        <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--slate);">Full brief in: phase_3/music_brief.md</div>
+      </div>
+    </div>
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">🎬</span>
+        <span class="brief-title">Clip Assembly Brief — Phase 3 · 83-Shot Timeline</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">83 shots across 14 minutes. Key infographic insert moments:
+
+0:55–1:25 · SECTION 1: card_01.html (Smart Contract IF/THEN) — full-screen, hold 3.5s animation + 4s
+3:30–4:05 · SECTION 2: card_02.html (DeFi Lending Flow) — full-screen, hold 8s for 3-column absorption
+5:28–6:05 · SECTION 3: card_03.html (AMM x×y=k) — full-screen, let formula type in naturally
+
+Color grade: Deep teal-shifted shadows by default · Risk section desaturated 15% · Near-monochrome at peak risk moments
+Key moments: Music nearly silent on "$40B destroyed" · Hard hit on "THIS IS FRAUD." · Music resolves warm for CTA
+
+Full 83-shot list in: phase_3/clip_brief.md</div>
+      </div>
+    </div>
+
+    <div class="brief-item">
+      <div class="brief-head" onclick="toggleBrief(this)">
+        <span class="brief-icon">💬</span>
+        <span class="brief-title">Subtitles — Phase 3 · 174 Cues · Download .SRT</span>
+        <span class="brief-toggle">▼</span>
+      </div>
+      <div class="brief-body">
+        <div class="brief-content">174 subtitle cues covering the full 14-minute Phase 3 script · max 7 words per line · max 2 lines per cue · 1.5–4.5s duration each. 3 pre-delivery corrections applied. Ready for import into Premiere Pro, DaVinci Resolve, CapCut, or YouTube Studio.</div>
+        <div class="srt-dl" onclick="downloadSRT(3)">⬇ Download subtitles.srt (Phase 3)</div>
+      </div>
+    </div>
+
+  </div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 6 — EXPORT                       -->
+<!-- ══════════════════════════════════════════ -->
+<section id="export">
+  <p class="section-tag">06 — Export Tools</p>
+  <h2>Production Bundle</h2>
+  <p class="section-desc">Copy, download, or export your production assets.</p>
+
+  <div class="export-grid">
+    <div class="export-card" onclick="copyBrandGuidelines()">
+      <div class="export-icon">📋</div>
+      <div class="export-label">Copy Brand Guidelines</div>
+      <div class="export-desc">Copy brand_guidelines.md to clipboard for use in prompts</div>
+    </div>
+    <div class="export-card" onclick="alert('Open dashboard.html in browser → File → Print → Save as PDF')">
+      <div class="export-icon">📄</div>
+      <div class="export-label">Export as PDF</div>
+      <div class="export-desc">File → Print → Save as PDF for client delivery</div>
+    </div>
+    <div class="export-card" onclick="alert('Phase 1–3 cards available in the Cards section above.\nOpen any card_0N.html at 1080×1080 viewport and screen-record.')">
+      <div class="export-icon">⏺</div>
+      <div class="export-label">Screen-Record Cards</div>
+      <div class="export-desc">Open each card_0N.html at 1080×1080 viewport (P1 · 4 cards · P2 · 3 cards · P3 · 3 cards)</div>
+    </div>
+    <div class="export-card" onclick="alert('Phase 3 complete. Say \"continue\" to begin Phase 4: Security & Self-Custody.')">
+      <div class="export-icon">➡️</div>
+      <div class="export-label">Continue to Phase 4</div>
+      <div class="export-desc">Security &amp; Self-Custody — say "continue" to start</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ── SCREEN RECORD OVERLAY ── -->
+<div id="srOverlay">
+  <button class="sr-exit" onclick="exitScreenRecord()">✕ Exit</button>
+  <div id="srCountdown">3</div>
+  <iframe id="srFrame" src=""></iframe>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <span>Chain Clarity Dashboard · <strong>Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅</strong> · Generated 2026-05-27</span>
+  <span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;">BRANDFORGE · chain_clarity · v3.0</span>
+</footer>
+
+<script>
+  const cardSrcs = {
+    p1: [
+      'phase_1/infographic_assets/card_01.html',
+      'phase_1/infographic_assets/card_02.html',
+      'phase_1/infographic_assets/card_03.html',
+      'phase_1/infographic_assets/card_04.html'
+    ],
+    p2: [
+      'phase_2/infographic_assets/card_01.html',
+      'phase_2/infographic_assets/card_02.html',
+      'phase_2/infographic_assets/card_03.html'
+    ],
+    p3: [
+      'phase_3/infographic_assets/card_01.html',
+      'phase_3/infographic_assets/card_02.html',
+      'phase_3/infographic_assets/card_03.html'
+    ]
+  };
+  let currentCard = 0;
+  let currentPhase = 'p1';
+
+  function selectCard(idx, btn, phase) {
+    currentCard = idx;
+    currentPhase = phase || currentPhase;
+    const selector = phase === 'p2' ? '#phase2-cards .card-btn' : '#phase1-cards .card-btn';
+    document.querySelectorAll(selector).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const frame = document.getElementById('cardFrame');
+    frame.src = cardSrcs[currentPhase][idx];
+    resizeCardPreview();
+  }
+
+  function switchPhaseCards(phase, btn) {
+    currentPhase = 'p' + phase;
+    currentCard = 0;
+    document.querySelectorAll('#cards .stab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('phase1-cards').style.display = phase === 1 ? 'block' : 'none';
+    document.getElementById('phase2-cards').style.display = phase === 2 ? 'block' : 'none';
+    document.getElementById('phase3-cards').style.display = phase === 3 ? 'block' : 'none';
+    const frame = document.getElementById('cardFrame');
+    frame.src = cardSrcs[currentPhase][0];
+    const containerId = '#phase' + phase + '-cards';
+    const firstBtn = document.querySelector(containerId + ' .card-btn');
+    if (firstBtn) {
+      document.querySelectorAll(containerId + ' .card-btn').forEach(b => b.classList.remove('active'));
+      firstBtn.classList.add('active');
+    }
+    resizeCardPreview();
+  }
+
+  function replayCard() {
+    const frame = document.getElementById('cardFrame');
+    frame.src = frame.src;
+  }
+
+  function enterScreenRecord() {
+    const overlay = document.getElementById('srOverlay');
+    const countdown = document.getElementById('srCountdown');
+    const srFrame = document.getElementById('srFrame');
+    overlay.classList.add('active');
+    countdown.style.display = 'block';
+    srFrame.style.display = 'none';
+    let count = 3;
+    countdown.textContent = count;
+    const interval = setInterval(() => {
+      count--;
+      if (count === 0) {
+        clearInterval(interval);
+        countdown.style.display = 'none';
+        srFrame.src = cardSrcs[currentPhase][currentCard];
+        srFrame.style.display = 'block';
+      } else {
+        countdown.textContent = count;
+      }
+    }, 1000);
+  }
+
+  function exitScreenRecord() {
+    const overlay = document.getElementById('srOverlay');
+    overlay.classList.remove('active');
+    document.getElementById('srFrame').src = '';
+    document.getElementById('srFrame').style.display = 'none';
+    document.getElementById('srCountdown').style.display = 'block';
+  }
+
+  function togglePhase(row) {
+    const body = row.querySelector('.phase-body');
+    body.classList.toggle('open');
+  }
+
+  function toggleBrief(head) {
+    const body = head.nextElementSibling;
+    body.classList.toggle('open');
+    head.querySelector('.brief-toggle').textContent = body.classList.contains('open') ? '▲' : '▼';
+  }
+
+  function switchScript(type, btn) {
+    const section = btn.closest('section');
+    section.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    section.querySelectorAll('.script-panel').forEach(p => p.classList.remove('active'));
+    section.querySelector('#script-' + type).classList.add('active');
+  }
+
+  function switchScript2(type, btn) {
+    const section = btn.closest('section');
+    section.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    section.querySelectorAll('.script-panel').forEach(p => p.classList.remove('active'));
+    section.querySelector('#script-' + type).classList.add('active');
+  }
+
+  function switchScript3(type, btn) {
+    const section = btn.closest('section');
+    section.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    section.querySelectorAll('.script-panel').forEach(p => p.classList.remove('active'));
+    section.querySelector('#script-' + type).classList.add('active');
+  }
+
+  function copyColor(hex, el) {
+    navigator.clipboard.writeText(hex).then(() => {
+      const msg = el.querySelector('.copied-msg');
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 1800);
+    });
+  }
+
+  function copyText(text, el) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = el.textContent;
+      el.textContent = '✓ Copied!';
+      setTimeout(() => el.textContent = orig, 1500);
+    });
+  }
+
+  function copyBrandGuidelines() {
+    const text = `Chain Clarity — Brand Guidelines\nBrand: Chain Clarity\nTagline: Blockchain, without the noise.\nColors: #00D4AA (teal), #F5A623 (gold), #8B9BB4 (slate), #0A0E1A (navy), #7B5CF0 (violet)\nFonts: Space Grotesk (heading), Inter (body), JetBrains Mono (code)\nTone: Senior engineer, analogy-first, no forbidden words (moon, lambo, HODL, simply, just, obviously, easy, basic, pump, dump, guaranteed, rich, explosive)`;
+    navigator.clipboard.writeText(text).then(() => alert('Brand guidelines copied to clipboard!'));
+  }
+
+  function downloadSRT(phase) {
+    window.open('phase_' + phase + '/subtitles.srt');
+  }
+
+  // Auto-resize card preview iframe
+  function resizeCardPreview() {
+    const preview = document.querySelector('.card-preview');
+    if (!preview) return;
+    const w = preview.offsetWidth;
+    const scale = w / 1080;
+    const frame = document.getElementById('cardFrame');
+    frame.style.transform = `scale(${scale})`;
+    frame.style.transformOrigin = 'top left';
+    preview.style.height = Math.round(1080 * scale) + 'px';
+  }
+  window.addEventListener('resize', resizeCardPreview);
+  window.addEventListener('load', resizeCardPreview);
+</script>
+
+</body>
+</html>

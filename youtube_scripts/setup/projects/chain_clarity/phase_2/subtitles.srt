@@ -1,0 +1,749 @@
+1
+00:00:00,000 --> 00:00:03,200
+What if your money had a hard limit?
+
+2
+00:00:03,200 --> 00:00:06,000
+Not a soft limit.
+Not a government policy.
+
+3
+00:00:06,000 --> 00:00:08,500
+Not a promise.
+A mathematical guarantee.
+
+4
+00:00:08,500 --> 00:00:11,500
+Enforced by code.
+
+5
+00:00:11,500 --> 00:00:15,000
+21 million. No more. Ever.
+
+6
+00:00:15,000 --> 00:00:18,000
+Today we understand how Bitcoin
+and Ethereum actually work.
+
+7
+00:00:18,000 --> 00:00:22,000
+And why they solve
+completely different problems.
+
+8
+00:00:22,000 --> 00:00:26,000
+Digital money is not new.
+PayPal launched in 1998.
+
+9
+00:00:26,000 --> 00:00:30,000
+Online banking existed before that.
+
+10
+00:00:30,000 --> 00:00:34,000
+You could move numbers electronically
+for decades before Bitcoin.
+
+11
+00:00:34,000 --> 00:00:37,500
+So what did Bitcoin actually change?
+
+12
+00:00:37,500 --> 00:00:40,000
+Three things.
+
+13
+00:00:40,000 --> 00:00:43,500
+First: no issuer.
+No company creates or controls Bitcoin.
+
+14
+00:00:43,500 --> 00:00:47,000
+The protocol runs itself.
+
+15
+00:00:47,000 --> 00:00:51,000
+Second: no gatekeeper.
+Any person with internet can transact.
+
+16
+00:00:51,000 --> 00:00:55,000
+No account required.
+No approval needed. No ID check.
+
+17
+00:00:55,000 --> 00:00:59,000
+Third: a fixed supply.
+No entity can create more Bitcoin.
+
+18
+00:00:59,000 --> 00:01:03,000
+The total supply is 21 million.
+
+19
+00:01:03,000 --> 00:01:06,500
+Written into the code in 2009.
+
+20
+00:01:06,500 --> 00:01:10,000
+Think about regular money.
+A central bank controls the supply.
+
+21
+00:01:10,000 --> 00:01:14,000
+When an economy needs stimulus,
+more money is printed.
+
+22
+00:01:14,000 --> 00:01:18,000
+When inflation runs high,
+policy changes.
+
+23
+00:01:18,000 --> 00:01:22,000
+The rules are set by humans
+and changed by humans.
+
+24
+00:01:22,000 --> 00:01:26,000
+Bitcoin's rules are set by math.
+
+25
+00:01:26,000 --> 00:01:30,000
+The code IS the policy.
+
+26
+00:01:30,000 --> 00:01:34,000
+And changing it requires every node
+in the network to agree.
+
+27
+00:01:34,000 --> 00:01:38,500
+That has effectively never happened
+for the core rules.
+
+28
+00:01:38,500 --> 00:01:43,000
+So who actually adds new blocks
+to the Bitcoin chain?
+
+29
+00:01:43,000 --> 00:01:47,000
+Specialized computers called miners.
+
+30
+00:01:47,000 --> 00:01:51,000
+Here is how it works.
+
+31
+00:01:51,000 --> 00:01:55,000
+Every 10 minutes, miners compete
+to solve a puzzle.
+
+32
+00:01:55,000 --> 00:02:00,000
+The puzzle: find a number
+called a nonce.
+
+33
+00:02:00,000 --> 00:02:05,000
+Such that, when combined with
+the block's data and hashed —
+
+34
+00:02:05,000 --> 00:02:09,000
+the output starts with
+a specific number of zeros.
+
+35
+00:02:09,000 --> 00:02:13,000
+There is no shortcut.
+There is no formula.
+
+36
+00:02:13,000 --> 00:02:17,000
+You can only find it by trying
+billions of random guesses per second.
+
+37
+00:02:17,000 --> 00:02:22,000
+The first miner to find a valid solution
+broadcasts the new block.
+
+38
+00:02:22,000 --> 00:02:26,000
+Every other node verifies it instantly.
+
+39
+00:02:26,000 --> 00:02:30,000
+The winner gets a reward: new Bitcoin.
+
+40
+00:02:30,000 --> 00:02:34,000
+This mechanism is called
+Proof of Work.
+
+41
+00:02:34,000 --> 00:02:38,000
+Why work? Because computation
+costs real energy.
+
+42
+00:02:38,000 --> 00:02:42,000
+That energy cost is the security model.
+
+43
+00:02:42,000 --> 00:02:46,000
+Think of it like this.
+
+44
+00:02:46,000 --> 00:02:51,000
+Imagine a combination lock
+with a billion possible combinations.
+
+45
+00:02:51,000 --> 00:02:55,000
+The only way to open it
+is to try every number.
+
+46
+00:02:55,000 --> 00:02:59,000
+That takes time.
+That takes resources.
+
+47
+00:02:59,000 --> 00:03:04,000
+Anyone who wants to attack the network
+must out-compute all honest miners.
+
+48
+00:03:04,000 --> 00:03:09,000
+Today, that would cost millions
+of dollars per hour.
+
+49
+00:03:09,000 --> 00:03:13,000
+That is the anchor.
+
+50
+00:03:13,000 --> 00:03:18,000
+Bitcoin's network currently uses roughly
+150 terawatt-hours per year.
+
+51
+00:03:18,000 --> 00:03:23,000
+That sounds enormous. And it is.
+
+52
+00:03:23,000 --> 00:03:28,000
+But an attacker must match
+that entire energy budget.
+
+53
+00:03:28,000 --> 00:03:33,000
+Sustainably — to have any chance.
+
+54
+00:03:33,000 --> 00:03:38,000
+Let's talk about where
+Bitcoin comes from.
+
+55
+00:03:38,000 --> 00:03:43,000
+When a miner wins the puzzle
+and adds a block,
+
+56
+00:03:43,000 --> 00:03:47,000
+they receive a reward.
+New Bitcoin, created by the protocol.
+
+57
+00:03:47,000 --> 00:03:51,000
+This is the only way
+new Bitcoin enters circulation.
+
+58
+00:03:51,000 --> 00:03:55,000
+In 2009, the reward was
+50 BTC per block.
+
+59
+00:03:55,000 --> 00:04:00,000
+Every 210,000 blocks —
+roughly every four years —
+
+60
+00:04:00,000 --> 00:04:04,000
+that reward is cut in half.
+This is called a halving.
+
+61
+00:04:04,000 --> 00:04:08,500
+2009: 50 BTC per block.
+2012: 25 BTC.
+
+62
+00:04:08,500 --> 00:04:13,000
+2016: 12.5 BTC.
+2020: 6.25 BTC.
+
+63
+00:04:13,000 --> 00:04:17,500
+2024: 3.125 BTC.
+
+64
+00:04:17,500 --> 00:04:22,000
+The halvings continue until the reward
+reaches a number so small —
+
+65
+00:04:22,000 --> 00:04:26,500
+it rounds to zero.
+That happens around the year 2140.
+
+66
+00:04:26,500 --> 00:04:31,000
+At that point, no new Bitcoin
+will ever be created.
+
+67
+00:04:31,000 --> 00:04:35,500
+Total supply: 21 million. Final.
+
+68
+00:04:35,500 --> 00:04:40,000
+As of 2024, about 19.7 million Bitcoin
+have already been mined.
+
+69
+00:04:40,000 --> 00:04:44,000
+Only 1.3 million remain.
+
+70
+00:04:44,000 --> 00:04:49,000
+Think of it like a gold mine
+where the vein gets thinner by half
+
+71
+00:04:49,000 --> 00:04:53,000
+every four years.
+By design. Built into the bedrock.
+
+72
+00:04:53,000 --> 00:04:57,000
+No negotiation. No exception.
+
+73
+00:04:57,000 --> 00:05:02,000
+This predictable scarcity is one reason
+Bitcoin is compared to gold.
+
+74
+00:05:02,000 --> 00:05:07,000
+But unlike gold, you can verify
+the total supply of Bitcoin in seconds.
+
+75
+00:05:07,000 --> 00:05:11,500
+Run a node. Count the coins.
+Transparent and auditable by anyone.
+
+76
+00:05:11,500 --> 00:05:17,000
+Bitcoin answered one question:
+how do we move value without a bank?
+
+77
+00:05:17,000 --> 00:05:22,000
+In 2013, a 19-year-old
+named Vitalik Buterin
+
+78
+00:05:22,000 --> 00:05:26,000
+asked a different question.
+
+79
+00:05:26,000 --> 00:05:30,500
+What if we could run code
+without a server?
+
+80
+00:05:30,500 --> 00:05:35,000
+His insight: a blockchain is not a ledger.
+
+81
+00:05:35,000 --> 00:05:39,500
+It is a shared, unstoppable computer.
+
+82
+00:05:39,500 --> 00:05:44,000
+Bitcoin's blockchain can record:
+'Alex sent 1 BTC to Maria.'
+
+83
+00:05:44,000 --> 00:05:49,000
+Ethereum's blockchain can record
+and execute:
+
+84
+00:05:49,000 --> 00:05:54,000
+'IF Maria deposits 100 ETH,
+THEN release the loan.'
+
+85
+00:05:54,000 --> 00:05:59,000
+'IF she misses a payment,
+THEN liquidate automatically.'
+
+86
+00:05:59,000 --> 00:06:03,500
+This is the fundamental difference.
+Bitcoin: a currency system.
+
+87
+00:06:03,500 --> 00:06:08,000
+Ethereum: a programmable platform.
+
+88
+00:06:08,000 --> 00:06:12,500
+The programs that run on Ethereum
+are called smart contracts.
+
+89
+00:06:12,500 --> 00:06:17,000
+They live on the blockchain.
+They run automatically.
+
+90
+00:06:17,000 --> 00:06:21,000
+No company behind them.
+No server to switch off.
+
+91
+00:06:21,000 --> 00:06:26,000
+Think of it this way.
+Bitcoin is a vending machine.
+
+92
+00:06:26,000 --> 00:06:30,500
+You put money in. You get something out.
+That is all it does.
+
+93
+00:06:30,500 --> 00:06:35,000
+Ethereum is a general-purpose computer.
+
+94
+00:06:35,000 --> 00:06:40,000
+You can run any program on it —
+lending, trading, voting, identity.
+
+95
+00:06:40,000 --> 00:06:45,000
+As long as you can write the logic.
+
+96
+00:06:45,000 --> 00:06:50,000
+Vitalik launched Ethereum in 2015.
+
+97
+00:06:50,000 --> 00:06:55,000
+Today, tens of thousands of applications
+run on it.
+
+98
+00:06:55,000 --> 00:07:00,000
+None of them require permission
+from Ethereum to exist.
+
+99
+00:07:00,000 --> 00:07:05,000
+In September 2022, Ethereum did something
+Bitcoin has never done.
+
+100
+00:07:05,000 --> 00:07:09,500
+It changed its consensus mechanism.
+
+101
+00:07:09,500 --> 00:07:13,500
+This event was called The Merge.
+
+102
+00:07:13,500 --> 00:07:18,000
+Ethereum switched from Proof of Work
+to Proof of Stake.
+
+103
+00:07:18,000 --> 00:07:22,500
+In Proof of Work, miners compete
+using energy.
+
+104
+00:07:22,500 --> 00:07:27,000
+In Proof of Stake, validators compete
+using collateral.
+
+105
+00:07:27,000 --> 00:07:31,500
+Here is how Proof of Stake works.
+
+106
+00:07:31,500 --> 00:07:36,000
+To become a validator,
+you lock up 32 ETH as a deposit.
+
+107
+00:07:36,000 --> 00:07:40,000
+This is called staking.
+
+108
+00:07:40,000 --> 00:07:44,500
+The protocol randomly selects validators
+to propose new blocks.
+
+109
+00:07:44,500 --> 00:07:49,000
+If you propose valid blocks honestly —
+you earn rewards.
+
+110
+00:07:49,000 --> 00:07:54,000
+If you cheat, try to include
+invalid transactions, or go offline —
+
+111
+00:07:54,000 --> 00:07:58,000
+part of your deposit is destroyed.
+This is called slashing.
+
+112
+00:07:58,000 --> 00:08:02,500
+Your locked ETH is the security.
+Cheating means losing money directly.
+
+113
+00:08:02,500 --> 00:08:07,000
+That financial stake replaces
+the energy cost.
+
+114
+00:08:07,000 --> 00:08:12,000
+The result: Ethereum's energy use
+dropped 99.9% after The Merge.
+
+115
+00:08:12,000 --> 00:08:17,000
+The same security guarantees —
+enforced by economic punishment.
+
+116
+00:08:17,000 --> 00:08:22,000
+Instead of computation.
+
+117
+00:08:22,000 --> 00:08:27,000
+Proof of Work: prove you did the work
+by showing the energy bill.
+
+118
+00:08:27,000 --> 00:08:31,500
+And the blisters.
+
+119
+00:08:31,500 --> 00:08:36,000
+Proof of Stake: prove your commitment
+by putting your own money first.
+
+120
+00:08:36,000 --> 00:08:41,000
+One of the most common misconceptions:
+a crypto wallet holds your Bitcoin.
+
+121
+00:08:41,000 --> 00:08:45,000
+It does not.
+
+122
+00:08:45,000 --> 00:08:49,500
+Your Bitcoin lives on the blockchain.
+
+123
+00:08:49,500 --> 00:08:54,000
+What a wallet holds is the key
+that proves you own it.
+
+124
+00:08:54,000 --> 00:08:58,500
+Here is the three-layer structure.
+
+125
+00:08:58,500 --> 00:09:03,000
+Private key.
+A 256-bit number. Randomly generated.
+
+126
+00:09:03,000 --> 00:09:07,000
+This is your proof of ownership.
+
+127
+00:09:07,000 --> 00:09:11,500
+Whoever holds the private key
+controls the coins.
+
+128
+00:09:11,500 --> 00:09:16,000
+Lose it — the coins are inaccessible.
+Forever.
+
+129
+00:09:16,000 --> 00:09:20,000
+Share it — the coins are gone.
+
+130
+00:09:20,000 --> 00:09:24,500
+Public key.
+Mathematically derived from the private key.
+
+131
+00:09:24,500 --> 00:09:29,000
+This derivation is one-way.
+
+132
+00:09:29,000 --> 00:09:33,000
+You can generate the public key
+from the private key.
+
+133
+00:09:33,000 --> 00:09:37,000
+You cannot go backwards.
+
+134
+00:09:37,000 --> 00:09:41,500
+Address.
+A shorter version, derived from the public key.
+
+135
+00:09:41,500 --> 00:09:46,000
+This is what you share when someone
+wants to send you Bitcoin.
+
+136
+00:09:46,000 --> 00:09:50,000
+Like a mailbox number.
+
+137
+00:09:50,000 --> 00:09:55,000
+When you send Bitcoin:
+you create a transaction.
+
+138
+00:09:55,000 --> 00:10:00,000
+From address A, to address B, amount X.
+
+139
+00:10:00,000 --> 00:10:04,500
+You sign it with your private key.
+
+140
+00:10:04,500 --> 00:10:09,000
+The signature proves ownership
+without revealing the private key.
+
+141
+00:10:09,000 --> 00:10:13,500
+The transaction is broadcast
+to the network.
+
+142
+00:10:13,500 --> 00:10:17,500
+Nodes verify the signature.
+If valid — included in the next block.
+
+143
+00:10:17,500 --> 00:10:22,000
+The analogy:
+your address is your mailbox.
+
+144
+00:10:22,000 --> 00:10:26,500
+Anyone can find it.
+Anyone can drop something in.
+
+145
+00:10:26,500 --> 00:10:31,000
+Your private key is a master seal stamp.
+
+146
+00:10:31,000 --> 00:10:35,500
+Only you can authorize
+an outgoing package.
+
+147
+00:10:35,500 --> 00:10:40,000
+The signature on the package
+proves it came from you —
+
+148
+00:10:40,000 --> 00:10:44,000
+without exposing the stamp itself.
+
+149
+00:10:44,000 --> 00:10:49,000
+Here is what you now understand.
+
+150
+00:10:49,000 --> 00:10:54,000
+Bitcoin: a fixed-supply digital currency.
+21 million maximum.
+
+151
+00:10:54,000 --> 00:10:58,500
+Secured by Proof of Work.
+
+152
+00:10:58,500 --> 00:11:03,000
+Ethereum: a programmable blockchain.
+Secured by Proof of Stake since 2022.
+
+153
+00:11:03,000 --> 00:11:08,000
+Smart contracts: code that runs
+automatically on Ethereum.
+
+154
+00:11:08,000 --> 00:11:12,000
+No company required.
+
+155
+00:11:12,000 --> 00:11:17,000
+Wallets: key holders, not coin holders.
+Private key equals ownership.
+
+156
+00:11:17,000 --> 00:11:22,000
+These are the two foundational protocols.
+
+157
+00:11:22,000 --> 00:11:27,000
+Everything else in this space
+builds on top of them.
+
+158
+00:11:27,000 --> 00:11:32,000
+In Phase 3, we go into DeFi.
+
+159
+00:11:32,000 --> 00:11:37,000
+Decentralized lending, trading, and yield —
+all running on smart contracts.
+
+160
+00:11:37,000 --> 00:11:41,500
+No banks. No brokers. No permission.
+
+161
+00:11:41,500 --> 00:11:46,000
+Subscribe now.
+Phase 3 is already scheduled.

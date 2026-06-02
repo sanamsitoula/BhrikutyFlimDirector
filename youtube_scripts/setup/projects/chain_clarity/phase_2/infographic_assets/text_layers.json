@@ -1,0 +1,626 @@
+{
+  "meta": {
+    "project": "chain_clarity",
+    "phase": 2,
+    "agent": "Agent 12 — Infographic Asset Generator",
+    "export_targets": ["Premiere Pro", "Final Cut Pro", "DaVinci Resolve", "CapCut"],
+    "card_count": 3,
+    "canvas_size": { "width": 1080, "height": 1080, "unit": "px" },
+    "color_space": "sRGB",
+    "generated": "2026-05-27"
+  },
+
+  "fonts": {
+    "display":  { "family": "Space Grotesk", "source": "Google Fonts", "weights": [300, 500, 600, 700] },
+    "body":     { "family": "Inter",          "source": "Google Fonts", "weights": [400, 500] },
+    "mono":     { "family": "JetBrains Mono", "source": "Google Fonts", "weights": [400, 500] }
+  },
+
+  "colors": {
+    "navy":   "#0A0E1A",
+    "teal":   "#00D4AA",
+    "gold":   "#F5A623",
+    "slate":  "#8B9BB4",
+    "violet": "#7B5CF0",
+    "white":  "#FFFFFF"
+  },
+
+  "cards": [
+
+    {
+      "card_id": "phase2_card_01",
+      "title": "PROOF OF WORK vs PROOF OF STAKE",
+      "export_formats": ["instagram_1080x1080", "youtube_thumbnail_1280x720"],
+      "background_color": "#0A0E1A",
+      "layers": [
+
+        {
+          "id": "p2c1_logo_mark",
+          "type": "svg",
+          "label": "Logo mark",
+          "position": { "x": 60, "y": 52, "anchor": "top-left" },
+          "size": { "width": 48, "height": 41 },
+          "animation": { "type": "slide_down", "delay_ms": 200, "duration_ms": 300, "easing": "ease-out" }
+        },
+        {
+          "id": "p2c1_logo_text",
+          "type": "text",
+          "label": "Logo wordmark",
+          "content": "ChainClarity",
+          "font": "Space Grotesk",
+          "weight": 600,
+          "size_px": 22,
+          "color": "#FFFFFF",
+          "color_accent": "#00D4AA",
+          "position": { "x": 122, "y": 63, "anchor": "middle-left" },
+          "animation": { "type": "slide_down", "delay_ms": 200, "duration_ms": 300, "easing": "ease-out" }
+        },
+
+        {
+          "id": "p2c1_headline",
+          "type": "text",
+          "label": "Headline — PROOF OF WORK",
+          "content": "PROOF OF WORK",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 72,
+          "color": "#FFFFFF",
+          "letter_spacing_px": -2,
+          "position": { "x": 60, "y": 148, "anchor": "top-left" },
+          "animation": { "type": "typewriter_words", "delay_ms": 500, "word_interval_ms": 80 }
+        },
+        {
+          "id": "p2c1_sub_headline",
+          "type": "text",
+          "label": "Sub-headline — vs PROOF OF STAKE",
+          "content": "vs PROOF OF STAKE",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 72,
+          "color": "#00D4AA",
+          "letter_spacing_px": -2,
+          "position": { "x": 60, "y": 228, "anchor": "top-left" },
+          "animation": { "type": "typewriter_words", "delay_ms": 740, "word_interval_ms": 80 }
+        },
+        {
+          "id": "p2c1_divider",
+          "type": "shape",
+          "label": "Section divider line",
+          "shape": "rectangle",
+          "fill": "#8B9BB4",
+          "opacity": 0.25,
+          "size": { "width": 960, "height": 1 },
+          "position": { "x": 60, "y": 332, "anchor": "top-left" },
+          "animation": { "type": "fade_in", "delay_ms": 1100, "duration_ms": 300 }
+        },
+
+        {
+          "id": "p2c1_pow_col_header",
+          "type": "text",
+          "label": "PoW column header",
+          "content": "PoW",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 52,
+          "color": "#F5A623",
+          "letter_spacing_px": -1,
+          "position": { "x": 300, "y": 408, "anchor": "top-center" },
+          "animation": { "type": "slide_in_left", "delay_ms": 1200, "duration_ms": 400, "easing": "ease-out" }
+        },
+        {
+          "id": "p2c1_pos_col_header",
+          "type": "text",
+          "label": "PoS column header",
+          "content": "PoS",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 52,
+          "color": "#7B5CF0",
+          "letter_spacing_px": -1,
+          "position": { "x": 780, "y": 408, "anchor": "top-center" },
+          "animation": { "type": "slide_in_right", "delay_ms": 1400, "duration_ms": 400, "easing": "ease-out" }
+        },
+
+        {
+          "id": "p2c1_row1_label",
+          "type": "text",
+          "label": "Row 1 label — HOW IT WORKS",
+          "content": "HOW IT WORKS",
+          "font": "Space Grotesk",
+          "weight": 600,
+          "size_px": 22,
+          "color": "#8B9BB4",
+          "letter_spacing_px": 1,
+          "position": { "x": 88, "y": 548, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 1550, "duration_ms": 300 }
+        },
+        {
+          "id": "p2c1_row1_pow_value",
+          "type": "text",
+          "label": "Row 1 PoW — Solve a hash puzzle",
+          "content": "Solve a hash puzzle",
+          "font": "Space Grotesk",
+          "weight": 500,
+          "size_px": 32,
+          "color": "#FFFFFF",
+          "position": { "x": 88, "y": 574, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 1550, "duration_ms": 300 }
+        },
+        {
+          "id": "p2c1_row1_pos_value",
+          "type": "text",
+          "label": "Row 1 PoS — Lock ETH as collateral",
+          "content": "Lock ETH as collateral",
+          "font": "Space Grotesk",
+          "weight": 500,
+          "size_px": 32,
+          "color": "#FFFFFF",
+          "position": { "x": 570, "y": 574, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 1700, "duration_ms": 300 }
+        },
+
+        {
+          "id": "p2c1_row2_label",
+          "type": "text",
+          "label": "Row 2 label — ENERGY USE",
+          "content": "ENERGY USE",
+          "font": "Space Grotesk",
+          "weight": 600,
+          "size_px": 22,
+          "color": "#8B9BB4",
+          "letter_spacing_px": 1,
+          "position": { "x": 88, "y": 682, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 1700, "duration_ms": 300 }
+        },
+        {
+          "id": "p2c1_row2_pow_value",
+          "type": "text",
+          "label": "Row 2 PoW — Very high (~150 TWh/yr)",
+          "content": "Very high (~150 TWh/yr)",
+          "font": "Space Grotesk",
+          "weight": 500,
+          "size_px": 32,
+          "color": "#FFFFFF",
+          "position": { "x": 88, "y": 708, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 1700, "duration_ms": 300 }
+        },
+        {
+          "id": "p2c1_row2_pos_value",
+          "type": "text",
+          "label": "Row 2 PoS — −99.9% after The Merge",
+          "content": "−99.9% after The Merge",
+          "font": "Space Grotesk",
+          "weight": 500,
+          "size_px": 32,
+          "color": "#FFFFFF",
+          "color_highlight": "#00D4AA",
+          "highlight_segment": "−99.9%",
+          "position": { "x": 570, "y": 708, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 1850, "duration_ms": 300 }
+        },
+
+        {
+          "id": "p2c1_row3_label",
+          "type": "text",
+          "label": "Row 3 label — SECURITY MODEL",
+          "content": "SECURITY MODEL",
+          "font": "Space Grotesk",
+          "weight": 600,
+          "size_px": 22,
+          "color": "#8B9BB4",
+          "letter_spacing_px": 1,
+          "position": { "x": 88, "y": 816, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 1850, "duration_ms": 300 }
+        },
+        {
+          "id": "p2c1_row3_pow_value",
+          "type": "text",
+          "label": "Row 3 PoW — Energy cost = attack cost",
+          "content": "Energy cost = attack cost",
+          "font": "Space Grotesk",
+          "weight": 500,
+          "size_px": 32,
+          "color": "#FFFFFF",
+          "position": { "x": 88, "y": 842, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 1850, "duration_ms": 300 }
+        },
+        {
+          "id": "p2c1_row3_pos_value",
+          "type": "text",
+          "label": "Row 3 PoS — Cheating burns your stake",
+          "content": "Cheating burns your stake",
+          "font": "Space Grotesk",
+          "weight": 500,
+          "size_px": 32,
+          "color": "#FFFFFF",
+          "position": { "x": 570, "y": 842, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 2000, "duration_ms": 300 }
+        },
+
+        {
+          "id": "p2c1_row4_label",
+          "type": "text",
+          "label": "Row 4 label — USED BY",
+          "content": "USED BY",
+          "font": "Space Grotesk",
+          "weight": 600,
+          "size_px": 22,
+          "color": "#8B9BB4",
+          "letter_spacing_px": 1,
+          "position": { "x": 88, "y": 950, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 2000, "duration_ms": 300 }
+        },
+        {
+          "id": "p2c1_row4_pow_value",
+          "type": "text",
+          "label": "Row 4 PoW — Bitcoin",
+          "content": "Bitcoin",
+          "font": "Space Grotesk",
+          "weight": 500,
+          "size_px": 32,
+          "color": "#FFFFFF",
+          "position": { "x": 88, "y": 976, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 2000, "duration_ms": 300 }
+        },
+        {
+          "id": "p2c1_row4_pos_value",
+          "type": "text",
+          "label": "Row 4 PoS — Ethereum (since Sept 2022)",
+          "content": "Ethereum (since Sept 2022)",
+          "font": "Space Grotesk",
+          "weight": 500,
+          "size_px": 32,
+          "color": "#FFFFFF",
+          "position": { "x": 570, "y": 976, "anchor": "top-left" },
+          "animation": { "type": "slide_in_left", "delay_ms": 2150, "duration_ms": 300 }
+        },
+
+        {
+          "id": "p2c1_wordmark",
+          "type": "text",
+          "label": "Bottom wordmark",
+          "content": "ChainClarity",
+          "font": "Space Grotesk",
+          "weight": 600,
+          "size_px": 26,
+          "color": "#8B9BB4",
+          "opacity": 0.5,
+          "position": { "x": 1020, "y": 1036, "anchor": "bottom-right" },
+          "animation": { "type": "fade_in", "delay_ms": 2300, "duration_ms": 400 }
+        }
+
+      ]
+    },
+
+    {
+      "card_id": "phase2_card_02",
+      "title": "BITCOIN'S 21 MILLION HARD CAP",
+      "export_formats": ["instagram_1080x1080", "stories_1080x1920"],
+      "background_color": "#0A0E1A",
+      "layers": [
+
+        {
+          "id": "p2c2_logo_mark",
+          "type": "svg",
+          "label": "Logo mark",
+          "position": { "x": 60, "y": 52, "anchor": "top-left" },
+          "size": { "width": 48, "height": 41 },
+          "animation": { "type": "slide_down", "delay_ms": 200, "duration_ms": 300, "easing": "ease-out" }
+        },
+
+        {
+          "id": "p2c2_big_stat",
+          "type": "text",
+          "label": "21M counter stat",
+          "content": "21,000,000",
+          "font": "JetBrains Mono",
+          "weight": 500,
+          "size_px": 108,
+          "color": "#00D4AA",
+          "letter_spacing_px": -4,
+          "position": { "x": 60, "y": 148, "anchor": "top-left" },
+          "animation": { "type": "count_up", "start_value": 0, "end_value": 21000000, "delay_ms": 500, "duration_ms": 1200, "easing": "easeOutCubic", "format": "comma_separated" }
+        },
+        {
+          "id": "p2c2_stat_label",
+          "type": "text",
+          "label": "Stat label — MAXIMUM BTC. EVER.",
+          "content": "MAXIMUM BTC. EVER.",
+          "font": "Space Grotesk",
+          "weight": 700,
+          "size_px": 56,
+          "color": "#F5A623",
+          "letter_spacing_px": -1.5,
+          "position": { "x": 60, "y": 282, "anchor": "top-left" },
+          "animation": { "type": "typewriter_words", "delay_ms": 1300, "word_interval_ms": 80 }
+        },
+
+        {
+          "id": "p2c2_section_label",
+          "type": "text",
+          "label": "Section label — HALVING TIMELINE",
+          "content": "HALVING TIMELINE",
+          "font": "Space Grotesk",
+          "weight": 600,
+          "size_px": 26,
+          "color": "#8B9BB4",
+          "letter_spacing_px": 2,
+          "position": { "x": 60, "y": 444, "anchor": "top-left" },
+          "animation": { "type": "slide_up", "delay_ms": 1600, "duration_ms": 400 }
+        },
+        {
+          "id": "p2c2_timeline_bar",
+          "type": "shape",
+          "label": "Halving timeline bar",
+          "shape": "rectangle",
+          "fill": "linear_gradient",
+          "gradient_stops": [
+            { "color": "#00D4AA", "position": 0 },
+            { "color": "#F5A623", "position": 0.8 },
+            { "color": "#7B5CF0", "position": 1.0 }
+          ],
+          "size": { "width": 960, "height": 4 },
+          "position": { "x": 60, "y": 484, "anchor": "top-left" },
+          "animation": { "type": "draw_left_to_right", "delay_ms": 2000, "duration_ms": 800, "easing": "ease-out" }
+        },
+
+        {
+          "id": "p2c2_tick_2009_year",
+          "type": "text", "label": "Year 2009", "content": "2009",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 26, "color": "#8B9BB4",
+          "position": { "x": 60, "y": 508, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2100, "duration_ms": 250 }
+        },
+        {
+          "id": "p2c2_tick_2009_reward",
+          "type": "text", "label": "Reward 50 BTC", "content": "50",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 36, "color": "#F5A623",
+          "position": { "x": 60, "y": 542, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2100, "duration_ms": 250 }
+        },
+        {
+          "id": "p2c2_tick_2009_unit",
+          "type": "text", "label": "Unit BTC/block", "content": "BTC/block",
+          "font": "Space Grotesk", "weight": 400, "size_px": 20, "color": "#8B9BB4",
+          "position": { "x": 60, "y": 586, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2100, "duration_ms": 250 }
+        },
+
+        {
+          "id": "p2c2_tick_2012_year",
+          "type": "text", "label": "Year 2012", "content": "2012",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 26, "color": "#8B9BB4",
+          "position": { "x": 252, "y": 508, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2220, "duration_ms": 250 }
+        },
+        {
+          "id": "p2c2_tick_2012_reward",
+          "type": "text", "label": "Reward 25 BTC", "content": "25",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 36, "color": "#F5A623",
+          "position": { "x": 252, "y": 542, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2220, "duration_ms": 250 }
+        },
+
+        {
+          "id": "p2c2_tick_2016_year",
+          "type": "text", "label": "Year 2016", "content": "2016",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 26, "color": "#8B9BB4",
+          "position": { "x": 444, "y": 508, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2340, "duration_ms": 250 }
+        },
+        {
+          "id": "p2c2_tick_2016_reward",
+          "type": "text", "label": "Reward 12.5 BTC", "content": "12.5",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 36, "color": "#F5A623",
+          "position": { "x": 444, "y": 542, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2340, "duration_ms": 250 }
+        },
+
+        {
+          "id": "p2c2_tick_2020_year",
+          "type": "text", "label": "Year 2020", "content": "2020",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 26, "color": "#8B9BB4",
+          "position": { "x": 636, "y": 508, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2460, "duration_ms": 250 }
+        },
+        {
+          "id": "p2c2_tick_2020_reward",
+          "type": "text", "label": "Reward 6.25 BTC", "content": "6.25",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 36, "color": "#F5A623",
+          "position": { "x": 636, "y": 542, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2460, "duration_ms": 250 }
+        },
+
+        {
+          "id": "p2c2_tick_2024_year",
+          "type": "text", "label": "Year 2024", "content": "2024",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 26, "color": "#8B9BB4",
+          "position": { "x": 828, "y": 508, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2580, "duration_ms": 250 }
+        },
+        {
+          "id": "p2c2_tick_2024_reward",
+          "type": "text", "label": "Reward 3.125 BTC", "content": "3.125",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 36, "color": "#F5A623",
+          "position": { "x": 828, "y": 542, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2580, "duration_ms": 250 }
+        },
+
+        {
+          "id": "p2c2_tick_2140_year",
+          "type": "text", "label": "Year ~2140", "content": "~2140",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 26, "color": "#7B5CF0",
+          "position": { "x": 1020, "y": 508, "anchor": "top-center" },
+          "animation": { "type": "bounce", "delay_ms": 2700, "duration_ms": 300 }
+        },
+        {
+          "id": "p2c2_tick_2140_label",
+          "type": "text", "label": "Last coin label", "content": "last coin",
+          "font": "Space Grotesk", "weight": 600, "size_px": 28, "color": "#7B5CF0",
+          "position": { "x": 1020, "y": 542, "anchor": "top-center" },
+          "animation": { "type": "bounce", "delay_ms": 2700, "duration_ms": 300 }
+        },
+
+        {
+          "id": "p2c2_footer_mined",
+          "type": "text", "label": "Footer — ~19.7M already mined",
+          "content": "~19.7M already mined",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 30, "color": "#8B9BB4",
+          "color_highlight": "#00D4AA", "highlight_segment": "~19.7M",
+          "position": { "x": 192, "y": 952, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2900, "duration_ms": 400 }
+        },
+        {
+          "id": "p2c2_footer_remaining",
+          "type": "text", "label": "Footer — 1.3M remaining",
+          "content": "1.3M remaining",
+          "font": "JetBrains Mono", "weight": 500, "size_px": 30, "color": "#8B9BB4",
+          "color_highlight": "#00D4AA", "highlight_segment": "1.3M",
+          "position": { "x": 780, "y": 952, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 2900, "duration_ms": 400 }
+        },
+
+        {
+          "id": "p2c2_wordmark",
+          "type": "text", "label": "Bottom wordmark", "content": "ChainClarity",
+          "font": "Space Grotesk", "weight": 600, "size_px": 26,
+          "color": "#8B9BB4", "opacity": 0.5,
+          "position": { "x": 1020, "y": 1036, "anchor": "bottom-right" },
+          "animation": { "type": "fade_in", "delay_ms": 3100, "duration_ms": 400 }
+        }
+      ]
+    },
+
+    {
+      "card_id": "phase2_card_03",
+      "title": "TWO TOOLS. DIFFERENT JOBS.",
+      "export_formats": ["instagram_1080x1080", "youtube_thumbnail_1280x720"],
+      "background_color": "#0A0E1A",
+      "layers": [
+
+        {
+          "id": "p2c3_logo_mark",
+          "type": "svg",
+          "label": "Logo mark",
+          "position": { "x": 60, "y": 52, "anchor": "top-left" },
+          "size": { "width": 48, "height": 41 },
+          "animation": { "type": "slide_down", "delay_ms": 200, "duration_ms": 300, "easing": "ease-out" }
+        },
+
+        {
+          "id": "p2c3_headline",
+          "type": "text", "label": "Headline — TWO TOOLS.",
+          "content": "TWO TOOLS.",
+          "font": "Space Grotesk", "weight": 700, "size_px": 88,
+          "color": "#FFFFFF", "letter_spacing_px": -3,
+          "position": { "x": 60, "y": 148, "anchor": "top-left" },
+          "animation": { "type": "typewriter_words", "delay_ms": 500, "word_interval_ms": 80 }
+        },
+        {
+          "id": "p2c3_sub_headline",
+          "type": "text", "label": "Sub-headline — DIFFERENT JOBS.",
+          "content": "DIFFERENT JOBS.",
+          "font": "Space Grotesk", "weight": 700, "size_px": 88,
+          "color": "#00D4AA", "letter_spacing_px": -3,
+          "position": { "x": 60, "y": 256, "anchor": "top-left" },
+          "animation": { "type": "typewriter_words", "delay_ms": 660, "word_interval_ms": 80 }
+        },
+
+        {
+          "id": "p2c3_btc_panel_title",
+          "type": "text", "label": "BTC panel title — BITCOIN",
+          "content": "BITCOIN",
+          "font": "Space Grotesk", "weight": 700, "size_px": 48,
+          "color": "#F5A623", "letter_spacing_px": -1,
+          "position": { "x": 258, "y": 478, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 1150, "duration_ms": 400 }
+        },
+        {
+          "id": "p2c3_btc_line1",
+          "type": "text", "label": "BTC line 1 — Send & receive value",
+          "content": "Send & receive value",
+          "font": "Space Grotesk", "weight": 500, "size_px": 28,
+          "color": "#8B9BB4",
+          "position": { "x": 258, "y": 600, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 1500, "duration_ms": 250 }
+        },
+        {
+          "id": "p2c3_btc_line2",
+          "type": "text", "label": "BTC line 2 — Fixed supply",
+          "content": "Fixed supply",
+          "font": "Space Grotesk", "weight": 500, "size_px": 28,
+          "color": "#8B9BB4",
+          "position": { "x": 258, "y": 648, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 1620, "duration_ms": 250 }
+        },
+        {
+          "id": "p2c3_btc_line3",
+          "type": "text", "label": "BTC line 3 — Currency only",
+          "content": "Currency only",
+          "font": "Space Grotesk", "weight": 500, "size_px": 28,
+          "color": "#8B9BB4",
+          "position": { "x": 258, "y": 696, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 1740, "duration_ms": 250 }
+        },
+
+        {
+          "id": "p2c3_eth_panel_title",
+          "type": "text", "label": "ETH panel title — ETHEREUM",
+          "content": "ETHEREUM",
+          "font": "Space Grotesk", "weight": 700, "size_px": 48,
+          "color": "#7B5CF0", "letter_spacing_px": -1,
+          "position": { "x": 822, "y": 478, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 1300, "duration_ms": 400 }
+        },
+        {
+          "id": "p2c3_eth_line1",
+          "type": "text", "label": "ETH line 1 — Run code on-chain",
+          "content": "Run code on-chain",
+          "font": "Space Grotesk", "weight": 500, "size_px": 28,
+          "color": "#8B9BB4",
+          "position": { "x": 822, "y": 600, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 1650, "duration_ms": 250 }
+        },
+        {
+          "id": "p2c3_eth_line2",
+          "type": "text", "label": "ETH line 2 — IF/THEN logic runs",
+          "content": "IF/THEN logic runs",
+          "font": "Space Grotesk", "weight": 500, "size_px": 28,
+          "color": "#8B9BB4",
+          "color_highlight": "#00D4AA", "highlight_segment": "IF/THEN",
+          "position": { "x": 822, "y": 648, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 1770, "duration_ms": 250 }
+        },
+        {
+          "id": "p2c3_eth_line3",
+          "type": "text", "label": "ETH line 3 — automatically, no server",
+          "content": "automatically, no server",
+          "font": "Space Grotesk", "weight": 500, "size_px": 28,
+          "color": "#8B9BB4",
+          "position": { "x": 822, "y": 696, "anchor": "top-center" },
+          "animation": { "type": "slide_up", "delay_ms": 1890, "duration_ms": 250 }
+        },
+
+        {
+          "id": "p2c3_callout",
+          "type": "text", "label": "Callout — ETHEREUM ADDED THE IF/THEN",
+          "content": "ETHEREUM ADDED THE IF/THEN",
+          "font": "Space Grotesk", "weight": 700, "size_px": 38,
+          "color": "#7B5CF0", "letter_spacing_px": -0.5,
+          "position": { "x": 540, "y": 900, "anchor": "top-center" },
+          "animation": { "type": "bounce", "delay_ms": 2100, "duration_ms": 300 }
+        },
+
+        {
+          "id": "p2c3_wordmark",
+          "type": "text", "label": "Bottom wordmark", "content": "ChainClarity",
+          "font": "Space Grotesk", "weight": 600, "size_px": 26,
+          "color": "#8B9BB4", "opacity": 0.5,
+          "position": { "x": 1020, "y": 1036, "anchor": "bottom-right" },
+          "animation": { "type": "fade_in", "delay_ms": 2400, "duration_ms": 400 }
+        }
+      ]
+    }
+
+  ]
+}

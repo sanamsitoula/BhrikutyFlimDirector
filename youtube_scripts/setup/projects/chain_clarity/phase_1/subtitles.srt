@@ -1,0 +1,557 @@
+1
+00:00:00,000 --> 00:00:03,500
+In 2022, a crypto exchange called
+FTX collapsed in 72 hours.
+
+2
+00:00:03,500 --> 00:00:06,000
+Eight billion dollars in
+customer funds — gone.
+
+3
+00:00:06,000 --> 00:00:08,200
+No warning.
+No recourse. No refunds.
+
+4
+00:00:08,200 --> 00:00:10,800
+That same week, the Bitcoin blockchain
+processed over 200,000 transactions.
+
+5
+00:00:10,800 --> 00:00:12,500
+Zero errors.
+Zero downtime.
+
+6
+00:00:12,500 --> 00:00:14,800
+Same industry.
+Completely different result.
+
+7
+00:00:14,800 --> 00:00:17,200
+Today, we are going to understand
+exactly why.
+
+8
+00:00:18,000 --> 00:00:21,000
+Every financial system has
+the same design flaw.
+
+9
+00:00:21,000 --> 00:00:23,500
+It requires you to
+trust someone else.
+
+10
+00:00:23,500 --> 00:00:26,000
+When you send money,
+you trust your bank.
+
+11
+00:00:26,000 --> 00:00:29,000
+You trust their systems.
+Their employees. Their decisions.
+
+12
+00:00:29,000 --> 00:00:33,500
+You trust that they won't fail,
+freeze your account, or disappear overnight.
+
+13
+00:00:33,500 --> 00:00:36,500
+For most of history,
+that was the only option.
+
+14
+00:00:36,500 --> 00:00:39,500
+No trusted middleman —
+no transaction.
+
+15
+00:00:40,000 --> 00:00:43,500
+Computer scientists called this
+the Byzantine Generals Problem.
+
+16
+00:00:43,500 --> 00:00:46,000
+Here's the analogy
+that makes it click.
+
+17
+00:00:46,500 --> 00:00:50,000
+Imagine four generals
+surrounding an enemy city.
+
+18
+00:00:50,000 --> 00:00:54,000
+They must agree on a plan:
+attack at dawn, or retreat.
+
+19
+00:00:54,000 --> 00:00:56,500
+They can only communicate
+by messenger.
+
+20
+00:00:56,500 --> 00:01:00,000
+But one general is a traitor.
+
+21
+00:01:00,000 --> 00:01:04,000
+The traitor sends different messages
+to different generals.
+
+22
+00:01:04,000 --> 00:01:08,500
+How do you reach agreement —
+when you can't trust the messenger?
+
+23
+00:01:09,000 --> 00:01:12,500
+This problem stumped researchers
+for decades.
+
+24
+00:01:12,500 --> 00:01:16,500
+Then in 2008, an anonymous developer
+named Satoshi Nakamoto published a paper.
+
+25
+00:01:16,500 --> 00:01:20,500
+The title: "Bitcoin: A Peer-to-Peer
+Electronic Cash System."
+
+26
+00:01:20,500 --> 00:01:23,500
+The solution:
+a chain of blocks.
+
+27
+00:01:25,000 --> 00:01:28,000
+Start with the
+building block.
+
+28
+00:01:28,000 --> 00:01:31,000
+A block is a
+container of data.
+
+29
+00:01:31,000 --> 00:01:34,500
+Think of it like one page
+in a shared ledger.
+
+30
+00:01:34,500 --> 00:01:37,500
+Each page records a
+batch of transactions.
+
+31
+00:01:37,500 --> 00:01:41,500
+On Bitcoin, each block holds roughly
+2,000 to 3,000 transactions.
+
+32
+00:01:41,500 --> 00:01:44,500
+Once the page fills up —
+it's sealed.
+
+33
+00:01:44,500 --> 00:01:47,500
+No changes.
+A new page begins.
+
+34
+00:01:48,000 --> 00:01:52,000
+But a blockchain page has three parts
+a normal ledger doesn't.
+
+35
+00:01:52,500 --> 00:01:55,000
+First: the data.
+
+36
+00:01:55,000 --> 00:01:58,000
+Who sent what to whom,
+and how much.
+
+37
+00:01:58,000 --> 00:02:01,500
+Every transaction in this block,
+recorded and verified.
+
+38
+00:02:02,000 --> 00:02:04,500
+Second: the timestamp.
+
+39
+00:02:04,500 --> 00:02:07,500
+The exact moment this block
+was created and sealed.
+
+40
+00:02:07,500 --> 00:02:11,000
+Precise, permanent,
+and cannot be altered.
+
+41
+00:02:11,500 --> 00:02:14,500
+Third: the hash.
+
+42
+00:02:14,500 --> 00:02:18,000
+This is the most critical part
+of the entire system.
+
+43
+00:02:18,000 --> 00:02:21,000
+We need to understand hashes properly.
+
+44
+00:02:21,000 --> 00:02:24,500
+Everything else depends on this.
+
+45
+00:02:26,000 --> 00:02:29,000
+A hash is a fingerprint
+for data.
+
+46
+00:02:29,000 --> 00:02:32,500
+You feed any input into
+a hash function.
+
+47
+00:02:32,500 --> 00:02:36,000
+It produces a fixed-length
+string of characters.
+
+48
+00:02:36,000 --> 00:02:39,000
+Always the same length.
+Always looks random.
+
+49
+00:02:40,000 --> 00:02:44,000
+Here is the SHA-256 hash
+of the word "Hello":
+
+50
+00:02:44,000 --> 00:02:48,500
+185f8db32921bd46d35c
+c96953e114e6c68af82b...
+
+51
+00:02:49,000 --> 00:02:53,000
+Here is the hash of "Hello!" —
+one character different:
+
+52
+00:02:53,000 --> 00:02:57,500
+334d016f755cd6dc58c5
+3a86e183882f8ec14f52...
+
+53
+00:02:57,500 --> 00:03:01,500
+Completely different output.
+From a single character change.
+
+54
+00:03:02,000 --> 00:03:05,000
+This is the key property
+of a hash.
+
+55
+00:03:05,000 --> 00:03:09,000
+You cannot predict the output
+without running the function.
+
+56
+00:03:09,000 --> 00:03:13,000
+You cannot reverse-engineer
+the input from the output.
+
+57
+00:03:13,000 --> 00:03:17,000
+Change one byte of the input —
+the entire output changes.
+
+58
+00:03:17,500 --> 00:03:20,000
+Every block gets a hash.
+
+59
+00:03:20,000 --> 00:03:24,000
+It is the fingerprint of
+everything inside.
+
+60
+00:03:24,000 --> 00:03:27,000
+Now here is the chain part.
+
+61
+00:03:28,000 --> 00:03:32,000
+Every block contains the hash
+of the block before it.
+
+62
+00:03:32,000 --> 00:03:36,000
+That is the entire chain structure.
+Let that sink in.
+
+63
+00:03:36,500 --> 00:03:40,000
+Block 101 contains the
+hash of block 100.
+
+64
+00:03:40,000 --> 00:03:43,500
+Block 100 contains the
+hash of block 99.
+
+65
+00:03:43,500 --> 00:03:47,000
+All the way back to block zero —
+called the Genesis Block.
+
+66
+00:03:48,000 --> 00:03:51,000
+Think of a document
+audit trail.
+
+67
+00:03:51,000 --> 00:03:55,500
+At the top of every new page,
+you write a summary of the previous page.
+
+68
+00:03:55,500 --> 00:03:59,500
+If anyone secretly changes a past page —
+the summary no longer matches.
+
+69
+00:03:59,500 --> 00:04:02,500
+The tampering is visible
+to anyone who checks.
+
+70
+00:04:03,500 --> 00:04:07,500
+Now watch what happens when someone
+tries to alter the blockchain.
+
+71
+00:04:08,000 --> 00:04:11,500
+Suppose an attacker wants to change
+a transaction from six months ago.
+
+72
+00:04:11,500 --> 00:04:14,000
+They alter block 500.
+
+73
+00:04:14,500 --> 00:04:18,000
+The moment they change block 500's data —
+its hash changes.
+
+74
+00:04:18,000 --> 00:04:22,000
+Block 501 stored the old hash
+of block 500. Now block 501 is invalid.
+
+75
+00:04:22,000 --> 00:04:25,500
+To fix block 501,
+they must recalculate it.
+
+76
+00:04:25,500 --> 00:04:28,500
+But recalculating block 501
+changes its hash.
+
+77
+00:04:28,500 --> 00:04:32,500
+Now block 502 is invalid.
+And block 503. All the way to the present.
+
+78
+00:04:33,000 --> 00:04:37,000
+In a chain with hundreds of thousands
+of blocks — this is computationally enormous.
+
+79
+00:04:37,500 --> 00:04:40,500
+The past is locked.
+This property is called immutability.
+
+80
+00:04:42,000 --> 00:04:44,500
+Now the final layer.
+
+81
+00:04:44,500 --> 00:04:47,000
+Who holds this chain?
+
+82
+00:04:48,000 --> 00:04:52,500
+In a blockchain network, thousands of
+computers — called nodes — hold a complete copy.
+
+83
+00:04:52,500 --> 00:04:55,500
+No central server.
+No headquarters.
+
+84
+00:04:55,500 --> 00:04:58,000
+No single point of failure.
+
+85
+00:04:58,500 --> 00:05:02,500
+When a new block is proposed, every node
+validates it independently.
+
+86
+00:05:02,500 --> 00:05:05,500
+They check: are all
+transactions valid?
+
+87
+00:05:05,500 --> 00:05:08,500
+Does the hash match
+the block's contents?
+
+88
+00:05:08,500 --> 00:05:12,500
+Does it correctly reference
+the previous block's hash?
+
+89
+00:05:13,000 --> 00:05:16,500
+Only if the majority agrees —
+the block is added to every copy.
+
+90
+00:05:17,000 --> 00:05:21,000
+Think of it as a town meeting
+without a mayor.
+
+91
+00:05:21,000 --> 00:05:24,000
+A new rule is proposed.
+Everyone votes independently.
+
+92
+00:05:24,000 --> 00:05:27,000
+No single person
+controls the outcome.
+
+93
+00:05:27,500 --> 00:05:30,000
+This is called consensus.
+
+94
+00:05:31,000 --> 00:05:34,500
+Bitcoin uses a mechanism
+called Proof of Work.
+
+95
+00:05:34,500 --> 00:05:38,500
+Miners — specialised nodes — compete
+to solve a computational puzzle.
+
+96
+00:05:38,500 --> 00:05:42,000
+The first to solve it earns the right
+to add the next block.
+
+97
+00:05:42,000 --> 00:05:45,500
+This puzzle requires real energy.
+That energy cost is what makes it expensive to attack.
+
+98
+00:05:46,500 --> 00:05:50,500
+To rewrite Bitcoin's history, an attacker
+would need more power than all honest miners.
+
+99
+00:05:51,000 --> 00:05:54,500
+Today, that would cost
+billions of dollars per hour.
+
+100
+00:05:55,000 --> 00:05:59,000
+That is why Bitcoin's ledger has never
+been successfully altered.
+
+101
+00:06:01,000 --> 00:06:04,000
+Here is what you
+now understand.
+
+102
+00:06:04,000 --> 00:06:08,000
+A block is a sealed ledger page —
+data, timestamp, and hash.
+
+103
+00:06:08,000 --> 00:06:12,000
+A hash is a digital fingerprint.
+One byte changed — entirely different.
+
+104
+00:06:12,000 --> 00:06:16,000
+Each block stores the previous
+block's hash. That is the chain.
+
+105
+00:06:16,000 --> 00:06:19,000
+Thousands of nodes
+each hold the full chain.
+
+106
+00:06:19,000 --> 00:06:23,500
+Altering any past block breaks the chain
+forward — every node knows immediately.
+
+107
+00:06:24,000 --> 00:06:28,000
+This is why Bitcoin's ledger is 14 years old
+and has never been rewritten.
+
+108
+00:06:28,000 --> 00:06:31,000
+Not because it's protected
+by a company.
+
+109
+00:06:31,000 --> 00:06:34,500
+Because the math makes it
+practically impossible.
+
+110
+00:06:36,000 --> 00:06:38,500
+In the next video, we go deeper.
+
+111
+00:06:38,500 --> 00:06:41,000
+Bitcoin versus Ethereum.
+
+112
+00:06:41,000 --> 00:06:44,500
+What the 21-million-coin limit
+actually means.
+
+113
+00:06:44,500 --> 00:06:49,000
+And why Ethereum introduced programmability
+that Bitcoin was never designed for.
+
+114
+00:06:50,000 --> 00:06:52,500
+Subscribe now. Hit the bell.
+
+115
+00:06:52,500 --> 00:06:55,000
+Phase 2 drops in [X] days.

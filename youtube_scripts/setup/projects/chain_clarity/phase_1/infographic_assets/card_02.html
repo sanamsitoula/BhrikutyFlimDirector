@@ -1,0 +1,197 @@
+<!-- EXPORT: Instagram Post 1080x1080px — set browser viewport to 1080x1080 before recording -->
+<!-- EXPORT: Stories/Reels 1080x1920px — adjust layout for vertical format -->
+<!-- Chain Clarity · Phase 1 · Card 02 · THE HASH FINGERPRINT -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080">
+  <title>Chain Clarity — The Hash Fingerprint</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --teal:   #00D4AA;
+      --gold:   #F5A623;
+      --slate:  #8B9BB4;
+      --navy:   #0A0E1A;
+      --violet: #7B5CF0;
+      --white:  #FFFFFF;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @keyframes fadeIn  { from{opacity:0}                           to{opacity:1} }
+    @keyframes slideDown{from{transform:translateY(-28px);opacity:0} to{transform:translateY(0);opacity:1} }
+    @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+    @keyframes bounce  { 0%{transform:scale(0.6) translateY(20px);opacity:0} 60%{transform:scale(1.08) translateY(-4px)} 100%{transform:scale(1) translateY(0);opacity:1} }
+    @keyframes wordIn  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes revealRow{ from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+
+    body {
+      width:1080px; height:1080px;
+      background:var(--navy);
+      overflow:hidden;
+      font-family:'Inter',sans-serif;
+    }
+    .bg {
+      position:absolute;inset:0;
+      background: radial-gradient(ellipse at 70% 30%, rgba(245,166,35,0.05) 0%, transparent 55%),
+                  radial-gradient(ellipse at 20% 80%, rgba(123,92,240,0.06) 0%, transparent 50%),
+                  var(--navy);
+      animation:fadeIn 0.2s ease-out forwards;
+    }
+    .card {
+      position:relative; width:1080px; height:1080px;
+      display:flex; flex-direction:column;
+      padding:72px 80px;
+    }
+
+    /* Logo */
+    .logo {
+      display:flex; align-items:center; gap:16px;
+      opacity:0; animation:slideDown 0.3s ease-out 0.3s forwards;
+    }
+    .logo-text .name { font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700; color:var(--white); line-height:1; }
+    .logo-text .name span { font-weight:300; color:var(--teal); }
+    .logo-text .tag  { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--slate); margin-top:3px; }
+
+    /* Headline */
+    .headline {
+      font-family:'Space Grotesk',sans-serif;
+      font-size:88px; font-weight:700;
+      color:var(--teal); line-height:1; letter-spacing:-2px;
+      margin-top:44px;
+    }
+    .headline .word { display:inline-block; opacity:0; animation:wordIn 0.15s ease-out forwards; }
+    .headline .word:nth-child(1){ animation-delay:0.6s; }
+    .headline .word:nth-child(2){ animation-delay:0.76s; }
+    .headline .word:nth-child(3){ animation-delay:0.92s; }
+
+    /* Demo grid */
+    .demo {
+      display:grid; grid-template-columns:1fr auto 1fr; gap:24px;
+      align-items:center; margin-top:44px;
+      opacity:0; animation:slideUp 0.4s ease-out 1.4s forwards;
+    }
+    .col-head {
+      font-family:'Space Grotesk',sans-serif;
+      font-size:28px; font-weight:600; letter-spacing:3px;
+      text-transform:uppercase; color:var(--slate);
+      padding-bottom:12px;
+      border-bottom:1px solid rgba(139,155,180,0.2);
+    }
+    .arrow-head { text-align:center; }
+    .arrow-icon {
+      font-size:48px; color:var(--teal);
+      font-family:'Inter',sans-serif;
+    }
+
+    .hash-pair {
+      display:contents;
+    }
+    .input-val {
+      font-family:'JetBrains Mono',monospace;
+      font-size:52px; font-weight:500; color:var(--white);
+      padding:24px 28px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:12px;
+      opacity:0;
+    }
+    .input-val.row1 { animation:revealRow 0.4s ease-out 1.8s forwards; }
+    .input-val.row2 { animation:revealRow 0.4s ease-out 2.2s forwards; }
+
+    .arrow-cell { text-align:center; }
+    .arr { font-size:36px; color:var(--teal); opacity:0; }
+    .arr.row1 { animation:fadeIn 0.3s ease-out 1.9s forwards; }
+    .arr.row2 { animation:fadeIn 0.3s ease-out 2.3s forwards; }
+
+    .output-val {
+      font-family:'JetBrains Mono',monospace;
+      font-size:30px; color:var(--gold);
+      padding:24px 28px;
+      background:rgba(245,166,35,0.05);
+      border:1px solid rgba(245,166,35,0.15);
+      border-radius:12px;
+      word-break:break-all;
+      line-height:1.4;
+      opacity:0;
+    }
+    .output-val.row1 { animation:revealRow 0.4s ease-out 2.0s forwards; }
+    .output-val.row2 { animation:revealRow 0.4s ease-out 2.4s forwards; }
+
+    /* Key insight */
+    .insight {
+      margin-top:36px;
+      padding:28px 36px;
+      background:rgba(123,92,240,0.10);
+      border:1px solid rgba(123,92,240,0.30);
+      border-radius:14px;
+      opacity:0;
+      animation:bounce 0.35s ease-out 2.8s forwards;
+    }
+    .insight-line1 {
+      font-family:'Space Grotesk',sans-serif;
+      font-size:52px; font-weight:700; color:var(--violet);
+      line-height:1.1;
+    }
+    .insight-line2 {
+      font-family:'Space Grotesk',sans-serif;
+      font-size:52px; font-weight:700; color:var(--violet);
+      line-height:1.1;
+    }
+
+    /* Body */
+    .body-text {
+      margin-top:28px;
+      font-family:'Inter',sans-serif;
+      font-size:32px; color:var(--slate); line-height:1.5;
+      opacity:0; animation:slideUp 0.4s ease-out 3.0s forwards;
+    }
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="card">
+
+  <div class="logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 62" width="52" height="45">
+      <polygon points="42,30 32,47 12,47 2,30 12,13 32,13" fill="#00D4AA"/>
+      <polygon points="68,30 58,47 38,47 28,30 38,13 58,13" fill="#0A0E1A" stroke="#7B5CF0" stroke-width="2.5"/>
+      <polygon points="35,18 42,30 35,42 28,30" fill="#F5A623"/>
+    </svg>
+    <div class="logo-text">
+      <div class="name">Chain <span>Clarity</span></div>
+      <div class="tag">Blockchain without the noise</div>
+    </div>
+  </div>
+
+  <div class="headline">
+    <span class="word">THE&nbsp;</span><span class="word">HASH&nbsp;</span><span class="word">FINGERPRINT</span>
+  </div>
+
+  <div class="demo">
+    <div class="col-head">INPUT</div>
+    <div class="arrow-head"></div>
+    <div class="col-head">SHA-256 OUTPUT</div>
+
+    <div class="input-val row1">"Hello"</div>
+    <div class="arrow-cell"><div class="arr row1">→</div></div>
+    <div class="output-val row1">185f8db32921bd46d35c<br>c96953e114e6c68af82b...</div>
+
+    <div class="input-val row2">"Hello!"</div>
+    <div class="arrow-cell"><div class="arr row2">→</div></div>
+    <div class="output-val row2">334d016f755cd6dc58c5<br>3a86e183882f8ec14f52...</div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-line1">1 CHARACTER CHANGE →</div>
+    <div class="insight-line2">100% DIFFERENT FINGERPRINT</div>
+  </div>
+
+  <div class="body-text">
+    You can't predict it. You can't reverse it.
+  </div>
+
+</div>
+</body>
+</html>

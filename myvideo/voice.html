@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker Voiceover Script – DevOps Series Ep. 1</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f1117;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .page {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  /* Title block */
+  .title-block {
+    border-left: 4px solid #3b82f6;
+    padding: 1.5rem 1.5rem 1.5rem 1.8rem;
+    margin-bottom: 2.5rem;
+    background: #161b27;
+    border-radius: 0 8px 8px 0;
+  }
+  .series-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #3b82f6;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .title-block h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #f8fafc;
+    line-height: 1.35;
+    margin-bottom: 0.75rem;
+  }
+  .meta-row {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+  }
+  .meta-item {
+    font-size: 12.5px;
+    color: #94a3b8;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .meta-dot { width: 6px; height: 6px; border-radius: 50%; background: #475569; display: inline-block; }
+
+  /* Scene card */
+  .scene {
+    background: #161b27;
+    border: 1px solid #1e2a40;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .scene-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1.4rem;
+    border-bottom: 1px solid #1e2a40;
+    background: #12172200;
+  }
+
+  .scene-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    letter-spacing: 0.06em;
+    min-width: 64px;
+  }
+
+  .scene-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #f1f5f9;
+    flex: 1;
+  }
+
+  .scene-time {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #3b82f6;
+    background: #1e3a5f30;
+    border: 1px solid #1e3a5f;
+    border-radius: 4px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+
+  .scene-body {
+    padding: 1.25rem 1.4rem;
+    display: flex; flex-direction: column; gap: 1.1rem;
+  }
+
+  /* Script lines */
+  .vo-block {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 0.75rem 1rem;
+    align-items: start;
+  }
+
+  .vo-lang {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    padding-top: 3px;
+    text-transform: uppercase;
+  }
+  .vo-lang.nepali { color: #f59e0b; }
+  .vo-lang.english { color: #60a5fa; }
+  .vo-lang.bilingual { color: #a78bfa; }
+
+  .vo-text {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #e2e8f0;
+  }
+
+  .vo-text.nep {
+    font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+  }
+
+  .vo-text strong {
+    color: #f8fafc;
+    font-weight: 600;
+  }
+
+  .vo-text em {
+    color: #94a3b8;
+    font-style: normal;
+    font-size: 13.5px;
+  }
+
+  /* Technical term */
+  .tech {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    color: #34d399;
+    background: #0d2a1e;
+    border: 1px solid #134e2a;
+    border-radius: 3px;
+    padding: 0 5px;
+  }
+
+  /* Direction block */
+  .direction {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    background: #1a1f2e;
+    border-left: 3px solid #334155;
+    border-radius: 0 6px 6px 0;
+    padding: 0.65rem 1rem;
+  }
+  .direction-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: #475569;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    min-width: 52px;
+    padding-top: 2px;
+  }
+  .direction-text {
+    font-size: 13px;
+    color: #64748b;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* Step items for install section */
+  .step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .step-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .step-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #3b82f6;
+    background: #1e3a5f30;
+    border: 1px solid #1e3a5f;
+    border-radius: 4px;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-weight: 600;
+  }
+  .step-text { font-size: 14.5px; line-height: 1.75; color: #e2e8f0; }
+  .step-text .nep { font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; }
+
+  /* Divider */
+  .scene-divider { height: 1px; background: #1e2a40; margin: 0.5rem 0; }
+
+  /* Word count footer */
+  .footer {
+    margin-top: 2.5rem;
+    padding: 1rem 1.4rem;
+    background: #161b27;
+    border: 1px solid #1e2a40;
+    border-radius: 8px;
+    display: flex; gap: 2rem; flex-wrap: wrap;
+  }
+  .footer-item { font-size: 12.5px; color: #64748b; }
+  .footer-item span { color: #94a3b8; font-weight: 500; }
+
+  @media print {
+    body { background: white; color: #111; }
+    .scene { border-color: #ddd; background: #fff; }
+    .tech { background: #f0fff4; border-color: #6ee7b7; color: #065f46; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="title-block">
+    <div class="series-tag">📹 DevOps Series — Episode 1 · Voiceover Script</div>
+    <h1>What is Docker? Install on Windows</h1>
+    <div class="meta-row">
+      <div class="meta-item"><div class="meta-dot"></div> Language: Nepali + English (Bilingual)</div>
+      <div class="meta-item"><div class="meta-dot"></div> Runtime: ~6:45</div>
+      <div class="meta-item"><div class="meta-dot"></div> Tone: Bold, elder-brother energy</div>
+      <div class="meta-item"><div class="meta-dot"></div> ~780 words spoken</div>
+    </div>
+  </div>
+
+  <!-- SCENE 01 – HOOK -->
+  <div class="scene">
+    <div class="scene-header">
+      <div class="scene-num">SCENE 01</div>
+      <div class="scene-title">Hook — "Works on My Machine" Problem</div>
+      <div class="scene-time">0:00 – 0:30</div>
+    </div>
+    <div class="scene-body">
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          Yaar — <strong>timro computer ma kaam garcha, server ma lagauda bhanga hunchha.</strong> Yo problem sanga familiar chau ki chaina?
+        </div>
+      </div>
+      <div class="vo-block">
+        <div class="vo-lang english">English</div>
+        <div class="vo-text">
+          <em>"It works on my machine!" — the four most dangerous words in software development.</em>
+        </div>
+      </div>
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          Dev le bhandai chha <em>"hamro machine ma ta bilkul chalcha!"</em> — ani production server le bhanchha <em>"maile chindina, brother."</em>
+          Aaj hami tyo dukha lai <strong>hamesha ko lagi</strong> hataudauchau. Solution ko naam ho — <span class="tech">Docker</span>.
+        </div>
+      </div>
+      <div class="direction">
+        <div class="direction-label">Visual</div>
+        <div class="direction-text">Split screen: Dev laptop (green checkmarks) vs production server (red crash screen). Animate the error message appearing on right side.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 02 – WHAT IS DOCKER -->
+  <div class="scene">
+    <div class="scene-header">
+      <div class="scene-num">SCENE 02</div>
+      <div class="scene-title">What is Docker — Shipping Container Analogy</div>
+      <div class="scene-time">0:30 – 1:30</div>
+    </div>
+    <div class="scene-body">
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          Sochai herau — pahile paani jahaj ma saman kasari pathainthyo? Har company ko aafnai packing style, aafnai dibbi. Load garna garo, samaan damage hunthyo. Ani ek din — <strong>standardized shipping container</strong> aayo. Ek nai size ko dibba, jaha pani fit huncha.
+        </div>
+      </div>
+      <div class="direction">
+        <div class="direction-label">Visual</div>
+        <div class="direction-text">Animate old chaotic ship loading → then a standard container snapping into place perfectly.</div>
+      </div>
+      <div class="scene-divider"></div>
+      <div class="vo-block">
+        <div class="vo-lang bilingual">Both</div>
+        <div class="vo-text nep">
+          <span class="tech">Docker</span> exactly त्यही गर्छ — तर software को लागि। Timro application — code, libraries, configs, sab kei — ek <span class="tech">container</span> ma pack hudcha. Tyo container <strong>jaha pani lagaau</strong> — timro laptop ma, AWS ma, Azure ma, colleague ko machine ma — same result. Guaranteed.
+        </div>
+      </div>
+      <div class="vo-block">
+        <div class="vo-lang english">English</div>
+        <div class="vo-text">
+          Think of it this way — a <span class="tech">Docker container</span> is a self-contained box. Everything your app needs to run lives inside that box. The environment outside doesn't matter anymore.
+        </div>
+      </div>
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          <strong>"Works on my machine"</strong> ko problem nai gayena — kinabhane aba machine matter gardaina. <em>Container</em> nai cha tyo machine.
+        </div>
+      </div>
+      <div class="direction">
+        <div class="direction-label">Visual</div>
+        <div class="direction-text">Animate box with app inside being dragged across: Laptop → AWS cloud → Azure → colleague's PC. Same green checkmark at every stop.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 03 – DEV vs OPS -->
+  <div class="scene">
+    <div class="scene-header">
+      <div class="scene-num">SCENE 03</div>
+      <div class="scene-title">Dev vs Ops Gap — The Wall</div>
+      <div class="scene-time">1:30 – 2:30</div>
+    </div>
+    <div class="scene-body">
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          Aba euta real problem ko kura garau. Pahile software company ma ek boro <strong>wall</strong> huthyo — Developers ko side ma, Ops team ko side ma.
+        </div>
+      </div>
+      <div class="direction">
+        <div class="direction-label">Visual</div>
+        <div class="direction-text">Brick wall animation splitting two groups of people.</div>
+      </div>
+      <div class="scene-divider"></div>
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          Developers le code likhthyo — "feature ready, deploy gara!" — ani wall ko paari Ops team lai던져dinthyo. Ops team bhan: <em>"bhai, hamro server ma Java 11 chha, timle Java 17 ma lekhechau, run garda mardaina!"</em> Dev bhan: <em>"hamro machine ma ta dherai ramro chalthyo!"</em>
+        </div>
+      </div>
+      <div class="vo-block">
+        <div class="vo-lang english">English</div>
+        <div class="vo-text">
+          This gap — the "wall" between Development and Operations — it wasn't about laziness or politics. It was an <strong>environment mismatch problem</strong>. Different OS versions, different dependencies, different configs.
+        </div>
+      </div>
+      <div class="scene-divider"></div>
+      <div class="vo-block">
+        <div class="vo-lang bilingual">Both</div>
+        <div class="vo-text nep">
+          <span class="tech">Docker</span> le yo wall todyo। Kinabhane ab Dev le container banaudcha — tyo same container Ops le server ma run gardcha। <strong>Ek nai environment. Sab jaga. No more wall.</strong>
+        </div>
+      </div>
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          Yahi reason le <span class="tech">Docker</span> DevOps movement ko <strong>symbol</strong> bana. Development ra Operations — duitai team ek nai language bolna thale.
+        </div>
+      </div>
+      <div class="direction">
+        <div class="direction-label">Visual</div>
+        <div class="direction-text">Docker logo crashes through the brick wall. Both teams high-five on the same side. Clean, unified environment graphic.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 04 – DEVOPS ROADMAP -->
+  <div class="scene">
+    <div class="scene-header">
+      <div class="scene-num">SCENE 04</div>
+      <div class="scene-title">DevOps Roadmap — Why Docker is Step 1</div>
+      <div class="scene-time">2:30 – 3:00</div>
+    </div>
+    <div class="scene-body">
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          Timi yadi <strong>DevOps engineer</strong> banna chahanchau — wa cloud job khojdaichau — bhane sunau: <span class="tech">Docker</span> bina agi badna sakdaina. Yo series ko lesson 1 Docker kina raakhein thaha chha?
+        </div>
+      </div>
+      <div class="vo-block">
+        <div class="vo-lang bilingual">Both</div>
+        <div class="vo-text">
+          <span class="tech">Kubernetes</span>? — Docker containers manage garchha.<br>
+          <span class="tech">CI/CD pipelines</span>? — Docker containers ma run hunchha.<br>
+          <span class="tech">AWS, Azure, GCP</span>? — Tyo sab Docker bata suru hunchha.
+        </div>
+      </div>
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          <strong>Foundation rakhyo bhane building thanchha.</strong> Foundation nai naraakhni bhane — jति नि माथि उठाउ — bhanchha. So — Docker first. Baki sab pachhi aunchha.
+        </div>
+      </div>
+      <div class="direction">
+        <div class="direction-label">Visual</div>
+        <div class="direction-text">Roadmap pyramid: Docker at base → CI/CD → Kubernetes → Cloud. Each level lights up as mentioned.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 05 – INSTALLATION -->
+  <div class="scene">
+    <div class="scene-header">
+      <div class="scene-num">SCENE 05</div>
+      <div class="scene-title">Windows Installation Walkthrough</div>
+      <div class="scene-time">3:00 – 6:00</div>
+    </div>
+    <div class="scene-body">
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          Aba hands-on। <strong>Install garau</strong>। Timro PC ma Windows 10 wa 11 chahiyo — Home wa Pro duitai chalcha। Pahile hami <span class="tech">WSL2</span> enable garnu parchha — yo <em>Windows Subsystem for Linux</em> ho — basically Windows bhitra Linux chalnu dine feature.
+        </div>
+      </div>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <span class="nep"><strong>Start menu</strong> kholau, <em>"Turn Windows features on or off"</em> search gara। Tyaha <span class="tech">Windows Subsystem for Linux</span> ra <span class="tech">Virtual Machine Platform</span> — duitai check box lagau। Restart maagna sakcha — lagaideu।</span>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <span class="nep">Restart paachi <span class="tech">PowerShell</span> admin ma kholau ani run gara: <span class="tech">wsl --set-default-version 2</span> — yo command le WSL2 lai default banaunchha। Simple।</span>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <span class="nep">Ab browser ma jau — <span class="tech">docker.com</span> — <em>Get Started</em> click gara — <strong>Docker Desktop for Windows</strong> download gara। File size around 500MB hunchha, so internet speed anusaar time lagcha।</span>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            <span class="nep">Downloaded installer run gara। Setup wizard ma <em>"Use WSL 2 instead of Hyper-V"</em> — yo checked rahana deu। Default settings chalcha — Install click gara। Complete huna केही minutes lagcha।</span>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">5</div>
+          <div class="step-text">
+            <span class="nep"><strong>Docker Desktop</strong> open hunchha — whale logo dekhnuchha taskbar ma। Yo ayo matlab Docker running chha। Ab terminal kholau।</span>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">6</div>
+          <div class="step-text">
+            <span class="nep"><span class="tech">terminal</span> — PowerShell wa Command Prompt — kholau ani type gara: <span class="tech">docker --version</span>। Output ayena bhane restart garera hera। Aayo? Great — installation successful छ।</span>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">7</div>
+          <div class="step-text">
+            <div>
+              <span class="nep">Aba <strong>magic moment</strong>। Type gara: <span class="tech">docker run hello-world</span></span>
+              <br><br>
+              <span class="nep">Pahilo palta run garnu bhayo bhane Docker le automatically image pull garcha internet bata। Ani ek message aunchha — <em>"Hello from Docker!"</em> — yo ayo bhane <strong>timi officially Docker suru garisakeya!</strong> System kaam gariraakhyo।</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          Kasai lai problem aayo? Tala comment section ma lekha — ma reply garchu। Common issue hunchha — <em>Virtualization disabled</em> — tyaso bhaye BIOS ma gae enable garna sakcha, next video ma tyo ni cover garchu।
+        </div>
+      </div>
+      <div class="direction">
+        <div class="direction-label">Visual</div>
+        <div class="direction-text">Full screen recording throughout. Highlight each click. Show terminal output clearly. Zoom into "Hello from Docker!" message at the end.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 06 – OUTRO -->
+  <div class="scene">
+    <div class="scene-header">
+      <div class="scene-num">SCENE 06</div>
+      <div class="scene-title">Outro + Episode 2 Teaser</div>
+      <div class="scene-time">6:00 – 6:45</div>
+    </div>
+    <div class="scene-body">
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          Yaar — aaj Docker install garyau। "Works on my machine" wala problem bujhyo। Container kya ho bujhyo। Foundation tayar chha।
+        </div>
+      </div>
+      <div class="vo-block">
+        <div class="vo-lang bilingual">Both</div>
+        <div class="vo-text nep">
+          Next episode ma hami <span class="tech">Docker images</span> ra <span class="tech">containers</span> bich ko farak bujhchau — <strong>Dockerfile</strong> kasari likhne — aafnai pehilo application containerize kasari garne। Yo series follow gariraakha bhane — aile nai <strong>Subscribe</strong> gara, <strong>Bell icon</strong> click gara — notification aunchha।
+        </div>
+      </div>
+      <div class="vo-block">
+        <div class="vo-lang nepali">Nepali</div>
+        <div class="vo-text nep">
+          Aru kei question chha bhane tala comment ma lekha। Sathi haru lai ni share gara — yo knowledge tiniharulai ni kaam lagchha। <strong>Milchha Episode 2 ma!</strong>
+        </div>
+      </div>
+      <div class="direction">
+        <div class="direction-label">Visual</div>
+        <div class="direction-text">Talking head to camera. Subscribe animation overlay. End card showing Episode 2 thumbnail preview and playlist graphic.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-item">Estimated spoken words: <span>~780</span></div>
+    <div class="footer-item">Total runtime: <span>~6:45</span></div>
+    <div class="footer-item">Technical terms in English: <span>Docker, container, WSL2, terminal, Dockerfile, Kubernetes, CI/CD</span></div>
+    <div class="footer-item">Everyday Nepali tone: <span>Conversational, non-formal</span></div>
+  </div>
+
+</div>
+</body>
+</html>

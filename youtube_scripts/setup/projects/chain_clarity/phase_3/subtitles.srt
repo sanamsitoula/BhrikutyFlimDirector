@@ -1,0 +1,840 @@
+1
+00:00:00,000 --> 00:00:03,000
+In 2010, getting a bank loan
+meant paperwork and credit checks.
+
+2
+00:00:03,000 --> 00:00:06,000
+In 2024, a protocol lent
+someone ten million dollars in seconds.
+
+3
+00:00:06,000 --> 00:00:09,000
+No meeting. No signature.
+No banker.
+
+4
+00:00:09,000 --> 00:00:12,500
+The code processes the loan.
+Instantly.
+
+5
+00:00:12,500 --> 00:00:15,000
+This is DeFi.
+
+6
+00:00:15,000 --> 00:00:19,000
+A smart contract is a program
+that runs on a blockchain.
+
+7
+00:00:19,000 --> 00:00:23,000
+When conditions are met,
+it executes automatically.
+
+8
+00:00:23,000 --> 00:00:27,000
+No one needs to approve it.
+No one can stop it.
+
+9
+00:00:27,000 --> 00:00:31,000
+Think of a vending machine.
+You insert money.
+
+10
+00:00:31,000 --> 00:00:35,000
+The machine checks the amount.
+If correct, it releases the snack.
+
+11
+00:00:35,000 --> 00:00:39,000
+No human involvement.
+That's a smart contract.
+
+12
+00:00:39,000 --> 00:00:43,000
+Here's what it looks like in DeFi.
+
+13
+00:00:43,000 --> 00:00:47,500
+IF you deposit 150 dollars of ETH
+as collateral—
+
+14
+00:00:47,500 --> 00:00:52,000
+THEN the protocol releases
+a 100-dollar stablecoin loan.
+
+15
+00:00:52,000 --> 00:00:56,500
+IF your collateral drops
+below 120 dollars—
+
+16
+00:00:56,500 --> 00:01:01,000
+THEN the protocol automatically
+liquidates your position.
+
+17
+00:01:01,000 --> 00:01:05,000
+The code checks these conditions
+every few seconds.
+
+18
+00:01:05,000 --> 00:01:08,500
+No sleep. No lunch break.
+No bias.
+
+19
+00:01:08,500 --> 00:01:13,000
+The code is the bank.
+
+20
+00:01:13,000 --> 00:01:17,000
+These protocols don't ask questions.
+They execute rules.
+
+21
+00:01:17,000 --> 00:01:21,000
+Rules written in code.
+Rules that anyone can read.
+
+22
+00:01:21,000 --> 00:01:25,000
+Rules no one can change
+without a governance vote.
+
+23
+00:01:25,000 --> 00:01:29,000
+That's what makes DeFi different
+from traditional finance.
+
+24
+00:01:29,000 --> 00:01:33,500
+The mechanism is the rule.
+
+25
+00:01:33,500 --> 00:01:37,500
+No exceptions. No favors.
+No closing hours.
+
+26
+00:01:37,500 --> 00:01:42,000
+A bank can deny your loan.
+Delay your transfer.
+
+27
+00:01:42,000 --> 00:01:46,000
+A smart contract cannot.
+It can only follow code.
+
+28
+00:01:46,000 --> 00:01:50,000
+And that code is public.
+Anyone can verify it.
+
+29
+00:01:50,000 --> 00:01:54,500
+This is what decentralized finance
+is actually built on.
+
+30
+00:01:54,500 --> 00:01:58,500
+Not trust in an institution.
+Trust in mathematics.
+
+31
+00:01:58,500 --> 00:02:02,500
+Not trust in a person.
+Trust in transparent code.
+
+32
+00:02:02,500 --> 00:02:06,500
+That's the foundation.
+Everything else builds on this.
+
+33
+00:02:06,500 --> 00:02:10,500
+Let's look at what's been built.
+
+34
+00:02:10,500 --> 00:02:15,000
+Starting with DeFi lending.
+
+35
+00:02:15,000 --> 00:02:20,000
+Billions of dollars.
+Lent by code. Without banks.
+
+36
+00:02:20,000 --> 00:02:26,000
+Here's how it works.
+
+37
+00:02:26,000 --> 00:02:30,000
+The two biggest DeFi lending protocols
+are Aave and Compound.
+
+38
+00:02:30,000 --> 00:02:34,000
+Combined, they've managed
+billions in loans.
+
+39
+00:02:34,000 --> 00:02:38,000
+Lenders deposit assets—
+ETH, USDC, whatever they hold.
+
+40
+00:02:38,000 --> 00:02:42,000
+The protocol pays them interest
+automatically.
+
+41
+00:02:42,000 --> 00:02:45,500
+No bank needed.
+
+42
+00:02:45,500 --> 00:02:49,500
+Borrowers come to the other side.
+
+43
+00:02:49,500 --> 00:02:54,000
+To borrow 100 dollars of USDC,
+you post 150 dollars of ETH.
+
+44
+00:02:54,000 --> 00:02:58,000
+That's 150% collateralization.
+
+45
+00:02:58,000 --> 00:03:02,000
+Why so high?
+Because crypto prices move fast.
+
+46
+00:03:02,000 --> 00:03:06,500
+If ETH drops suddenly,
+the protocol needs a cushion.
+
+47
+00:03:06,500 --> 00:03:11,000
+When collateral drops below threshold,
+the protocol sells it automatically.
+
+48
+00:03:11,000 --> 00:03:15,500
+Think of it like a pawn shop
+with no pawnbroker.
+
+49
+00:03:15,500 --> 00:03:19,500
+You leave collateral. You get the loan.
+If you don't pay—
+
+50
+00:03:19,500 --> 00:03:23,000
+the collateral is sold.
+
+51
+00:03:23,000 --> 00:03:27,000
+Automatic. Instant. Unstoppable.
+
+52
+00:03:27,000 --> 00:03:31,500
+Interest rates aren't set by a committee.
+They respond to supply and demand.
+
+53
+00:03:31,500 --> 00:03:35,500
+More borrowers — rates rise.
+More lenders — rates fall.
+
+54
+00:03:35,500 --> 00:03:39,500
+All of this happens through code.
+No human sets the rate.
+
+55
+00:03:39,500 --> 00:03:44,000
+And it runs 24 hours a day,
+seven days a week.
+
+56
+00:03:44,000 --> 00:03:48,000
+No holidays. No system maintenance.
+No business hours.
+
+57
+00:03:48,000 --> 00:03:52,000
+What you deposit earns yield.
+What you borrow costs interest.
+
+58
+00:03:52,000 --> 00:03:56,500
+The protocol collects the spread.
+Automatically.
+
+59
+00:03:56,500 --> 00:04:01,000
+No loan officer. No credit check.
+No relationship required.
+
+60
+00:04:01,000 --> 00:04:05,500
+Just code, collateral, and a wallet.
+
+61
+00:04:05,500 --> 00:04:10,000
+Why would someone borrow
+against assets they already own?
+
+62
+00:04:10,000 --> 00:04:14,500
+Tax efficiency. Access to liquidity.
+Without selling your position.
+
+63
+00:04:14,500 --> 00:04:19,000
+That's why DeFi lending exists.
+It fills a real need.
+
+64
+00:04:19,000 --> 00:04:24,000
+Now: how do you trade
+without anyone on the other side?
+
+65
+00:04:24,000 --> 00:04:30,000
+That's what an AMM solves.
+
+66
+00:04:30,000 --> 00:04:35,000
+Traditional exchanges use order books.
+Buyers and sellers list prices.
+
+67
+00:04:35,000 --> 00:04:39,500
+AMMs — Automated Market Makers —
+work completely differently.
+
+68
+00:04:39,500 --> 00:04:43,500
+There's no order book.
+Instead: a liquidity pool.
+
+69
+00:04:43,500 --> 00:04:48,000
+Two assets sit in a smart contract.
+ETH and USDC, for example.
+
+70
+00:04:48,000 --> 00:04:52,000
+The price is set by a formula.
+
+71
+00:04:52,000 --> 00:04:56,500
+x times y equals k.
+The constant product formula.
+
+72
+00:04:56,500 --> 00:05:01,000
+x is the ETH amount.
+y is the USDC amount.
+
+73
+00:05:01,000 --> 00:05:05,500
+k is a constant.
+It never changes.
+
+74
+00:05:05,500 --> 00:05:10,000
+Add ETH to the pool—
+the ETH supply increases.
+
+75
+00:05:10,000 --> 00:05:14,500
+So ETH's relative price drops.
+USDC becomes relatively scarce.
+
+76
+00:05:14,500 --> 00:05:19,000
+So USDC's price in the pool rises.
+
+77
+00:05:19,000 --> 00:05:23,000
+No one set that price.
+The math set it.
+
+78
+00:05:23,000 --> 00:05:27,000
+No one sets the price.
+The math does.
+
+79
+00:05:27,000 --> 00:05:31,500
+Protocols like Uniswap, Curve,
+and Balancer use this model.
+
+80
+00:05:31,500 --> 00:05:35,500
+Anyone can provide liquidity.
+Anyone can trade.
+
+81
+00:05:35,500 --> 00:05:39,500
+The protocol never closes.
+
+82
+00:05:39,500 --> 00:05:44,000
+To become a liquidity provider,
+you deposit both assets.
+
+83
+00:05:44,000 --> 00:05:48,500
+In the same ratio as the pool.
+Fifty-fifty by value.
+
+84
+00:05:48,500 --> 00:05:53,000
+You receive LP tokens in return.
+These represent your share.
+
+85
+00:05:53,000 --> 00:05:57,500
+When you withdraw,
+you get your share of the pool.
+
+86
+00:05:57,500 --> 00:06:02,000
+Plus the fees accumulated
+while you were in.
+
+87
+00:06:02,000 --> 00:06:06,500
+Every trade pays a fee.
+Usually 0.3%.
+
+88
+00:06:06,500 --> 00:06:11,000
+That fee goes to liquidity providers.
+Proportionally to their share.
+
+89
+00:06:11,000 --> 00:06:15,500
+More volume in the pool—
+more fees earned.
+
+90
+00:06:15,500 --> 00:06:20,000
+This is how passive yield
+is generated in DeFi.
+
+91
+00:06:20,000 --> 00:06:24,500
+Without a financial intermediary.
+Without a middleman.
+
+92
+00:06:24,500 --> 00:06:29,000
+Just a formula and two asset pools
+doing their job.
+
+93
+00:06:29,000 --> 00:06:33,500
+The AMM never sleeps.
+It processes trades continuously.
+
+94
+00:06:33,500 --> 00:06:38,000
+Now let's talk about the catch.
+
+95
+00:06:38,000 --> 00:06:42,500
+Because there is always a catch
+when yield is involved.
+
+96
+00:06:44,000 --> 00:06:49,000
+Where does the yield come from?
+Two main sources.
+
+97
+00:06:49,000 --> 00:06:53,500
+Trading fees and protocol incentives.
+Let's take them one at a time.
+
+98
+00:06:53,500 --> 00:06:58,000
+Trading fees: every swap pays 0.3%.
+Those fees go to LP holders.
+
+99
+00:06:58,000 --> 00:07:02,500
+The more volume, the more you earn.
+Volume is the key variable.
+
+100
+00:07:02,500 --> 00:07:07,000
+Protocol incentives are different.
+They're funded by token issuance.
+
+101
+00:07:07,000 --> 00:07:11,500
+If the protocol is printing tokens
+to pay you yield—
+
+102
+00:07:11,500 --> 00:07:16,000
+that yield has a cost.
+The token loses value over time.
+
+103
+00:07:16,000 --> 00:07:20,000
+Now: impermanent loss.
+
+104
+00:07:20,000 --> 00:07:24,500
+When you provide liquidity,
+you deposit two assets.
+
+105
+00:07:24,500 --> 00:07:29,000
+If one asset's price changes significantly,
+you end up with less total value.
+
+106
+00:07:29,000 --> 00:07:33,500
+Less total value than if you'd held
+both assets in your wallet.
+
+107
+00:07:33,500 --> 00:07:38,000
+The loss is impermanent—
+if prices return to the original ratio—
+
+108
+00:07:38,000 --> 00:07:42,000
+it disappears.
+If they don't—
+
+109
+00:07:42,000 --> 00:07:46,000
+it becomes permanent.
+
+110
+00:07:46,000 --> 00:07:50,000
+Another risk: smart contract bugs.
+
+111
+00:07:50,000 --> 00:07:54,500
+In 2020, the Harvest Finance protocol
+lost 34 million dollars.
+
+112
+00:07:54,500 --> 00:07:58,500
+In a single transaction.
+A price manipulation attack.
+
+113
+00:07:58,500 --> 00:08:02,500
+Smart contracts are code.
+Code can have bugs.
+
+114
+00:08:02,500 --> 00:08:07,000
+Even audited code.
+Even code that passed review.
+
+115
+00:08:07,000 --> 00:08:11,500
+Here's the hard truth about yield.
+
+116
+00:08:11,500 --> 00:08:16,000
+If the APY looks too high to be real—
+it probably is.
+
+117
+00:08:16,000 --> 00:08:20,500
+If you don't understand
+where the yield comes from—
+
+118
+00:08:20,500 --> 00:08:24,500
+that's your signal.
+Walk away.
+
+119
+00:08:24,500 --> 00:08:29,000
+Sustainable yield has a source.
+Unsustainable yield has a victim.
+
+120
+00:08:29,000 --> 00:08:33,500
+Remember this distinction.
+It will protect you.
+
+121
+00:08:33,500 --> 00:08:39,000
+Now let's look at the asset
+at the center of most DeFi activity.
+
+122
+00:08:39,000 --> 00:08:44,000
+The stablecoin.
+
+123
+00:08:44,000 --> 00:08:49,000
+Stablecoins are crypto assets
+designed to hold a fixed value.
+
+124
+00:08:49,000 --> 00:08:53,500
+Usually one dollar.
+There are three main types.
+
+125
+00:08:53,500 --> 00:08:58,000
+Fiat-backed: USDC and USDT.
+Real dollars held in reserve.
+
+126
+00:08:58,000 --> 00:09:02,500
+For every USDC token,
+there's a dollar in a bank account.
+
+127
+00:09:02,500 --> 00:09:07,000
+Crypto-backed: DAI.
+Backed by ETH and other crypto assets.
+
+128
+00:09:07,000 --> 00:09:11,500
+It maintains its peg
+through overcollateralization.
+
+129
+00:09:11,500 --> 00:09:15,500
+And smart contract mechanisms.
+Not a bank account.
+
+130
+00:09:15,500 --> 00:09:20,000
+Algorithmic: no reserves at all.
+Supply adjustments and incentives.
+
+131
+00:09:20,000 --> 00:09:25,000
+The theory: the peg holds
+because it's profitable to maintain it.
+
+132
+00:09:25,000 --> 00:09:30,000
+In May 2022, Terra's UST
+was the third-largest stablecoin.
+
+133
+00:09:30,000 --> 00:09:34,500
+Algorithmic. No reserve backing.
+Tens of billions in circulation.
+
+134
+00:09:34,500 --> 00:09:39,000
+Then the peg broke.
+
+135
+00:09:39,000 --> 00:09:43,500
+The mechanism that was supposed
+to restore the peg—
+
+136
+00:09:43,500 --> 00:09:47,500
+made it worse.
+
+137
+00:09:47,500 --> 00:09:52,000
+UST fell from one dollar
+to fractions of a cent.
+
+138
+00:09:52,000 --> 00:09:56,500
+Forty billion dollars in value
+destroyed in four days.
+
+139
+00:09:56,500 --> 00:10:00,500
+The mechanism failed.
+The peg broke.
+
+140
+00:10:00,500 --> 00:10:05,500
+Forty billion dollars.
+Four days.
+
+141
+00:10:05,500 --> 00:10:10,000
+This is why the type of stablecoin matters.
+
+142
+00:10:10,000 --> 00:10:14,500
+Not all dollar tokens
+carry the same risk.
+
+143
+00:10:14,500 --> 00:10:19,000
+The backing mechanism is the difference.
+Understand it before you trust it.
+
+144
+00:10:19,000 --> 00:10:24,000
+Now let's put all the risks
+on the table at once.
+
+145
+00:10:24,000 --> 00:10:29,000
+Because in DeFi,
+they're all real.
+
+146
+00:10:29,000 --> 00:10:34,000
+DeFi has real risks.
+Here they are.
+
+147
+00:10:34,000 --> 00:10:38,500
+Smart contract risk: the code can fail.
+Even after multiple audits.
+
+148
+00:10:38,500 --> 00:10:43,000
+Protocol risk: the design can be flawed.
+Governance can be captured.
+
+149
+00:10:43,000 --> 00:10:47,500
+Liquidation risk: if collateral falls fast,
+you lose your entire position.
+
+150
+00:10:47,500 --> 00:10:52,000
+Rug pulls: developers build a protocol,
+attract liquidity—
+
+151
+00:10:52,000 --> 00:10:56,000
+and disappear with the funds.
+
+152
+00:10:56,000 --> 00:11:00,000
+This is fraud.
+
+153
+00:11:00,000 --> 00:11:04,000
+It happens.
+And it's rarely recovered.
+
+154
+00:11:04,000 --> 00:11:08,500
+Oracle risk: protocols need
+real-world price data.
+
+155
+00:11:08,500 --> 00:11:12,500
+If an oracle is manipulated,
+the protocol can be drained.
+
+156
+00:11:12,500 --> 00:11:17,000
+This is not theoretical.
+It has happened multiple times.
+
+157
+00:11:17,000 --> 00:11:21,500
+Regulatory risk: the legal landscape
+around DeFi is still forming.
+
+158
+00:11:21,500 --> 00:11:26,000
+Protocols available today
+may face restrictions tomorrow.
+
+159
+00:11:26,000 --> 00:11:30,000
+These risks are documented losses.
+Real money. Real people.
+
+160
+00:11:30,000 --> 00:11:34,500
+None of this means DeFi is a mistake.
+It means it requires understanding.
+
+161
+00:11:34,500 --> 00:11:39,000
+More understanding than most
+financial products have ever demanded.
+
+162
+00:11:39,000 --> 00:11:43,500
+Don't interact with any protocol
+you can't explain to someone else.
+
+163
+00:11:43,500 --> 00:11:48,000
+If you can't explain how it works,
+you don't understand the risk.
+
+164
+00:11:48,000 --> 00:11:52,500
+That's not a warning against DeFi.
+It's a standard for engaging with it.
+
+165
+00:11:52,500 --> 00:11:57,000
+Understand first. Then decide.
+
+166
+00:11:57,000 --> 00:12:02,000
+DeFi is powerful.
+Smart contracts work.
+
+167
+00:12:02,000 --> 00:12:06,500
+Liquidity pools generate real fees.
+The mechanism is real.
+
+168
+00:12:06,500 --> 00:12:11,000
+But it requires understanding
+before trusting real value to it.
+
+169
+00:12:11,000 --> 00:12:15,500
+In Phase 4, we cover
+security and self-custody.
+
+170
+00:12:15,500 --> 00:12:20,000
+How to hold crypto safely.
+What a hardware wallet actually does.
+
+171
+00:12:20,000 --> 00:12:24,500
+And why "not your keys, not your coins"
+isn't just a phrase.
+
+172
+00:12:24,500 --> 00:12:29,000
+It's a principle that has saved—
+and cost—people millions.
+
+173
+00:12:29,000 --> 00:12:33,500
+See you in Phase 4.
+
+174
+00:12:33,500 --> 00:12:38,000
+Chain Clarity.
+Blockchain, without the noise.
+

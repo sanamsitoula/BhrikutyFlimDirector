@@ -1,0 +1,405 @@
+{
+  "meta": {
+    "project": "chain_clarity",
+    "phase": 2,
+    "agent": "Agent 12 — Infographic Asset Generator",
+    "description": "Animation timing specification for After Effects / CapCut / DaVinci Resolve / Premiere Pro",
+    "frame_rate": 30,
+    "canvas": { "width": 1080, "height": 1080, "unit": "px" },
+    "duration_note": "All timings in milliseconds from card start (t=0)",
+    "easing_library": {
+      "ease-out":      [0.0, 0.0, 0.2, 1.0],
+      "ease-in-out":   [0.42, 0.0, 0.58, 1.0],
+      "easeOutCubic":  [0.33, 1.0, 0.68, 1.0],
+      "spring_bounce": [0.34, 1.56, 0.64, 1.0]
+    }
+  },
+
+  "cards": [
+
+    {
+      "card_id": "phase2_card_01",
+      "title": "PROOF OF WORK vs PROOF OF STAKE",
+      "total_duration_ms": 2700,
+      "animation_layers": [
+        {
+          "layer": "background_radial",
+          "type": "opacity",
+          "keyframes": [
+            { "t_ms": 0,   "opacity": 0 },
+            { "t_ms": 200, "opacity": 1 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "logo_group",
+          "type": "opacity_translateY",
+          "keyframes": [
+            { "t_ms": 200, "opacity": 0, "y": -28 },
+            { "t_ms": 500, "opacity": 1, "y": 0 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "headline_word_1",
+          "type": "opacity_translateY",
+          "keyframes": [
+            { "t_ms": 500, "opacity": 0, "y": 12 },
+            { "t_ms": 750, "opacity": 1, "y": 0 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "headline_word_2",
+          "type": "opacity_translateY",
+          "keyframes": [
+            { "t_ms": 580, "opacity": 0, "y": 12 },
+            { "t_ms": 830, "opacity": 1, "y": 0 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "headline_word_3",
+          "type": "opacity_translateY",
+          "keyframes": [
+            { "t_ms": 660, "opacity": 0, "y": 12 },
+            { "t_ms": 910, "opacity": 1, "y": 0 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "sub_word_vs",
+          "type": "opacity_translateY",
+          "keyframes": [
+            { "t_ms": 740, "opacity": 0, "y": 12 },
+            { "t_ms": 990, "opacity": 1, "y": 0 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "sub_word_proof",
+          "type": "opacity_translateY",
+          "keyframes": [
+            { "t_ms": 820, "opacity": 0, "y": 12 },
+            { "t_ms": 1070, "opacity": 1, "y": 0 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "sub_word_of",
+          "type": "opacity_translateY",
+          "keyframes": [
+            { "t_ms": 900, "opacity": 0, "y": 12 },
+            { "t_ms": 1150, "opacity": 1, "y": 0 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "sub_word_stake",
+          "type": "opacity_translateY",
+          "keyframes": [
+            { "t_ms": 980, "opacity": 0, "y": 12 },
+            { "t_ms": 1230, "opacity": 1, "y": 0 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "divider_line",
+          "type": "opacity",
+          "keyframes": [
+            { "t_ms": 1100, "opacity": 0 },
+            { "t_ms": 1400, "opacity": 1 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "pow_column_group",
+          "type": "opacity_translateX",
+          "keyframes": [
+            { "t_ms": 1200, "opacity": 0, "x": -40 },
+            { "t_ms": 1600, "opacity": 1, "x": 0 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "pos_column_group",
+          "type": "opacity_translateX",
+          "keyframes": [
+            { "t_ms": 1400, "opacity": 0, "x": 40 },
+            { "t_ms": 1800, "opacity": 1, "x": 0 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "pow_row_1", "type": "opacity_translateX",
+          "keyframes": [{ "t_ms": 1550, "opacity": 0, "x": -12 }, { "t_ms": 1850, "opacity": 1, "x": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "pos_row_1", "type": "opacity_translateX",
+          "keyframes": [{ "t_ms": 1700, "opacity": 0, "x": -12 }, { "t_ms": 2000, "opacity": 1, "x": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "pow_row_2", "type": "opacity_translateX",
+          "keyframes": [{ "t_ms": 1700, "opacity": 0, "x": -12 }, { "t_ms": 2000, "opacity": 1, "x": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "pos_row_2", "type": "opacity_translateX",
+          "keyframes": [{ "t_ms": 1850, "opacity": 0, "x": -12 }, { "t_ms": 2150, "opacity": 1, "x": 0 }],
+          "easing": "ease-out",
+          "note": "−99.9% stat highlight in #00D4AA fires here"
+        },
+        {
+          "layer": "pow_row_3", "type": "opacity_translateX",
+          "keyframes": [{ "t_ms": 1850, "opacity": 0, "x": -12 }, { "t_ms": 2150, "opacity": 1, "x": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "pos_row_3", "type": "opacity_translateX",
+          "keyframes": [{ "t_ms": 2000, "opacity": 0, "x": -12 }, { "t_ms": 2300, "opacity": 1, "x": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "pow_row_4", "type": "opacity_translateX",
+          "keyframes": [{ "t_ms": 2000, "opacity": 0, "x": -12 }, { "t_ms": 2300, "opacity": 1, "x": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "pos_row_4", "type": "opacity_translateX",
+          "keyframes": [{ "t_ms": 2150, "opacity": 0, "x": -12 }, { "t_ms": 2450, "opacity": 1, "x": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "wordmark",
+          "type": "opacity",
+          "keyframes": [
+            { "t_ms": 2300, "opacity": 0 },
+            { "t_ms": 2700, "opacity": 1 }
+          ],
+          "easing": "ease-out"
+        }
+      ]
+    },
+
+    {
+      "card_id": "phase2_card_02",
+      "title": "BITCOIN'S 21 MILLION HARD CAP",
+      "total_duration_ms": 3500,
+      "animation_layers": [
+        {
+          "layer": "background_radial",
+          "type": "opacity",
+          "keyframes": [{ "t_ms": 0, "opacity": 0 }, { "t_ms": 200, "opacity": 1 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "logo_group",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 200, "opacity": 0, "y": -28 }, { "t_ms": 500, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "big_number_counter",
+          "type": "count_up",
+          "keyframes": [
+            { "t_ms": 500,  "value": 0,        "opacity": 0 },
+            { "t_ms": 550,  "value": 0,        "opacity": 1 },
+            { "t_ms": 1700, "value": 21000000, "opacity": 1 }
+          ],
+          "easing": "easeOutCubic",
+          "note": "Format output as comma-separated integer: 21,000,000"
+        },
+        {
+          "layer": "stat_label_word_1",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 1300, "opacity": 0, "y": 12 }, { "t_ms": 1550, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "stat_label_word_2",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 1380, "opacity": 0, "y": 12 }, { "t_ms": 1630, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "stat_label_word_3",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 1460, "opacity": 0, "y": 12 }, { "t_ms": 1710, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "section_label_halving",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 1600, "opacity": 0, "y": 32 }, { "t_ms": 2000, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "timeline_bar",
+          "type": "width_draw",
+          "keyframes": [
+            { "t_ms": 2000, "width_pct": 0,   "opacity": 0 },
+            { "t_ms": 2020, "width_pct": 0,   "opacity": 1 },
+            { "t_ms": 2800, "width_pct": 100, "opacity": 1 }
+          ],
+          "easing": "ease-out",
+          "gradient": "linear #00D4AA → #F5A623 → #7B5CF0"
+        },
+        {
+          "layer": "tick_2009", "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 2100, "opacity": 0, "y": 16 }, { "t_ms": 2350, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "tick_2012", "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 2220, "opacity": 0, "y": 16 }, { "t_ms": 2470, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "tick_2016", "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 2340, "opacity": 0, "y": 16 }, { "t_ms": 2590, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "tick_2020", "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 2460, "opacity": 0, "y": 16 }, { "t_ms": 2710, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "tick_2024", "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 2580, "opacity": 0, "y": 16 }, { "t_ms": 2830, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "tick_2140_last_coin",
+          "type": "opacity_scale_translateY",
+          "keyframes": [
+            { "t_ms": 2700, "opacity": 0, "scale": 0.7, "y": 20 },
+            { "t_ms": 2870, "opacity": 1, "scale": 1.05, "y": -4 },
+            { "t_ms": 3000, "opacity": 1, "scale": 1.0,  "y": 0 }
+          ],
+          "easing": "spring_bounce"
+        },
+        {
+          "layer": "footer_strip",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 2900, "opacity": 0, "y": 32 }, { "t_ms": 3300, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "wordmark",
+          "type": "opacity",
+          "keyframes": [{ "t_ms": 3100, "opacity": 0 }, { "t_ms": 3500, "opacity": 1 }],
+          "easing": "ease-out"
+        }
+      ]
+    },
+
+    {
+      "card_id": "phase2_card_03",
+      "title": "TWO TOOLS. DIFFERENT JOBS.",
+      "total_duration_ms": 2800,
+      "animation_layers": [
+        {
+          "layer": "background_radial",
+          "type": "opacity",
+          "keyframes": [{ "t_ms": 0, "opacity": 0 }, { "t_ms": 200, "opacity": 1 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "logo_group",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 200, "opacity": 0, "y": -28 }, { "t_ms": 500, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "headline_word_two",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 500, "opacity": 0, "y": 12 }, { "t_ms": 750, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "headline_word_tools",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 580, "opacity": 0, "y": 12 }, { "t_ms": 830, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "sub_word_different",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 660, "opacity": 0, "y": 12 }, { "t_ms": 910, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "sub_word_jobs",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 740, "opacity": 0, "y": 12 }, { "t_ms": 990, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "btc_panel_group",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 1150, "opacity": 0, "y": 32 }, { "t_ms": 1550, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "btc_hex_stroke",
+          "type": "stroke_draw",
+          "keyframes": [
+            { "t_ms": 1350, "stroke_dashoffset": 600, "opacity": 0 },
+            { "t_ms": 1850, "stroke_dashoffset": 0,   "opacity": 1 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "btc_content_lines",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 1500, "opacity": 0, "y": 16 }, { "t_ms": 1750, "opacity": 1, "y": 0 }],
+          "easing": "ease-out",
+          "stagger_ms": 120
+        },
+        {
+          "layer": "eth_panel_group",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 1300, "opacity": 0, "y": 32 }, { "t_ms": 1700, "opacity": 1, "y": 0 }],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "eth_hex_stroke",
+          "type": "stroke_draw",
+          "keyframes": [
+            { "t_ms": 1650, "stroke_dashoffset": 600, "opacity": 0 },
+            { "t_ms": 2150, "stroke_dashoffset": 0,   "opacity": 1 }
+          ],
+          "easing": "ease-out"
+        },
+        {
+          "layer": "eth_content_lines",
+          "type": "opacity_translateY",
+          "keyframes": [{ "t_ms": 1650, "opacity": 0, "y": 16 }, { "t_ms": 1900, "opacity": 1, "y": 0 }],
+          "easing": "ease-out",
+          "stagger_ms": 120,
+          "note": "IF/THEN text segment renders in #00D4AA"
+        },
+        {
+          "layer": "callout_strip",
+          "type": "opacity_scale_translateY",
+          "keyframes": [
+            { "t_ms": 2100, "opacity": 0, "scale": 0.8, "y": 16 },
+            { "t_ms": 2310, "opacity": 1, "scale": 1.04, "y": -4 },
+            { "t_ms": 2400, "opacity": 1, "scale": 1.0,  "y": 0 }
+          ],
+          "easing": "spring_bounce"
+        },
+        {
+          "layer": "wordmark",
+          "type": "opacity",
+          "keyframes": [{ "t_ms": 2400, "opacity": 0 }, { "t_ms": 2800, "opacity": 1 }],
+          "easing": "ease-out"
+        }
+      ]
+    }
+
+  ]
+}

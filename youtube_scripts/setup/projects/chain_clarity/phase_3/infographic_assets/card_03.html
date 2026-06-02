@@ -1,0 +1,234 @@
+<!-- EXPORT: Instagram Post 1080x1080px · YouTube Thumbnail 1280x720px -->
+<!-- CARD 03 — HOW AMMS WORK: x × y = k -->
+<!-- Chain Clarity · Phase 3 · Agent 12 — Infographic Asset Generator -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080">
+  <title>Card 03 — AMM Liquidity Pool</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --teal:   #00D4AA;
+      --gold:   #F5A623;
+      --slate:  #8B9BB4;
+      --navy:   #0A0E1A;
+      --violet: #7B5CF0;
+      --white:  #FFFFFF;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1080px; height: 1080px;
+      background: var(--navy); overflow: hidden;
+      font-family: 'Space Grotesk', sans-serif; position: relative;
+    }
+
+    /* ── BACKGROUND ── */
+    .bg-radial {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 50% 50% at 25% 60%, rgba(245,166,35,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 50% at 75% 60%, rgba(0,212,170,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 40% at 50% 30%, rgba(123,92,240,0.04) 0%, transparent 60%);
+      opacity: 0; animation: fadeIn 0.2s ease forwards;
+    }
+
+    @keyframes fadeIn    { from { opacity: 0 } to { opacity: 1 } }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-28px) } to { opacity: 1; transform: translateY(0) } }
+    @keyframes slideUp   { from { opacity: 0; transform: translateY(32px)  } to { opacity: 1; transform: translateY(0) } }
+    @keyframes slideLeft { from { opacity: 0; transform: translateX(-40px) } to { opacity: 1; transform: translateX(0) } }
+    @keyframes slideRight{ from { opacity: 0; transform: translateX(40px)  } to { opacity: 1; transform: translateX(0) } }
+    @keyframes wordIn    { from { opacity: 0; transform: translateY(12px)  } to { opacity: 1; transform: translateY(0) } }
+    @keyframes bounce    { 0% { opacity: 0; transform: scale(0.8) translateY(16px) } 70% { transform: scale(1.04) translateY(-3px) } 100% { opacity: 1; transform: scale(1) translateY(0) } }
+    @keyframes typeChar  { from { opacity: 0 } to { opacity: 1 } }
+
+    /* ── LOGO ── */
+    .logo-wrap {
+      position: absolute; top: 52px; left: 60px;
+      display: flex; align-items: center; gap: 14px;
+      opacity: 0; animation: slideDown 0.3s ease forwards 0.2s;
+    }
+    .logo-text { font-size: 22px; font-weight: 600; color: var(--white); }
+    .logo-text span { color: var(--teal); }
+
+    /* ── HEADLINE ── */
+    .headline-block { position: absolute; top: 148px; left: 60px; right: 60px; }
+    .headline {
+      font-size: 72px; font-weight: 700; color: var(--white);
+      letter-spacing: -2px; line-height: 1; display: flex; gap: 16px;
+    }
+    .headline .word { opacity: 0; animation: wordIn 0.25s ease forwards; }
+    .headline .word:nth-child(1) { animation-delay: 0.5s; }
+    .headline .word:nth-child(2) { animation-delay: 0.58s; }
+    .headline .word:nth-child(3) { animation-delay: 0.66s; }
+    .sub-headline {
+      font-size: 72px; font-weight: 700; color: var(--teal);
+      letter-spacing: -2px; line-height: 1; margin-top: 6px;
+      display: flex; gap: 16px;
+    }
+    .sub-headline .word { opacity: 0; animation: wordIn 0.25s ease forwards; }
+    .sub-headline .word:nth-child(1) { animation-delay: 0.74s; }
+    .sub-headline .word:nth-child(2) { animation-delay: 0.82s; }
+    .sub-headline .word:nth-child(3) { animation-delay: 0.90s; }
+    .divider {
+      width: 100%; height: 1px; background: rgba(139,155,180,0.25);
+      margin-top: 20px; opacity: 0; animation: fadeIn 0.3s ease forwards 1.0s;
+    }
+
+    /* ── FORMULA CARD ── */
+    .formula-card {
+      position: absolute; top: 352px; left: 60px; right: 60px;
+      background: rgba(245,166,35,0.06); border: 1.5px solid var(--gold);
+      border-radius: 14px; padding: 20px 36px; text-align: center;
+      opacity: 0; animation: slideUp 0.5s ease forwards 1.0s;
+    }
+    .formula {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 72px; font-weight: 500; color: var(--gold);
+      letter-spacing: -1px; line-height: 1;
+    }
+    .formula .char {
+      display: inline-block;
+      opacity: 0; animation: typeChar 0.1s ease forwards;
+    }
+    .formula .char:nth-child(1) { animation-delay: 1.5s; }
+    .formula .char:nth-child(2) { animation-delay: 1.6s; }
+    .formula .char:nth-child(3) { animation-delay: 1.7s; }
+    .formula .char:nth-child(4) { animation-delay: 1.8s; }
+    .formula .char:nth-child(5) { animation-delay: 1.9s; }
+    .formula .char:nth-child(6) { animation-delay: 2.0s; }
+    .formula .char:nth-child(7) { animation-delay: 2.1s; }
+    .formula-label {
+      font-size: 22px; font-weight: 600; color: var(--slate);
+      letter-spacing: 2px; text-transform: uppercase; margin-top: 8px;
+    }
+
+    /* ── POOL PANELS ── */
+    .panels-wrap {
+      position: absolute; top: 556px; left: 60px; right: 60px;
+      display: grid; grid-template-columns: 1fr 80px 1fr; align-items: center;
+    }
+
+    .panel {
+      border-radius: 12px; padding: 28px 24px;
+      opacity: 0;
+    }
+    .panel-eth {
+      border: 1.5px solid var(--gold); background: rgba(245,166,35,0.06);
+      animation: slideLeft 0.4s ease forwards 2.0s;
+    }
+    .panel-usdc {
+      border: 1.5px solid var(--teal); background: rgba(0,212,170,0.06);
+      animation: slideRight 0.4s ease forwards 2.3s;
+    }
+    .panel-title { font-size: 44px; font-weight: 700; letter-spacing: -1px; margin-bottom: 16px; }
+    .panel-eth .panel-title { color: var(--gold); }
+    .panel-usdc .panel-title { color: var(--teal); }
+    .panel-action { font-size: 26px; font-weight: 500; color: var(--white); margin-bottom: 8px; }
+    .panel-result { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+    .panel-eth .panel-result { color: var(--gold); }
+    .panel-usdc .panel-result { color: var(--teal); }
+
+    /* Exchange symbol */
+    .exchange-sym {
+      text-align: center; font-size: 52px; color: var(--slate);
+      opacity: 0; animation: fadeIn 0.4s ease forwards 2.3s;
+    }
+
+    /* ── BALANCE LABEL ── */
+    .balance-label {
+      position: absolute; top: 872px; left: 60px; right: 60px;
+      text-align: center; font-size: 24px; font-weight: 600;
+      color: var(--slate); letter-spacing: 1.5px; text-transform: uppercase;
+      opacity: 0; animation: fadeIn 0.4s ease forwards 2.8s;
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      position: absolute; bottom: 96px; left: 60px; right: 60px;
+      background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.3);
+      border-radius: 10px; padding: 22px 36px; text-align: center;
+      font-size: 34px; font-weight: 700; color: var(--teal); letter-spacing: -0.3px;
+      opacity: 0; animation: bounce 0.3s ease forwards 3.1s;
+    }
+
+    /* ── WORDMARK ── */
+    .wordmark {
+      position: absolute; bottom: 44px; right: 60px;
+      font-size: 26px; font-weight: 600; color: rgba(139,155,180,0.5);
+      opacity: 0; animation: fadeIn 0.4s ease forwards 3.4s;
+    }
+    .wordmark span { color: rgba(0,212,170,0.6); }
+  </style>
+</head>
+<body>
+
+  <div class="bg-radial"></div>
+
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 62" width="48" height="41">
+      <polygon points="42,30 32,47 12,47 2,30 12,13 32,13" fill="#00D4AA"/>
+      <polygon points="68,30 58,47 38,47 28,30 38,13 58,13" fill="#0A0E1A" stroke="#7B5CF0" stroke-width="2.5"/>
+      <polygon points="35,18 42,30 35,42 28,30" fill="#F5A623"/>
+    </svg>
+    <span class="logo-text">Chain<span>Clarity</span></span>
+  </div>
+
+  <!-- Headline -->
+  <div class="headline-block">
+    <div class="headline">
+      <span class="word">HOW</span><span class="word">AMMS</span><span class="word">WORK</span>
+    </div>
+    <div class="sub-headline">
+      <span class="word">NO</span><span class="word">ORDER</span><span class="word">BOOK</span>
+    </div>
+    <div class="divider"></div>
+  </div>
+
+  <!-- Formula card -->
+  <div class="formula-card">
+    <div class="formula">
+      <span class="char">x</span>
+      <span class="char"> </span>
+      <span class="char">×</span>
+      <span class="char"> </span>
+      <span class="char">y</span>
+      <span class="char"> </span>
+      <span class="char">=</span>
+      <span class="char"> </span>
+      <span class="char" style="animation-delay:2.2s;">k</span>
+    </div>
+    <div class="formula-label">Constant Product Formula</div>
+  </div>
+
+  <!-- Pool panels -->
+  <div class="panels-wrap">
+
+    <div class="panel panel-eth">
+      <div class="panel-title">ETH</div>
+      <div class="panel-action">You ADD ETH</div>
+      <div class="panel-result">Price ↓</div>
+    </div>
+
+    <div class="exchange-sym">⇌</div>
+
+    <div class="panel panel-usdc">
+      <div class="panel-title">USDC</div>
+      <div class="panel-action">You GET USDC</div>
+      <div class="panel-result">Price ↑</div>
+    </div>
+
+  </div>
+
+  <!-- Balance label -->
+  <div class="balance-label">Pool Balance Always Preserved</div>
+
+  <!-- Callout -->
+  <div class="callout">NO ONE SETS THE PRICE. THE MATH DOES.</div>
+
+  <div class="wordmark">Chain<span>Clarity</span></div>
+
+</body>
+</html>

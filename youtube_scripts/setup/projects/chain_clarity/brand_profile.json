@@ -1,0 +1,66 @@
+{
+  "brand_slug": "chain_clarity",
+  "brand_name": "Chain Clarity",
+  "tagline": "Blockchain, without the noise.",
+  "niche": "Blockchain & Cryptocurrency Education",
+  "target_audience": "Curious learners ages 22–40 who want to understand blockchain and crypto technically — not get-rich-quick seekers, but people who want real, lasting knowledge they can act on",
+  "platforms": ["YouTube", "TikTok", "Instagram"],
+  "tone_of_voice": {
+    "primary": "Trusted senior engineer explaining to a sharp, motivated student — clear, direct, analogy-driven, never condescending, never hype-driven",
+    "forbidden_words": ["moon", "lambo", "HODL", "simply", "just", "obviously", "easy", "basic", "pump", "dump", "guaranteed", "rich", "explosive", "massive gains"],
+    "sentence_style": "Short declarative sentences. Max 15 words per sentence in scripts. No passive voice. Lead with the concept, follow with the analogy.",
+    "analogy_style": "Everyday systems — banks, post offices, spreadsheets, vending machines, contracts, notaries, shared Google Docs. Never use financial analogies to explain financial concepts."
+  },
+  "colors": {
+    "primary":    { "name": "Electric Teal",   "hex": "#00D4AA", "usage": "headers, CTAs, key stats" },
+    "secondary":  { "name": "Deep Gold",       "hex": "#F5A623", "usage": "accents, icons, stat callouts" },
+    "neutral":    { "name": "Slate",           "hex": "#8B9BB4", "usage": "body text, secondary labels" },
+    "background": { "name": "Deep Navy",       "hex": "#0A0E1A", "usage": "card and screen backgrounds" },
+    "highlight":  { "name": "Electric Violet", "hex": "#7B5CF0", "usage": "emphasis, pull quotes, chapter markers" }
+  },
+  "typography": {
+    "heading_font": "Space Grotesk",
+    "body_font": "Inter",
+    "code_font": "JetBrains Mono",
+    "min_body_size_px": 48,
+    "min_header_size_px": 72,
+    "max_words_per_line": 7
+  },
+  "logo": {
+    "concept": "Two interlocking flat-top hexagons representing blockchain blocks forming a chain link. Left block filled teal, right block dark with violet stroke, overlap zone in gold — symbolising the connection point where knowledge becomes clarity.",
+    "symbol": "Dual-hex chain link with gold intersection diamond",
+    "svg_code": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 72 62\" width=\"72\" height=\"62\"><polygon points=\"42,30 32,47 12,47 2,30 12,13 32,13\" fill=\"#00D4AA\"/><polygon points=\"68,30 58,47 38,47 28,30 38,13 58,13\" fill=\"#0A0E1A\" stroke=\"#7B5CF0\" stroke-width=\"2.5\"/><polygon points=\"35,18 42,30 35,42 28,30\" fill=\"#F5A623\"/></svg>"
+  },
+  "sound_identity": {
+    "intro_music_style": "Electronic ambient / lo-fi tech — spacious pads, subtle arpeggios, forward momentum without aggression",
+    "bpm_range": "88–112",
+    "mood_keywords": ["focused", "curious", "empowering", "intelligent", "grounded"],
+    "forbidden_genres": ["trap", "hype EDM", "aggressive dubstep", "party anthems", "countdown-style builds"],
+    "royalty_free_search_terms": [
+      "lo-fi electronic focused",
+      "ambient tech background",
+      "minimal electronic study",
+      "calm tech beat",
+      "intelligent electronic chill"
+    ]
+  },
+  "content_pillars": [
+    "How Blockchain Works",
+    "Cryptocurrency Fundamentals",
+    "DeFi & Smart Contracts",
+    "Security & Self-Custody",
+    "Real-World Blockchain Applications"
+  ],
+  "card_dimensions": {
+    "instagram_post":    "1080x1080px",
+    "stories_reels":     "1080x1920px",
+    "youtube_thumbnail": "1280x720px",
+    "youtube_endscreen": "1920x1080px"
+  },
+  "animation_style": {
+    "default_transition": "slide-up",
+    "duration_ms": 400,
+    "text_animation": "typewriter",
+    "easing": "ease-out"
+  }
+}
