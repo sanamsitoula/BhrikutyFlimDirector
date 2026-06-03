@@ -9,6 +9,8 @@
 [![Claude API](https://img.shields.io/badge/Claude-Sonnet_4.6-orange?style=flat-square)](https://anthropic.com)
 [![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-blue?style=flat-square)](https://aistudio.google.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15%2B-blue?style=flat-square&logo=postgresql)](https://postgresql.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Open Source](https://img.shields.io/badge/Open_Source-❤️-red?style=flat-square)](https://github.com/sanamsitoula/BhrikutyFlimDirector)
 
 </div>
 
@@ -22,6 +24,13 @@ Give it a **topic**. It produces a complete **7-platform content package** — Y
 Brand Profile  →  Pipeline  →  7-Platform Package
    (once)          (per video)     (per video)
 ```
+
+## Open Source
+
+Built with love for the open source community. Contributions welcome!
+
+⭐ Star this repo: https://github.com/sanamsitoula/BhrikutyFlimDirector
+🐛 Issues & PRs: https://github.com/sanamsitoula/BhrikutyFlimDirector/issues
 
 ---
 
@@ -122,7 +131,7 @@ DASHSCOPE_API_KEY=    # Freemium — Qwen3-TTS
 
 # ── Optional ──────────────────────────────────────────
 ASSEMBLYAI_API_KEY=   # Auto YouTube chapters
-OPENAI_API_KEY=       # DALL-E images
+OPENAI_API_KEY=       # ChatGPT GPT-4o / DALL-E images
 BFL_API_KEY=          # FLUX.1 images
 RUNWAY_API_KEY=       # Runway Gen-4 B-roll
 ```
@@ -133,6 +142,14 @@ RUNWAY_API_KEY=       # Runway Gen-4 B-roll
 3. Force a provider: `python pipeline.py ... --provider gemini`
 
 Get a free Gemini key: `aistudio.google.com` → Get API Key
+
+**All supported AI providers:**
+- `anthropic` — Claude Sonnet 4.6 (primary, best quality)
+- `gemini` — Gemini 2.5 Flash (auto-fallback)
+- `openai` — ChatGPT GPT-4o (optional, `OPENAI_API_KEY`)
+- `dashscope` — Qwen3 (optional, `DASHSCOPE_API_KEY`)
+
+Force a provider: `python tools/generate_phase.py --project ecoWorld --phase 1 --topic "..." --provider openai`
 
 ---
 
@@ -463,7 +480,7 @@ curl -X POST http://localhost:8080/api/save-file \
 → `$env:PORT=8081; python server.py` (PowerShell)
 
 **`brand_profile.json not found`**
-→ Run `python tools/init_brand.py --slug yourBrand` first.
+→ Run `python tools/init_brand.py --slug your-brand` first.
 
 ---
 
@@ -497,6 +514,39 @@ python tools/text_content_generator.py --project ecoWorld --phase 1
 # 7. Track everything
 python server.py   # open http://localhost:8080
 ```
+
+---
+
+## Git Workflow — Step by Step
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/sanamsitoula/BhrikutyFlimDirector.git
+cd BhrikutyFlimDirector
+
+# 2. Create your working branch
+git checkout -b feat/my-brand
+
+# 3. Stage your changes
+git add server.py tools/ phase_dashboard.html dashboard.html
+
+# 4. Commit with a clear message
+git commit -m "feat: add ecoWorld brand with phase 1 content"
+
+# 5. Push to GitHub
+git push -u origin feat/my-brand
+
+# 6. Open a Pull Request on GitHub
+# → https://github.com/sanamsitoula/BhrikutyFlimDirector/pulls
+```
+
+Commit conventions:
+| Prefix | Use for |
+|--------|---------|
+| `feat:` | New brand, phase, or feature |
+| `fix:` | Bug fix |
+| `docs:` | README, guides |
+| `chore:` | Deps, cleanup |
 
 ---
 

@@ -98,14 +98,14 @@ def check_prerequisites():
     return missing
 
 
-def step_generate_phase(project: str, phase: int, topic: str, outline: str, duration: int, tags: str):
-    return run(
-        [sys.executable, str(TOOLS_DIR / "generate_phase.py"),
-         "--project", project, "--phase", str(phase),
-         "--topic", topic, "--outline", outline,
-         "--duration", str(duration), "--tags", tags],
-        f"STEP 1: Generate phase {phase} content files"
-    )
+def step_generate_phase(project: str, phase: int, topic: str, outline: str, duration: int, tags: str, provider: str = "auto"):
+    cmd = [sys.executable, str(TOOLS_DIR / "generate_phase.py"),
+           "--project", project, "--phase", str(phase),
+           "--topic", topic, "--outline", outline,
+           "--duration", str(duration), "--tags", tags]
+    if provider and provider != "auto":
+        cmd += ["--provider", provider]
+    return run(cmd, f"STEP 1: Generate phase {phase} content files")
 
 
 def step_compliance_check(project: str, phase: int):
@@ -269,6 +269,8 @@ def main():
     parser.add_argument("--duration", type=int, default=12)
     parser.add_argument("--tags", default="blockchain,crypto,web3,chainclarity")
     parser.add_argument("--video", default="", help="Path to master video (optional, enables video cuts)")
+    parser.add_argument("--provider", choices=["auto","anthropic","gemini","openai","dashscope"],
+                        default="auto", help="Script AI provider (default: auto = Anthropic then Gemini)")
     parser.add_argument("--skip-generate", action="store_true", help="Skip content file generation")
     parser.add_argument("--skip-voiceover", action="store_true", help="Skip voiceover generation")
     parser.add_argument("--skip-remotion", action="store_true", help="Skip Remotion card render")
@@ -301,7 +303,7 @@ def main():
         if not args.topic:
             print("[ERROR] --topic required when not using --skip-generate")
             sys.exit(1)
-        ok = step_generate_phase(args.project, args.phase, args.topic, args.outline, args.duration, args.tags)
+        ok = step_generate_phase(args.project, args.phase, args.topic, args.outline, args.duration, args.tags, args.provider)
         (steps_run if ok else steps_skipped).append("1: Generate content files")
     else:
         steps_skipped.append("1: Generate content files (--skip-generate)")

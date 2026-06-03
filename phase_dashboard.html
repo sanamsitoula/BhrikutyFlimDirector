@@ -289,6 +289,39 @@ video{max-height:480px;background:#000;}
   .overview-grid{grid-template-columns:1fr;}
   .cards-grid{grid-template-columns:1fr;}
 }
+
+/* ── SUB-STEP ROWS ── */
+.substep-row td { border-bottom:1px solid rgba(20,27,45,.9); }
+.substep-num{
+  width:34px;height:26px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;font-family:'Space Grotesk',sans-serif;
+  background:var(--bg);color:var(--muted);border:1px solid var(--border);
+}
+.substep-row.step-done .substep-num{background:var(--teal-dim);color:var(--teal);border-color:rgba(0,212,170,.3);}
+/* ── CMD BLOCK ROW ── */
+.cmd-row td{padding:0 12px 10px 52px;background:rgba(0,0,0,.3);}
+.cmd-block{
+  background:#06090F;border:1px solid var(--border);border-radius:7px;
+  padding:10px 14px;overflow:hidden;
+}
+.cmd-block code{
+  font-family:'Courier New',Consolas,monospace;font-size:11px;
+  color:var(--teal);white-space:pre-wrap;word-break:break-all;display:block;margin-top:6px;
+}
+/* ── INLINE FILE EDITOR ── */
+.file-editor-label{font-size:12px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.file-editor-textarea{
+  width:100%;background:#06090F;color:#C8D8E8;
+  border:1px solid var(--border);border-radius:6px;
+  padding:12px 14px;font-family:'Courier New',Consolas,monospace;
+  font-size:12.5px;line-height:1.75;resize:vertical;
+  outline:none;box-sizing:border-box;min-height:280px;
+  transition:border-color .2s;
+}
+.file-editor-textarea:focus{border-color:var(--teal);}
+.file-editor-bar{margin-top:8px;display:flex;gap:8px;justify-content:flex-end;align-items:center;}
+.file-editor-status{font-size:11px;}
 </style>
 </head>
 <body>
@@ -406,6 +439,7 @@ function render() {
         <button class="tab-btn" onclick="switchTab('video',this)">🎬 Video</button>
         <button class="tab-btn" onclick="switchTab('compliance',this)">✅ Compliance</button>
         <button class="tab-btn" onclick="switchTab('files',this)">📁 All Files</button>
+        <button class="tab-btn" onclick="switchTab('context',this)" style="border-left:1px solid var(--border);margin-left:4px;color:var(--teal);">📋 Context</button>
       </div>
       <div style="padding:20px;">
         <div id="tab-overview"     class="tab-panel active">${renderOverview(d)}</div>
@@ -417,6 +451,7 @@ function render() {
         <div id="tab-video"        class="tab-panel">${renderVideo(d)}</div>
         <div id="tab-compliance"   class="tab-panel">${renderFileTab('compliance_report_auto.md')}</div>
         <div id="tab-files"        class="tab-panel">${renderFilesTab(d.files, d.cards)}</div>
+        <div id="tab-context"      class="tab-panel">${renderContext(d)}</div>
       </div>
     </div>
 
@@ -436,18 +471,113 @@ function render() {
 }
 
 // ─────────────────────────────────────────────────
+// CMD BLOCK helpers
+// ─────────────────────────────────────────────────
+function toggleCmd(id) {
+  const row = document.getElementById(id);
+  if (!row) return;
+  row.style.display = row.style.display === 'none' ? '' : 'none';
+}
+function copyCmd(codeId) {
+  const el = document.getElementById(codeId);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => showToast('Command copied!'));
+}
+async function runStepCmd(runData) {
+  const term = document.getElementById('mini-terminal');
+  const body = document.getElementById('mini-body');
+  if (!term || !body) return;
+  term.classList.add('open'); body.innerHTML = '';
+  document.getElementById('mini-badge').textContent = 'RUNNING';
+  document.getElementById('mini-badge').style.color = 'var(--gold)';
+  const label = runData.only ? `generate --only ${runData.only}` : 'generate (full)';
+  appendMini(`$ python tools/generate_phase.py  [${label}]\n\n`, 't-teal');
+  try {
+    const res = await fetch('/api/run-step', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(runData)
+    });
+    const { job_id } = await res.json();
+    streamJob(job_id);
+  } catch(e) {
+    appendMini(`[ERROR] ${e.message}\n`, 't-red');
+  }
+}
+
+function _cmdRow(rowId, codeId, cmdText, runData) {
+  const rdJson = JSON.stringify(runData || {}).replace(/'/g, '&#39;');
+  return `<tr id="${rowId}" class="cmd-row" style="display:none;">
+    <td colspan="4">
+      <div class="cmd-block">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);">Run Command</span>
+          <div style="display:flex;gap:5px;">
+            <button class="step-action-btn view" style="font-size:10px;padding:3px 9px;" onclick="copyCmd('${codeId}')">📋 Copy</button>
+            ${runData ? `<button class="step-action-btn run" style="font-size:10px;padding:3px 9px;" onclick='runStepCmd(${rdJson})'>▶ Run</button>` : ''}
+          </div>
+        </div>
+        <code id="${codeId}">${esc(cmdText)}</code>
+      </div>
+    </td>
+  </tr>`;
+}
+
+// ─────────────────────────────────────────────────
 // PIPELINE TABLE
 // ─────────────────────────────────────────────────
+function getStepHint(num, d) {
+  const b   = d?.brand         || {};
+  const rp  = d?.roadmap_phase || {};
+  const clr = b.colors         || {};
+  const primary   = clr.primary?.hex   || '';
+  const secondary = clr.secondary?.hex || '';
+  const topic     = rp.title || d?.title || 'this phase';
+  const duration  = d?.duration_min || 12;
+  const bd = rp.content_breakdown || [];
+  const lf = bd.find(c => c.type==='long-form');
+  const ar = bd.find(c => c.type==='article');
+  const ig = bd.find(c => c.type==='infographic');
+  const th = bd.find(c => c.type==='thread');
+  const hints = {
+    1: `Topic: ${topic} · ${lf?lf.duration_min:duration}min YouTube script + 60s TikTok cut + voiceover brief`,
+    2: `Checks tone, colors${primary?' ('+primary+')':''}, typography, animation, sound identity`,
+    3: `~${duration}min audio · Kokoro / ElevenLabs TTS · pacing from voiceover_brief.md`,
+    4: `${ig?ig.card_count:4} cards · 1080×1080px (Instagram) · ${primary}${secondary?' + '+secondary:''}`,
+    5: `1920×1080 MP4 · voiceover + b-roll + subtitles burned`,
+    6: `Auto-generate SRT caption file from voiceover audio`,
+    7: `TikTok 9:16 · Instagram 1:1 · Twitter 16:9`,
+    8: `${ar?ar.words:1500}-word article · ${th?th.tweets:7}-tweet thread · LinkedIn post`,
+    9: `Upload to ${(b.platforms||['YouTube','TikTok','Instagram']).join(', ')} · review all outputs`,
+  };
+  return hints[num] || '';
+}
+
+function toggleSubsteps(stepNum) {
+  const rows = document.querySelectorAll(`[data-parent="${stepNum}"]`);
+  const anyVisible = [...rows].some(r => r.style.display !== 'none');
+  const arrow = document.querySelector(`#step-row-${stepNum} .step-num-cell span`);
+  rows.forEach(r => r.style.display = anyVisible ? 'none' : '');
+  if (arrow) arrow.textContent = anyVisible ? '▶' : '▼';
+}
+
 function renderPipelineTable(steps) {
   const rows = steps.map(s => {
     const isDone = s.done;
-    const statusHtml = isDone
+    const status = isDone
       ? `<span class="status-dot done">✅ Done</span>`
       : `<span class="status-dot pending">⬜ Pending</span>`;
 
-    const chips = (s.key_files || []).slice(0, 3).map(f =>
-      `<span class="step-file-chip">${f}</span>`
-    ).join('');
+    const chips = (s.key_files || []).slice(0, 3).map(f => {
+      const viewable = (f.endsWith('.md') || f.endsWith('.srt') || f.endsWith('.json'))
+                       && !f.startsWith('_output');
+      return viewable
+        ? `<span class="step-file-chip" style="cursor:pointer;border-color:rgba(0,212,170,.25);" onclick="handleStepAction('view:${f}','${f}')" title="Open ${f}">${f}</span>`
+        : `<span class="step-file-chip">${f}</span>`;
+    }).join('');
+
+    const hint  = getStepHint(s.num, phaseData);
+    const subs  = s.substeps || [];
+    const hasSubs = subs.length > 0;
 
     const action = s.action || '';
     let btnClass = 'view', btnLabel = '👁 View';
@@ -455,17 +585,60 @@ function renderPipelineTable(steps) {
     if (action.startsWith('tab:'))     { btnClass = 'preview'; btnLabel = '👀 Preview'; }
     if (action === 'tab:infographics') { btnLabel = '🃏 Preview'; }
 
-    return `<tr class="${isDone ? 'step-done' : 'step-pending'}">
-      <td style="width:40px;padding:10px 8px;"><div class="step-num-cell">${s.num}</div></td>
-      <td>
-        <div class="step-name">${s.name}</div>
-        <div class="step-files">${chips}</div>
+    const parentRow = `<tr class="${isDone?'step-done':'step-pending'}" id="step-row-${s.num}">
+      <td style="width:40px;padding:10px 8px;">
+        <div class="step-num-cell"${hasSubs ? ` style="cursor:pointer;" onclick="toggleSubsteps(${s.num})" title="Toggle sub-steps"` : ''}>${s.num}${hasSubs ? `<span style="font-size:8px;display:block;color:var(--teal);margin-top:1px;">▼</span>` : ''}</div>
       </td>
-      <td style="width:120px;">${statusHtml}</td>
-      <td style="width:110px;text-align:right;">
-        <button class="step-action-btn ${btnClass}" onclick="handleStepAction('${action}', '${s.name}')">${btnLabel}</button>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="step-name">${s.name}</span>
+          ${hasSubs ? `<span style="font-size:9px;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:1px 6px;">${subs.length} sub-steps</span>` : ''}
+        </div>
+        ${hint ? `<div style="font-size:10px;color:var(--muted);margin-top:2px;line-height:1.5;">${esc(hint)}</div>` : ''}
+        <div class="step-files" style="margin-top:4px;">${chips}</div>
+      </td>
+      <td style="width:120px;">${status}</td>
+      <td style="width:160px;text-align:right;">
+        <div style="display:flex;gap:4px;justify-content:flex-end;">
+          ${s.cmd ? `<button class="step-action-btn view" style="font-size:10px;padding:4px 8px;" onclick="toggleCmd('pcmd-${s.num}')">$ CMD</button>` : ''}
+          <button class="step-action-btn ${btnClass}" onclick="handleStepAction('${action}','${s.name}')">${btnLabel}</button>
+        </div>
       </td>
     </tr>`;
+
+    const parentCmdRow = s.cmd ? _cmdRow(`pcmd-${s.num}`, `pcmd-${s.num}-code`, s.cmd, s.run_data||null) : '';
+
+    const subRows = subs.map(ss => {
+      const ssDone = ss.done;
+      const ssViewable = ss.file && (ss.file.endsWith('.md') || ss.file.endsWith('.srt') || ss.file.endsWith('.json'));
+      const cmdId  = `sscmd-${ss.id}`;
+      const codeId = `${cmdId}-code`;
+      return `
+        <tr class="substep-row ${ssDone?'step-done':'step-pending'}" data-parent="${s.num}">
+          <td style="width:40px;padding:5px 8px 5px 14px;">
+            <div class="substep-num">${ss.num}</div>
+          </td>
+          <td style="padding:5px 12px;">
+            <div style="font-size:12px;font-weight:600;color:var(--text);">${esc(ss.name)}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:1px;">
+              → <code style="color:var(--teal);font-size:10px;">${esc(ss.file||'')}</code>
+              <span style="margin-left:8px;opacity:.5;">needs: ${esc(ss.needs||'')}</span>
+            </div>
+          </td>
+          <td style="width:120px;">
+            ${ssDone ? '<span class="status-dot done" style="font-size:11px;">✅ Done</span>' : '<span class="status-dot pending" style="font-size:11px;">⬜ Pending</span>'}
+          </td>
+          <td style="width:160px;text-align:right;">
+            <div style="display:flex;gap:4px;justify-content:flex-end;">
+              <button class="step-action-btn view" style="font-size:10px;padding:3px 8px;" onclick="toggleCmd('${cmdId}')">$ CMD</button>
+              ${ssViewable ? `<button class="step-action-btn view" style="font-size:10px;padding:3px 8px;" onclick="handleStepAction('view:${ss.file}','${ss.name}')">👁</button>` : ''}
+            </div>
+          </td>
+        </tr>
+        ${ss.cmd ? _cmdRow(cmdId, codeId, ss.cmd, ss.run_data||null) : ''}`;
+    }).join('');
+
+    return parentRow + parentCmdRow + subRows;
   }).join('');
 
   return `<table class="pipeline-table">
@@ -473,17 +646,35 @@ function renderPipelineTable(steps) {
       <th style="width:40px;">#</th>
       <th>Step</th>
       <th>Status</th>
-      <th style="text-align:right;">Action</th>
+      <th style="text-align:right;width:160px;">Action</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
 }
 
+// Map file name → [tabId, tabIndex in .tab-btn NodeList]
+const _FILE_TAB_MAP = {
+  'script.md':                   ['script',     1],
+  'script_short.md':             ['short',      2],
+  'subtitles.srt':               ['srt',        4],
+  'compliance_report_auto.md':   ['compliance', 7],
+  'voiceover_brief.md':          ['audio',      5],
+  'clip_brief.md':               ['video',      6],
+};
+
 function handleStepAction(action, stepName) {
   if (action.startsWith('view:')) {
     const file = action.split(':')[1];
-    switchTab('files', document.querySelector('.tab-btn:last-child'));
-    setTimeout(() => viewFile(file), 100);
+    const entry = _FILE_TAB_MAP[file];
+    if (entry) {
+      const [tabId, tabIdx] = entry;
+      const btn = document.querySelectorAll('.tab-btn')[tabIdx];
+      switchTab(tabId, btn);
+    } else {
+      // Fallback: show in All Files inline viewer
+      switchTab('files', document.querySelectorAll('.tab-btn')[8]);
+      setTimeout(() => viewFile(file), 120);
+    }
   } else if (action === 'tab:infographics') {
     switchTab('infographics', document.querySelectorAll('.tab-btn')[3]);
   } else if (action.startsWith('run:')) {
@@ -534,42 +725,306 @@ function renderOverview(d) {
 }
 
 // ─────────────────────────────────────────────────
+// CONTEXT TAB — brand identity + phase goals
+// ─────────────────────────────────────────────────
+function renderContext(d) {
+  const b   = d.brand        || {};
+  const rp  = d.roadmap_phase|| {};
+  const clr = b.colors       || {};
+  const tone= b.tone_of_voice|| {};
+  const typo= b.typography   || {};
+  const snd = b.sound_identity|| {};
+
+  // ── Color swatches
+  const swatches = Object.values(clr).map(c => `
+    <div style="display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:1px solid rgba(30,42,66,.5);">
+      <div style="width:22px;height:22px;border-radius:5px;background:${esc(c.hex)};border:1px solid rgba(255,255,255,.12);flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <span style="font-size:12px;font-weight:600;color:var(--text);">${esc(c.name)}</span>
+        <code style="font-size:10px;color:var(--teal);margin-left:6px;">${esc(c.hex)}</code>
+      </div>
+      <span style="font-size:10px;color:var(--muted);">${esc(c.usage)}</span>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px;">No colors defined</div>';
+
+  // ── Content breakdown
+  const breakdown = (rp.content_breakdown || []).map(cb => {
+    const desc = cb.type==='long-form'   ? `${cb.duration_min}-min video`
+               : cb.type==='short-form'  ? `${cb.duration_min}-min cut`
+               : cb.type==='infographic' ? `${cb.card_count} cards`
+               : cb.type==='article'     ? `${cb.words} words`
+               : cb.type==='thread'      ? `${cb.tweets} tweets`
+               : cb.type;
+    const platIcon = {'YouTube':'▶️','TikTok':'🎵','Instagram':'📸','Blog':'📝','LinkedIn':'💼','Twitter':'🐦'}[cb.platform?.split('/')[0].trim()] || '📄';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(30,42,66,.4);">
+      <span style="font-size:13px;">${platIcon}</span>
+      <span style="font-size:12px;color:var(--text);flex:1;">${esc(cb.platform)}</span>
+      <span class="badge badge-blue">${desc}</span>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:12px;">No breakdown defined</div>';
+
+  // ── Learning goals
+  const goals = (rp.learning_goals || []).map(g =>
+    `<div style="display:flex;gap:8px;padding:4px 0;">
+      <span style="color:var(--teal);flex-shrink:0;font-weight:700;">→</span>
+      <span style="font-size:12px;color:var(--text2);">${esc(g)}</span>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px;">No goals defined</div>';
+
+  // ── Forbidden word badges
+  const forbidden = (tone.forbidden_words || []).map(w =>
+    `<span style="padding:2px 9px;background:var(--red-dim);border:1px solid rgba(255,77,106,.3);border-radius:8px;font-size:11px;color:var(--red);">✗ ${esc(w)}</span>`).join('');
+
+  // ── Content pillars
+  const pillars = (b.content_pillars || []).map((p, i) =>
+    `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(30,42,66,.4);">
+      <span style="width:20px;height:20px;border-radius:5px;background:var(--teal-dim);color:var(--teal);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</span>
+      <span style="font-size:12px;color:var(--text2);">${esc(p)}</span>
+    </div>`).join('');
+
+  // ── Typography rows
+  const typoRows = [
+    ['HEADING', typo.heading_font, `min ${typo.min_header_size_px||72}px`],
+    ['BODY',    typo.body_font,    `min ${typo.min_body_size_px||48}px`],
+    ['CODE',    typo.code_font,    'monospace'],
+  ].filter(r => r[1]).map(([lbl, font, note]) =>
+    `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(30,42,66,.4);">
+      <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);width:55px;flex-shrink:0;">${lbl}</span>
+      <span style="font-size:12px;color:var(--text);flex:1;">${esc(font)}</span>
+      <span style="font-size:10px;color:var(--muted);">${note}</span>
+    </div>`).join('');
+
+  // ── Sound identity
+  const soundBlock = snd.intro_music_style ? `
+    <div class="overview-card" style="grid-column:1/-1;">
+      <h4>Sound Identity</h4>
+      <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;">Music Style</div>
+          <div style="font-size:12px;color:var(--text2);">${esc(snd.intro_music_style)}</div>
+          <div style="margin-top:6px;font-size:11px;color:var(--muted);">BPM: ${esc(snd.bpm_range||'—')}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;">Mood</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">${(snd.mood_keywords||[]).map(k=>`<span class="badge badge-teal">${esc(k)}</span>`).join('')}</div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;">Avoid Genres</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">${(snd.forbidden_genres||[]).map(g=>`<span class="badge badge-red">${esc(g)}</span>`).join('')}</div>
+        </div>
+      </div>
+    </div>` : '';
+
+  return `
+    <!-- Copy Prompt bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--bg2);border:1px solid var(--teal);border-radius:10px;margin-bottom:16px;">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);">📋 Copy full brand + phase context as an AI prompt</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Paste into ChatGPT, Claude, or any AI tool before asking it to generate scripts, captions, or designs for this phase.</div>
+      </div>
+      <button class="btn btn-teal" onclick="copyPromptContext()" style="white-space:nowrap;flex-shrink:0;min-width:130px;">📋 Copy Prompt</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+      <!-- Phase topic & goals -->
+      <div class="overview-card" style="grid-column:1/-1;">
+        <h4>Phase ${d.phase} — Topic & Learning Goals</h4>
+        <div style="margin-top:8px;">
+          <div style="font-size:15px;font-weight:700;color:var(--teal);margin-bottom:10px;">${esc(rp.title||d.title||'Phase '+d.phase)}</div>
+          ${goals}
+        </div>
+      </div>
+
+      <!-- Content breakdown -->
+      <div class="overview-card">
+        <h4>Content Output Required</h4>
+        <div style="margin-top:8px;">${breakdown}</div>
+      </div>
+
+      <!-- Brand identity -->
+      <div class="overview-card">
+        <h4>Brand Identity</h4>
+        <div style="margin-top:8px;">
+          <div style="font-size:14px;font-weight:700;color:var(--text);">${esc(b.brand_name||d.project)}</div>
+          <div style="font-size:12px;color:var(--text2);font-style:italic;margin-bottom:10px;">${esc(b.tagline||'')}</div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;">Niche</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">${esc(b.niche||'—')}</div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;">Platforms</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">${(b.platforms||[]).map(p=>`<span class="badge badge-blue">${esc(p)}</span>`).join('')}</div>
+        </div>
+      </div>
+
+      <!-- Color palette -->
+      <div class="overview-card">
+        <h4>Color Palette</h4>
+        <div style="margin-top:8px;">${swatches}</div>
+      </div>
+
+      <!-- Typography -->
+      <div class="overview-card">
+        <h4>Typography</h4>
+        <div style="margin-top:8px;">${typoRows}
+          ${typo.max_words_per_line ? `<div style="margin-top:8px;font-size:11px;color:var(--muted);">Max ${typo.max_words_per_line} words per line on cards</div>` : ''}
+        </div>
+      </div>
+
+      <!-- Content pillars -->
+      <div class="overview-card">
+        <h4>Content Pillars</h4>
+        <div style="margin-top:8px;">${pillars||'<div style="color:var(--muted);font-size:12px;">None defined</div>'}</div>
+      </div>
+
+      <!-- Tone of voice -->
+      <div class="overview-card" style="grid-column:1/-1;">
+        <h4>Tone of Voice</h4>
+        <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;">Primary Tone</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.65;">${esc(tone.primary||'—')}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;">Sentence Style</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.65;">${esc(tone.sentence_style||'—')}</div>
+          </div>
+          ${tone.analogy_style ? `<div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;">Analogy Style</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.65;">${esc(tone.analogy_style)}</div>
+          </div>` : ''}
+          <div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;">Forbidden Words</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">${forbidden||'<span style="color:var(--muted);font-size:12px;">None</span>'}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Target audience -->
+      <div class="overview-card" style="grid-column:1/-1;">
+        <h4>Target Audience</h4>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-top:8px;">${esc(b.target_audience||'—')}</div>
+      </div>
+
+      ${soundBlock}
+
+    </div>`;
+}
+
+function copyPromptContext() {
+  const d   = phaseData;
+  const b   = d.brand         || {};
+  const rp  = d.roadmap_phase || {};
+  const tone= b.tone_of_voice || {};
+  const typo= b.typography    || {};
+  const clr = b.colors        || {};
+  const snd = b.sound_identity|| {};
+
+  const lines = [
+    `====== BRAND CONTEXT: ${b.brand_name||d.project} ======`,
+    `Tagline: ${b.tagline||'—'}`,
+    `Niche: ${b.niche||'—'}`,
+    `Target Audience: ${b.target_audience||'—'}`,
+    '',
+    `PHASE ${d.phase} — TOPIC: ${rp.title||d.title}`,
+    '',
+    'LEARNING GOALS:',
+    ...(rp.learning_goals||[]).map(g => `  - ${g}`),
+    '',
+    'CONTENT OUTPUT REQUIRED:',
+    ...(rp.content_breakdown||[]).map(cb => {
+      const desc = cb.type==='long-form'   ? `${cb.duration_min}-minute video`
+                 : cb.type==='short-form'  ? `${cb.duration_min}-minute short cut`
+                 : cb.type==='infographic' ? `${cb.card_count} infographic cards`
+                 : cb.type==='article'     ? `${cb.words}-word article`
+                 : cb.type==='thread'      ? `${cb.tweets}-tweet thread`
+                 : cb.type;
+      return `  - ${cb.platform}: ${desc}`;
+    }),
+    '',
+    'TONE OF VOICE:',
+    `  Primary: ${tone.primary||'—'}`,
+    `  Sentence Style: ${tone.sentence_style||'—'}`,
+    tone.analogy_style ? `  Analogy Style: ${tone.analogy_style}` : null,
+    `  Forbidden Words: ${(tone.forbidden_words||[]).join(', ')||'none'}`,
+    '',
+    'BRAND COLORS:',
+    ...Object.values(clr).map(c => `  - ${c.name} (${c.hex}): ${c.usage}`),
+    '',
+    'TYPOGRAPHY:',
+    typo.heading_font ? `  Heading Font: ${typo.heading_font} (min ${typo.min_header_size_px||72}px)` : null,
+    typo.body_font    ? `  Body Font: ${typo.body_font} (min ${typo.min_body_size_px||48}px)` : null,
+    typo.max_words_per_line ? `  Max words per line on cards: ${typo.max_words_per_line}` : null,
+    '',
+    'CONTENT PILLARS:',
+    ...(b.content_pillars||[]).map((p,i) => `  ${i+1}. ${p}`),
+  ];
+
+  if (snd.intro_music_style) {
+    lines.push('', 'SOUND IDENTITY:',
+      `  Music: ${snd.intro_music_style}`,
+      `  BPM: ${snd.bpm_range||'—'}`,
+      `  Mood: ${(snd.mood_keywords||[]).join(', ')}`,
+      `  Avoid: ${(snd.forbidden_genres||[]).join(', ')}`);
+  }
+  lines.push('', '====== END CONTEXT ======');
+
+  const text = lines.filter(l => l !== null).join('\n');
+  navigator.clipboard.writeText(text).then(() => showToast('✅ Prompt context copied!'));
+}
+
+// ─────────────────────────────────────────────────
 // FILE VIEWER TAB
 // ─────────────────────────────────────────────────
 function renderFileTab(filename) {
-  return `<div id="fv-${cssId(filename)}">
+  const id = cssId(filename);
+  return `<div id="fv-${id}">
     <div class="file-viewer">
       <div class="file-viewer-header">
         <span class="file-viewer-name">${filename}</span>
-        <span class="file-viewer-size" id="fvsz-${cssId(filename)}"></span>
-        <button class="copy-content-btn" onclick="copyFileContent('${cssId(filename)}')">📋 Copy</button>
+        <span class="file-viewer-size" id="fvsz-${id}"></span>
+        <button class="copy-content-btn edit-file-btn" id="fvedit-${id}" style="display:none;margin-right:4px;" onclick="editTabFile('${filename}','${id}')">✏️ Edit</button>
+        <button class="copy-content-btn" onclick="copyFileContent('${id}')">📋 Copy</button>
       </div>
-      <div class="file-content" id="fvc-${cssId(filename)}">
+      <div class="file-content" id="fvc-${id}">
         <div style="color:var(--muted);text-align:center;padding:40px;">
           <div style="font-size:24px;margin-bottom:8px;">📄</div>
-          Click to load file content
-          <br><button onclick="loadFileContent('${filename}','${cssId(filename)}')" style="margin-top:12px;" class="step-action-btn view">Load ${filename}</button>
+          Click to load
+          <br><button onclick="loadFileContent('${filename}','${id}')" style="margin-top:12px;" class="step-action-btn view">Load ${filename}</button>
         </div>
       </div>
     </div>
   </div>`;
 }
 
+const _editorFiles = {};
+
 async function loadFileContent(filename, id) {
   const container = document.getElementById(`fvc-${id}`);
   if (!container) return;
+  container._loading = true;
   container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">Loading…</div>';
   try {
     const r = await fetch(`/api/file?project=${PROJECT}&phase=${PHASE}&file=${encodeURIComponent(filename)}`);
+    if (r.status === 404) {
+      container._loading = false;
+      renderEditor(container, filename, id, false);
+      return;
+    }
     if (!r.ok) throw new Error(r.status);
     const data = await r.json();
+    container._rawContent = data.content;
+    container._editorMode = false;
+    container._loading = false;
     const szEl = document.getElementById(`fvsz-${id}`);
     if (szEl) szEl.textContent = (data.content.length/1024).toFixed(1) + ' KB';
     container.innerHTML = colorize(data.content, data.type, filename);
-    container._rawContent = data.content;
+    const editBtn = document.getElementById(`fvedit-${id}`);
+    if (editBtn) editBtn.style.display = '';
   } catch(e) {
+    container._loading = false;
     container.innerHTML = `<div style="color:var(--red);padding:20px;">Error: ${e.message}</div>`;
   }
+}
+
+function editTabFile(filename, id) {
+  const container = document.getElementById(`fvc-${id}`);
+  if (!container) return;
+  renderEditor(container, filename, id, false, container._rawContent || '');
 }
 
 function copyFileContent(id) {
@@ -730,20 +1185,151 @@ async function viewFile(filename) {
   if (!viewer) return;
   viewer.style.display = 'block';
   document.getElementById('iv-name').textContent = filename;
-  document.getElementById('iv-content').innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);">Loading…</div>';
+  // Clear old dynamic edit button
+  const oldEb = document.getElementById('iv-edit-btn-dyn');
+  if (oldEb) oldEb.remove();
+
+  const ivContent = document.getElementById('iv-content');
+  ivContent.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);">Loading…</div>';
   try {
     const r = await fetch(`/api/file?project=${PROJECT}&phase=${PHASE}&file=${encodeURIComponent(filename)}`);
+    if (r.status === 404) {
+      ivContent._editorMode = true;
+      renderEditor(ivContent, filename, 'inline', true);
+      viewer.scrollIntoView({behavior:'smooth'});
+      return;
+    }
     const data = await r.json();
     _inlineRaw = data.content;
+    ivContent._rawContent = data.content;
+    ivContent._editorMode = false;
     document.getElementById('iv-size').textContent = (data.content.length/1024).toFixed(1)+' KB';
-    document.getElementById('iv-content').innerHTML = colorize(data.content, data.type, filename);
+    ivContent.innerHTML = colorize(data.content, data.type, filename);
     viewer.scrollIntoView({behavior:'smooth'});
+    // Add dynamic Edit button
+    const hdr = viewer.querySelector('.file-viewer-header');
+    if (hdr) {
+      const eb = document.createElement('button');
+      eb.id = 'iv-edit-btn-dyn';
+      eb.className = 'copy-content-btn';
+      eb.textContent = '✏️ Edit';
+      eb.style.marginRight = '4px';
+      eb.onclick = () => renderEditor(ivContent, filename, 'inline', true, _inlineRaw);
+      hdr.insertBefore(eb, hdr.querySelector('.copy-content-btn'));
+    }
   } catch(e) {
-    document.getElementById('iv-content').innerHTML = `<span style="color:var(--red);">Error: ${e.message}</span>`;
+    ivContent.innerHTML = `<span style="color:var(--red);">Error: ${e.message}</span>`;
   }
 }
 function closeInlineViewer() { document.getElementById('inline-viewer').style.display='none'; }
 function copyInlineContent() { navigator.clipboard.writeText(_inlineRaw).then(()=>showToast('Copied!')); }
+
+// ─────────────────────────────────────────────────
+// EDITOR (create / edit files inline)
+// ─────────────────────────────────────────────────
+const _FILE_PLACEHOLDERS = {
+  'script.md':          '# Script\n\n## Introduction\n\nWrite your full narration script here...\n',
+  'script_short.md':    '# Short Script (60 seconds)\n\nWrite your short-form TikTok/Reels cut here...\n',
+  'voiceover_brief.md': '# Voiceover Brief\n\nPacing notes, emphasis cues, and TTS guidance...\n',
+  'clip_brief.md':      '# Clip Brief\n\n## Shot 1\n\nDescribe each shot and b-roll here...\n',
+  'music_brief.md':     '# Music Brief\n\nMood, tempo, and style notes for background music...\n',
+  'subtitles.srt':      '1\n00:00:00,000 --> 00:00:04,000\nSubtitle text here\n',
+};
+
+function renderEditor(container, filename, id, isInline, existingContent) {
+  _editorFiles[id] = filename;
+  container._editorMode = true;
+  container._rawContent = null;
+  const isNew = (existingContent === undefined || existingContent === null);
+  const initial = isNew ? (_FILE_PLACEHOLDERS[filename] || '') : existingContent;
+  const labelHtml = isNew
+    ? `<span style="color:var(--gold);">⚠️</span> <strong>${esc(filename)}</strong> not found — create it below:`
+    : `<span style="color:var(--blue);">✏️</span> Editing <strong>${esc(filename)}</strong>`;
+  container.innerHTML = `
+    <div style="padding:14px;">
+      <div class="file-editor-label">${labelHtml}</div>
+      <textarea id="editor-${id}" class="file-editor-textarea" rows="18"></textarea>
+      <div class="file-editor-bar">
+        <span id="editor-status-${id}" class="file-editor-status"></span>
+        ${!isNew ? `<button class="step-action-btn view" style="background:var(--card);" onclick="cancelEdit('${id}',${isInline})">✕ Cancel</button>` : ''}
+        <button class="step-action-btn run" onclick="saveFileContent('${id}',${isInline})">💾 Save</button>
+      </div>
+    </div>`;
+  const ta = document.getElementById(`editor-${id}`);
+  if (ta) {
+    ta.value = initial;
+    if (isNew) { ta.focus(); ta.select(); }
+  }
+}
+
+async function saveFileContent(id, isInline) {
+  const filename = _editorFiles[id];
+  if (!filename) return;
+  const ta = document.getElementById(`editor-${id}`);
+  if (!ta) return;
+  const content = ta.value;
+  const statusEl = document.getElementById(`editor-status-${id}`);
+  if (statusEl) { statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--gold)'; }
+  try {
+    const r = await fetch('/api/save-file', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ project: PROJECT, phase: PHASE, filename, content })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || r.status);
+    showToast(`✅ ${filename} saved!`);
+    delete _editorFiles[id];
+    if (isInline) {
+      const c = document.getElementById('iv-content');
+      if (c) { c._editorMode = false; c._loading = false; }
+      await viewFile(filename);
+    } else {
+      const c = document.getElementById(`fvc-${id}`);
+      if (c) { c._editorMode = false; c._loading = false; }
+      await loadFileContent(filename, id);
+    }
+    refreshPipelineSteps();
+  } catch(e) {
+    if (statusEl) { statusEl.textContent = `Error: ${e.message}`; statusEl.style.color = 'var(--red)'; }
+    showToast(`❌ Save failed: ${e.message}`);
+  }
+}
+
+function cancelEdit(id, isInline) {
+  const filename = _editorFiles[id];
+  if (!filename) return;
+  delete _editorFiles[id];
+  if (isInline) {
+    const c = document.getElementById('iv-content');
+    if (c) { c._editorMode = false; c._loading = false; }
+    viewFile(filename);
+  } else {
+    const c = document.getElementById(`fvc-${id}`);
+    if (c) { c._editorMode = false; c._loading = false; }
+    loadFileContent(filename, id);
+  }
+}
+
+async function refreshPipelineSteps() {
+  try {
+    const r = await fetch(`${API}/api/phase-data?project=${PROJECT}&phase=${PHASE}`);
+    if (!r.ok) return;
+    const d = await r.json();
+    phaseData = d;
+    const pct = Math.round((d.steps_done / d.steps_total) * 100);
+    const fill = document.querySelector('.progress-fill');
+    if (fill) fill.style.width = pct + '%';
+    const lbl = document.querySelector('.progress-label');
+    if (lbl) lbl.textContent = `Pipeline progress — ${pct}% complete`;
+    // Update meta chips
+    const chips = document.querySelectorAll('.meta-chip');
+    if (chips[1]) chips[1].textContent = `📁 ${d.files.length} files`;
+    if (chips[3]) chips[3].textContent = `📋 ${d.steps_done}/${d.steps_total} steps done`;
+    // Re-render pipeline table
+    const tblParent = document.querySelector('.pipeline-table')?.parentElement;
+    if (tblParent) tblParent.innerHTML = renderPipelineTable(d.pipeline_steps);
+  } catch(e) { /* silent */ }
+}
 
 // ─────────────────────────────────────────────────
 // COLORIZE FILE CONTENT
@@ -788,12 +1374,12 @@ function switchTab(id, btn) {
   const panel = document.getElementById('tab-' + id);
   if (panel) panel.classList.add('active');
 
-  // Auto-load file content for file tabs
+  // Auto-load file content for file tabs (skip if editor already shown or in flight)
   const autoLoad = { script:'script.md', short:'script_short.md', srt:'subtitles.srt', compliance:'compliance_report_auto.md' };
   if (autoLoad[id]) {
     const fid = cssId(autoLoad[id]);
     const el = document.getElementById(`fvc-${fid}`);
-    if (el && !el._rawContent && !el._loading) {
+    if (el && !el._rawContent && !el._loading && !el._editorMode) {
       el._loading = true;
       loadFileContent(autoLoad[id], fid);
     }

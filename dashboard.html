@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bhrikuty Film Director — Chain Clarity Dashboard</title>
+<title>Bhrikuty Film Director</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -1667,7 +1667,7 @@
         </svg>
         <div class="brand-text">
           <h1>Bhrikuty Film Director</h1>
-          <p>Chain Clarity · Topic → 7-Platform Content Package</p>
+          <p>Open Source · Topic → 7-Platform Content Package</p>
         </div>
       </a>
 
@@ -1802,9 +1802,51 @@
                 Skip voiceover (--skip-voiceover)
               </label>
             </div>
+
+            <!-- ── Script Generation AI ── -->
+            <div class="form-group" style="grid-column:1/-1;margin-top:6px;">
+              <label>Script Generation AI
+                <span id="script-ai-status-note" style="font-size:10px;font-weight:400;color:var(--text-muted);margin-left:8px;text-transform:none;letter-spacing:0;">Loading availability...</span>
+              </label>
+              <div class="radio-grid" id="script-ai-grid" style="grid-template-columns:repeat(4,1fr);margin-top:8px;gap:8px;">
+                <div class="radio-option">
+                  <input type="radio" name="script_ai" id="ai-anthropic" value="anthropic" checked onchange="updateCommand()">
+                  <label class="radio-label" for="ai-anthropic">
+                    <div class="radio-label-top"><span class="radio-name">Claude Sonnet 4.6</span><span class="badge badge-free" id="badge-ai-anthropic">checking...</span></div>
+                    <div class="radio-meta"><span class="radio-cost">claude-sonnet-4-6</span></div>
+                    <span style="font-size:11px;color:var(--text-muted)">Primary · Gemini auto-fallback</span>
+                  </label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" name="script_ai" id="ai-gemini" value="gemini" onchange="updateCommand()">
+                  <label class="radio-label" for="ai-gemini">
+                    <div class="radio-label-top"><span class="radio-name">Gemini 2.5 Flash</span><span class="badge badge-free" id="badge-ai-gemini">checking...</span></div>
+                    <div class="radio-meta"><span class="radio-cost">google-generativeai</span></div>
+                    <span style="font-size:11px;color:var(--text-muted)">Free tier · fast</span>
+                  </label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" name="script_ai" id="ai-openai" value="openai" onchange="updateCommand()">
+                  <label class="radio-label" for="ai-openai">
+                    <div class="radio-label-top"><span class="radio-name">ChatGPT GPT-4o</span><span class="badge badge-paid" id="badge-ai-openai">checking...</span></div>
+                    <div class="radio-meta"><span class="radio-cost">OPENAI_API_KEY</span></div>
+                    <span style="font-size:11px;color:var(--text-muted)">~$0.03/script</span>
+                  </label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" name="script_ai" id="ai-dashscope" value="dashscope" onchange="updateCommand()">
+                  <label class="radio-label" for="ai-dashscope">
+                    <div class="radio-label-top"><span class="radio-name">Qwen3 (DashScope)</span><span class="badge badge-paid" id="badge-ai-dashscope">checking...</span></div>
+                    <div class="radio-meta"><span class="radio-cost">DASHSCOPE_API_KEY</span></div>
+                    <span style="font-size:11px;color:var(--text-muted)">Alibaba · multilingual</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
           </div>
           <div class="step-actions">
-            <button class="btn btn-primary" onclick="goStep(2)">Next: Choose TTS →</button>
+            <button class="btn btn-primary" onclick="goStep(2)">Next: Choose TTS &rarr;</button>
           </div>
         </div>
 
@@ -2273,7 +2315,8 @@
   </main>
 
   <footer class="footer">
-    Bhrikuty Film Director · Chain Clarity Pipeline Dashboard · Built for <strong style="color:var(--teal)">ashma@beamlab.dev</strong> · 2026-06-02
+    Bhrikuty Film Director · Built with ❤️ for the open source community ·
+    <a href="https://github.com/sanamsitoula/BhrikutyFlimDirector" target="_blank" style="color:var(--teal);text-decoration:none;">github.com/sanamsitoula/BhrikutyFlimDirector</a>
   </footer>
 </div>
 
@@ -2766,8 +2809,9 @@ function updateCommand() {
   const outline  = (document.getElementById('inp-outline')?.value || '').trim();
   const duration = parseInt(document.getElementById('inp-duration')?.value) || 12;
   const tags     = (document.getElementById('inp-tags')?.value    || '').trim();
-  const skipGen  = document.getElementById('chk-skip-generate')?.checked;
-  const skipVO   = document.getElementById('chk-skip-voiceover')?.checked;
+  const skipGen   = document.getElementById('chk-skip-generate')?.checked;
+  const skipVO    = document.getElementById('chk-skip-voiceover')?.checked;
+  const scriptAI  = document.querySelector('input[name="script_ai"]:checked')?.value || 'anthropic';
 
   const topicSafe   = (topic   || 'Your Topic Here').replace(/"/g, '\\"');
   const outlineSafe = outline.replace(/"/g, '\\"').replace(/\n+/g, ', ');
@@ -2777,6 +2821,7 @@ function updateCommand() {
   if (outline) lines.push(`  --outline "${outlineSafe}" \\`);
   if (duration !== 12) lines.push(`  --duration ${duration} \\`);
   if (tags && tags !== 'blockchain,crypto,web3,chainclarity') lines.push(`  --tags "${tags}" \\`);
+  if (scriptAI && scriptAI !== 'anthropic') lines.push(`  --provider ${scriptAI} \\`);
   if (skipGen) lines.push(`  --skip-generate \\`);
   if (skipVO)  lines.push(`  --skip-voiceover \\`);
 
@@ -3364,13 +3409,60 @@ function appendLineAuto(line) {
   appendLine(line, cls);
 }
 
+// ======== TOOLS STATUS ========
+async function loadToolsStatus() {
+  try {
+    const r = await fetch('/api/tools-status');
+    if (!r.ok) return;
+    const tools = await r.json();
+
+    // Script AI badges
+    (tools.script || []).forEach(t => {
+      const badge = document.getElementById(`badge-ai-${t.id}`);
+      if (!badge) return;
+      if (t.configured) {
+        badge.textContent = '✓ Ready';
+        badge.className = 'badge badge-free';
+        badge.title = t.note || '';
+      } else {
+        badge.textContent = '⚠ No key';
+        badge.className = 'badge badge-paid';
+        badge.title = `Set ${t.id.toUpperCase()}_API_KEY in .env`;
+      }
+    });
+
+    // TTS badges (Step 2 radio options already in DOM)
+    (tools.tts || []).forEach(t => {
+      // Find existing badge by text content inside radio labels
+      const labels = document.querySelectorAll(`input[name="tts"][value="${t.id}"] + label .badge`);
+      labels.forEach(badge => {
+        if (t.configured) {
+          badge.textContent = t.local ? 'Free (local)' : '✓ Ready';
+          badge.className = 'badge badge-free';
+        } else {
+          badge.textContent = '⚠ No key';
+          badge.className = 'badge badge-paid';
+        }
+      });
+    });
+
+    // Update status note
+    const configured = (tools.script || []).filter(t => t.configured).map(t => t.name);
+    const note = document.getElementById('script-ai-status-note');
+    if (note) note.textContent = configured.length
+      ? `${configured.length} provider${configured.length > 1 ? 's' : ''} ready: ${configured.join(', ')}`
+      : 'No API keys set — add to .env';
+
+  } catch(e) { /* server may be offline */ }
+}
+
 // ======== INIT ========
 document.addEventListener('DOMContentLoaded', () => {
   renderMatrix();
   renderTTS();
   renderStepStars();
   updateCommand();
-  checkServer().then(() => { if (serverOnline) loadProjects(); });
+  checkServer().then(() => { if (serverOnline) { loadProjects(); loadToolsStatus(); } });
   setInterval(() => { checkServer().then(() => { if (serverOnline && _explorerProjects.length === 0) loadProjects(); }); }, 5000);
 });
 </script>

@@ -1,0 +1,26 @@
+{
+  "phase_1_auto": {
+    "date": "2026-06-03",
+    "overall": "FAIL",
+    "checks": {
+      "tone_of_voice": "FAIL",
+      "color_codes": "PASS",
+      "typography": "WARN",
+      "animation_sequence": "WARN",
+      "subtitles": "PASS",
+      "sound_identity": "PASS"
+    }
+  },
+  "phase_6_auto": {
+    "date": "2026-06-03",
+    "overall": "FAIL",
+    "checks": {
+      "tone_of_voice": "FAIL",
+      "color_codes": "PASS",
+      "typography": "PASS",
+      "animation_sequence": "PASS",
+      "subtitles": "WARN",
+      "sound_identity": "WARN"
+    }
+  }
+}

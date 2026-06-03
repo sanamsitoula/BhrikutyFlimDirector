@@ -15,6 +15,14 @@ Requires (at least one):
   pip install anthropic google-generativeai
 """
 
+import sys
+import io
+# Force UTF-8 stdout/stderr on Windows (avoids UnicodeEncodeError in cp1252 terminals)
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 import json
 import os
 import re
@@ -64,7 +72,8 @@ TOOLS_DIR    = Path(__file__).parent
 CLAUDE_MODEL  = "claude-sonnet-4-6"
 GEMINI_MODEL  = "gemini-2.5-flash"
 
-_BILLING_ERRORS = ("credit balance", "quota", "billing", "rate limit", "overloaded")
+_BILLING_ERRORS = ("credit balance", "quota", "billing", "rate limit", "overloaded",
+                   "invalid_request_error", "insufficient_quota", "payment")
 
 
 def load_brand(project: str) -> dict:
@@ -108,23 +117,33 @@ CONTENT STANDARDS:
 
 
 def _call_anthropic(client, system_prompt: str, user_prompt: str, max_tokens: int) -> str:
-    msg = client.messages.create(
-        model=CLAUDE_MODEL,
-        max_tokens=max_tokens,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_prompt}]
-    )
-    return msg.content[0].text
+    try:
+        msg = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=max_tokens,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_prompt}]
+        )
+        return msg.content[0].text
+    except Exception as e:
+        err_str = str(e)
+        # Print full prompt so user can paste it into another LLM
+        if "400" in err_str or "invalid_request" in err_str:
+            print("\n" + "="*60)
+            print("  PROMPT (copy to use in any other LLM):")
+            print("="*60)
+            print("\n--- SYSTEM ---")
+            print(system_prompt[:800])
+            print("\n--- USER ---")
+            print(user_prompt[:600])
+            print("="*60 + "\n")
+        raise
 
 
 def _call_gemini(system_prompt: str, user_prompt: str) -> str:
-    import time
+    import time, re as _re
     last_err = None
-    for attempt in range(4):
-        if attempt > 0:
-            wait = 2 ** attempt
-            print(f"  [GEMINI] Retry {attempt}/3 in {wait}s (503 overload)...")
-            time.sleep(wait)
+    for attempt in range(6):
         try:
             response = _GEMINI_CLIENT.models.generate_content(
                 model=GEMINI_MODEL,
@@ -136,8 +155,21 @@ def _call_gemini(system_prompt: str, user_prompt: str) -> str:
             return response.text
         except Exception as e:
             last_err = e
-            if "503" not in str(e) and "UNAVAILABLE" not in str(e):
-                raise
+            err = str(e)
+            if "429" in err or "RESOURCE_EXHAUSTED" in err:
+                # Extract the suggested retry delay from the error payload
+                m = _re.search(r'retryDelay[^0-9]*(\d+)', err)
+                wait = int(m.group(1)) + 5 if m else 65
+                print(f"  [GEMINI] Rate limit (429). Waiting {wait}s then retrying "
+                      f"(attempt {attempt+1}/6)...")
+                time.sleep(wait)
+                continue
+            if "503" in err or "UNAVAILABLE" in err:
+                wait = 2 ** (attempt + 1)
+                print(f"  [GEMINI] 503 overload. Retry in {wait}s (attempt {attempt+1}/6)...")
+                time.sleep(wait)
+                continue
+            raise  # Non-retriable error
     raise last_err
 
 
@@ -356,18 +388,95 @@ def run_compliance_check(project: str, phase: int):
             print(f"  [WARN] Compliance check issues: {result.stderr[-200:]}")
 
 
+def _generate_single(client, system_prompt: str, args, phase_dir: Path, assets_dir: Path, tags: list):
+    """Generate exactly one output file. All derivations from script.md read it from disk."""
+    only  = args.only
+    topic = args.topic or "Phase Topic"
+    phase_dir.mkdir(parents=True, exist_ok=True)
+    assets_dir.mkdir(parents=True, exist_ok=True)
+
+    def _read(name):
+        p = phase_dir / name
+        return p.read_text(encoding="utf-8") if p.exists() else ""
+
+    def _write(name, content, in_assets=False):
+        dest = (assets_dir if in_assets else phase_dir) / name
+        dest.write_text(content, encoding="utf-8")
+        print(f"  [ok] {name}  ({len(content):,} chars)")
+
+    script    = _read("script.md")
+    infobr    = _read("infographics.md")
+    needs_script = {"script_short.md", "subtitles.srt", "voiceover_brief.md",
+                    "infographics.md", "clip_brief.md", "content_spec.json",
+                    "card_01.html", "card_02.html", "card_03.html"}
+
+    if only in needs_script and not script:
+        print(f"[ERROR] script.md not found — generate it first:")
+        print(f"        python tools/generate_phase.py --project {args.project} --phase {args.phase} --topic \"{topic}\" --only script.md")
+        import sys; sys.exit(1)
+
+    if only == "script.md":
+        if not args.topic:
+            print("[ERROR] --topic is required when generating script.md"); import sys; sys.exit(1)
+        _write("script.md", generate_script(client, system_prompt, args.phase, topic, args.outline, args.duration))
+
+    elif only == "script_short.md":
+        _write("script_short.md", generate_script_short(client, system_prompt, args.phase, topic, script))
+
+    elif only == "subtitles.srt":
+        _write("subtitles.srt", generate_srt(client, system_prompt, script))
+
+    elif only == "voiceover_brief.md":
+        _write("voiceover_brief.md", generate_voiceover_brief(client, system_prompt, topic, script))
+
+    elif only == "music_brief.md":
+        _write("music_brief.md", generate_music_brief(client, system_prompt, topic))
+
+    elif only == "infographics.md":
+        _write("infographics.md", generate_infographics_brief(client, system_prompt, topic, script))
+
+    elif only == "clip_brief.md":
+        _write("clip_brief.md", generate_clip_brief(client, system_prompt, topic, script))
+
+    elif only in ("card_01.html", "card_02.html", "card_03.html"):
+        num   = int(only[5])
+        brief = f"Card {num} from brief:\n{infobr[num*200:(num+1)*400]}" if infobr else f"Card {num}"
+        _write(only, generate_html_card(client, system_prompt, args.phase, num, topic, brief), in_assets=True)
+
+    elif only == "content_spec.json":
+        spec = generate_content_spec(args.phase, topic, script, tags)
+        (phase_dir / "content_spec.json").write_text(json.dumps(spec, indent=2), encoding="utf-8")
+        print(f"  [ok] content_spec.json")
+
+    else:
+        print(f"[ERROR] Unknown --only value: '{only}'")
+        print("Valid: script.md | script_short.md | subtitles.srt | voiceover_brief.md |")
+        print("       music_brief.md | infographics.md | clip_brief.md |")
+        print("       card_01.html | card_02.html | card_03.html | content_spec.json")
+        import sys; sys.exit(1)
+
+    print(f"\n[DONE] Generated: {only}  ->  {phase_dir}")
+    run_compliance_check(args.project, args.phase)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Generate all phase production files via Claude (primary) or Gemini (fallback)"
     )
     parser.add_argument("--project",  default="chain_clarity")
     parser.add_argument("--phase",    type=int, required=True)
-    parser.add_argument("--topic",    required=True, help="Video title / topic")
+    parser.add_argument("--topic",    default="", help="Video title / topic (required for script.md)")
     parser.add_argument("--outline",  default="", help="Key subtopics comma-separated")
     parser.add_argument("--duration", type=int, default=12, help="Target duration in minutes")
     parser.add_argument("--tags",     default="education,explainer", help="Comma-separated tags")
     parser.add_argument("--provider", choices=["auto", "anthropic", "gemini"], default="auto",
                         help="Force a specific AI provider (default: auto = Anthropic then Gemini)")
+    parser.add_argument("--only",     default="",
+                        help="Generate a single file instead of all 9. "
+                             "Options: script.md | script_short.md | subtitles.srt | "
+                             "voiceover_brief.md | music_brief.md | infographics.md | "
+                             "clip_brief.md | card_01.html | card_02.html | card_03.html | "
+                             "content_spec.json")
     args = parser.parse_args()
 
     # Build Anthropic client if available and not forced to Gemini
@@ -387,9 +496,24 @@ def main():
     guidelines = load_brand_guidelines(args.project)
     system_prompt = build_system_prompt(brand, guidelines)
 
-    phase_dir = PROJECT_ROOT / args.project / f"phase_{args.phase}"
+    phase_dir  = PROJECT_ROOT / args.project / f"phase_{args.phase}"
     assets_dir = phase_dir / "infographic_assets"
-    tags = [t.strip() for t in args.tags.split(",")]
+    tags       = [t.strip() for t in args.tags.split(",")]
+
+    # ── Single-file mode ──────────────────────────────────────────────────────
+    if args.only:
+        print(f"\n{'='*60}")
+        print(f"  Generating: {args.only}")
+        print(f"  Project: {args.project}  Phase: {args.phase}")
+        print(f"{'='*60}\n")
+        _generate_single(client, system_prompt, args, phase_dir, assets_dir, tags)
+        return
+
+    # Full generation requires --topic
+    if not args.topic:
+        print("[ERROR] --topic is required for full generation.")
+        print("        Use --only <file> to generate a single file.")
+        sys.exit(1)
 
     print(f"\n{'='*60}")
     print(f"Generating Phase {args.phase}: {args.topic}")

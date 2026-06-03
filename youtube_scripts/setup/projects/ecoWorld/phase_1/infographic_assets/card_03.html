@@ -1,0 +1,194 @@
+<!-- EXPORT comment -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Eco World - Why Prices Change?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Brand Colors based on Eco World Brand Guidelines */
+            --bg-color: #0F1A14;
+            --primary-color: #2D7D46; /* Forest Green */
+            --secondary-color: #F5A623; /* Amber */
+            --neutral-color: #8B9BB4; /* Warm Gray */
+            --highlight-color: #3B82F6; /* Sky Blue */
+            --text-on-highlight: #0F1A14; /* Deep Charcoal for text on highlight */
+        }
+
+        body {
+            width: 1080px;
+            height: 1080px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background-color: transparent; /* Initial state for fadeInBg */
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            color: var(--neutral-color);
+            position: relative;
+            box-sizing: border-box;
+            animation: fadeInBg 0.5s forwards; /* Step 1: fadeIn bg */
+        }
+
+        /* Initial states before animations */
+        .logo-area, .headline, .sub-header, .cta-strip {
+            opacity: 0;
+            transform: translateY(-50px); /* Generic for slide effects */
+            position: relative;
+        }
+
+        .headline .word {
+            opacity: 0;
+            display: inline-block; /* Essential for individual word animation */
+            transform: translateY(20px);
+        }
+
+        .logo-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px; /* Provides space for slideDown effect */
+        }
+
+        .eco-world-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 72px; /* Standard header size */
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .phase-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 32px;
+            color: var(--neutral-color);
+        }
+
+        .content-area {
+            flex-grow: 1; /* Takes available vertical space */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 80px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .headline {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 82px;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            line-height: 1.2;
+            white-space: nowrap; /* Keep words on one line for better wordIn effect */
+        }
+
+        .sub-header {
+            font-family: 'Inter', sans-serif;
+            font-size: 58px;
+            color: var(--neutral-color);
+            line-height: 1.4;
+            max-width: 800px; /* Constrain width for readability */
+        }
+
+        .cta-strip {
+            width: 100%;
+            background-color: var(--highlight-color);
+            padding: 40px 0;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--text-on-highlight);
+            box-sizing: border-box;
+            transform: translateY(100px); /* Initial position off-screen for slideUp */
+        }
+
+        /* --- Keyframe Animations --- */
+
+        @keyframes fadeInBg {
+            from { background-color: transparent; }
+            to { background-color: var(--bg-color); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-100px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes wordIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUpAndBounce {
+            0% { opacity: 0; transform: translateY(100px); } /* Start off-screen */
+            40% { opacity: 1; transform: translateY(0); } /* Slide up into position */
+            50% { transform: translateY(-20px); } /* Bounce up */
+            60% { transform: translateY(0); } /* Bounce down */
+            70% { transform: translateY(-10px); } /* Smaller bounce up */
+            80% { transform: translateY(0); } /* Smaller bounce down */
+            100% { transform: translateY(0); } /* Settle */
+        }
+
+        /* --- Animation Sequence Application --- */
+
+        /* Step 1: fadeIn bg (applied to body element) */
+        
+        /* Step 2: slideDown logo */
+        .logo-area {
+            animation: slideDown 0.8s ease-out forwards;
+            animation-delay: 0.5s; /* Starts after background fade */
+        }
+
+        /* Step 3: wordIn headline */
+        .headline {
+            opacity: 1; /* Make parent visible for word children to appear */
+            transform: translateY(0);
+        }
+        .headline .word:nth-child(1) { animation: wordIn 0.4s ease-out forwards; animation-delay: 1.5s; }
+        .headline .word:nth-child(2) { animation: wordIn 0.4s ease-out forwards; animation-delay: 1.8s; }
+        .headline .word:nth-child(3) { animation: wordIn 0.4s ease-out forwards; animation-delay: 2.1s; }
+
+        /* Step 4: slideUp content (sub-header) */
+        .sub-header {
+            animation: slideDown 0.8s ease-out forwards; /* Using slideDown for 'slideUp content' as it's from current hidden state */
+            animation-delay: 2.8s; /* After headline words appear */
+        }
+
+        /* Step 5: stat countUp (Not applicable for this card) */
+
+        /* Step 6: bounce CTA */
+        .cta-strip {
+            animation: slideUpAndBounce 1.8s ease-out forwards; /* Combines slide up and bounce */
+            animation-delay: 3.8s; /* After sub-header appears */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="logo-area">
+        <div class="eco-world-logo">Eco World</div>
+        <div class="phase-label">Phase: 1 Card: 3</div>
+    </div>
+
+    <div class="content-area">
+        <div class="headline">
+            <span class="word">Why</span>
+            <span class="word">Prices</span>
+            <span class="word">Change?</span>
+        </div>
+        <div class="sub-header">Microeconomics Explained</div>
+    </div>
+
+    <div class="cta-strip">
+        Understand Your World
+    </div>
+</body>
+</html>

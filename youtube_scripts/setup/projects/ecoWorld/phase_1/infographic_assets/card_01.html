@@ -1,0 +1,180 @@
+<!-- EXPORT comment -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Eco World - Microeconomics Card 1</title>
+    <!-- Google Fonts CDN -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400&display=swap" rel="stylesheet">
+    <style>
+        /* Brand Colors */
+        :root {
+            --primary: #2D7D46;
+            --secondary: #F5A623;
+            --neutral: #8B9BB4;
+            --background: #0F1A14;
+            --highlight: #3B82F6;
+
+            /* Typography */
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--background); /* Overall page background */
+            overflow: hidden;
+        }
+
+        .card-container {
+            width: 1080px;
+            height: 1080px;
+            background-color: var(--background);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            opacity: 0; /* Initial state for fadeInBg */
+            animation: fadeInBg 1s forwards;
+        }
+
+        .header-area {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 60px;
+            box-sizing: border-box;
+            height: 120px;
+        }
+
+        .logo-wrapper, .phase-label {
+            opacity: 0;
+            transform: translateY(-100%); /* Initial state for slideDownLogo */
+            animation: slideDownLogo 0.8s forwards 0.5s; /* Animates after background fade */
+        }
+
+        .phase-label {
+            font-family: var(--font-body);
+            font-size: 32px;
+            color: var(--neutral);
+        }
+
+        .content-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 80px;
+        }
+
+        .headline {
+            font-family: var(--font-heading);
+            font-size: 82px;
+            color: var(--secondary);
+            line-height: 1.1;
+            margin-bottom: 30px;
+            display: flex; /* For word-by-word animation */
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px; /* Space between words */
+        }
+
+        .headline span {
+            display: inline-block; /* Each word for animation */
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .sub-headline {
+            font-family: var(--font-body);
+            font-size: 58px;
+            color: var(--neutral);
+            line-height: 1.3;
+            opacity: 0;
+            transform: translateY(100%); /* Initial state for slideUpContent */
+            animation: slideUpContent 0.8s forwards 2.5s; /* Animates after headline words */
+        }
+
+        .cta-strip {
+            width: 100%;
+            height: 100px;
+            background-color: var(--highlight);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-body);
+            font-size: 48px;
+            color: var(--background); /* Text color contrasting with highlight */
+            opacity: 0;
+            transform: translateY(100%); /* Initial state for bounceCTA */
+            animation: bounceCTA 0.8s forwards 3.5s; /* Animates after content */
+        }
+
+        /* --- Keyframe Animations --- */
+
+        @keyframes fadeInBg {
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDownLogo {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes wordIn {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideUpContent {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes bounceCTA {
+            0% { transform: translateY(100%); opacity: 0; }
+            60% { transform: translateY(-10%); opacity: 1; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Staggered animation for headline words */
+        .headline span:nth-child(1) { animation: wordIn 0.5s forwards 1.2s; } /* "Why" */
+        .headline span:nth-child(2) { animation: wordIn 0.5s forwards 1.4s; } /* "Prices" */
+        .headline span:nth-child(3) { animation: wordIn 0.5s forwards 1.6s; } /* "Change?" */
+
+    </style>
+</head>
+<body>
+    <div class="card-container">
+        <div class="header-area">
+            <div class="logo-wrapper">
+                <svg width="250" height="55" viewBox="0 0 250 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="42" font-family="Space Grotesk" font-weight="700" font-size="48" fill="var(--primary)">Eco</text>
+                    <text x="90" y="42" font-family="Space Grotesk" font-weight="700" font-size="48" fill="var(--secondary)">World</text>
+                </svg>
+            </div>
+            <div class="phase-label">Phase: 1 Card: 1</div>
+        </div>
+
+        <div class="content-area">
+            <h1 class="headline">
+                <span>Why</span>
+                <span>Prices</span>
+                <span>Change?</span>
+            </h1>
+            <p class="sub-headline">Microeconomics Explained</p>
+        </div>
+
+        <div class="cta-strip">
+            eco.world/learn
+        </div>
+    </div>
+</body>
+</html>

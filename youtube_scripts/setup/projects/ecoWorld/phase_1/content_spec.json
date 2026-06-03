@@ -1,0 +1,55 @@
+{
+  "project": "chain_clarity",
+  "phase": 1,
+  "title": "Microeconomics Basics",
+  "slug": "microeconomics-basics",
+  "duration_min": 20,
+  "status": "generated",
+  "tags": [
+    "education",
+    "explainer"
+  ],
+  "hashtags": [
+    "#education",
+    "#explainer"
+  ],
+  "platform_cuts": {
+    "tiktok_hook": {
+      "start": "0:00",
+      "end": "0:15",
+      "aspect": "9:16"
+    },
+    "tiktok_main": {
+      "start": "0:00",
+      "end": "1:00",
+      "aspect": "9:16"
+    },
+    "instagram_reel": {
+      "start": "0:00",
+      "end": "1:00",
+      "aspect": "9:16"
+    },
+    "twitter_clip": {
+      "start": "0:30",
+      "end": "1:00",
+      "aspect": "16:9"
+    }
+  },
+  "text_overlays": [
+    {
+      "time": "0:00",
+      "text": "Chain Clarity | Phase 1",
+      "position": "top-left",
+      "color": "#8B9BB4"
+    },
+    {
+      "time": "0:05",
+      "text": "#education #explainer",
+      "position": "bottom-left",
+      "color": "#8B9BB4"
+    }
+  ],
+  "tags_file": "../../tags_and_metadata.json",
+  "infographic_cards": 3,
+  "compliance_status": "PENDING"
+}

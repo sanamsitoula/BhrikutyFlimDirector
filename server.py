@@ -70,6 +70,8 @@ def build_pipeline_cmd(data: dict) -> list:
         cmd += ["--duration", str(data["duration"])]
     if data.get("tags"):
         cmd += ["--tags", data["tags"]]
+    if data.get("provider") and data["provider"] != "auto":
+        cmd += ["--provider", data["provider"]]
     if data.get("skip_generate"):
         cmd.append("--skip-generate")
     if data.get("skip_voiceover"):
@@ -163,6 +165,9 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/db-status":
             self._send_json({"available": db_available()})
 
+        elif path == "/api/tools-status":
+            self._api_tools_status()
+
         else:
             target = BASE_DIR / path.lstrip("/")
             if target.exists() and target.is_file():
@@ -198,6 +203,11 @@ class Handler(BaseHTTPRequestHandler):
             body = self.rfile.read(length)
             data = json.loads(body) if body else {}
             self._api_save_file(data)
+        elif path == "/api/run-step":
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length)
+            data = json.loads(body) if body else {}
+            self._api_run_step(data)
         else:
             self._send_json({"error": "not found"}, 404)
 
@@ -419,6 +429,17 @@ class Handler(BaseHTTPRequestHandler):
 
         total_done, total_steps_all, phase_summaries = 0, 0, []
 
+        # Pre-load roadmap for topic lookup
+        _topic_map = {}
+        _rm = proj_dir / "roadmap.json"
+        if _rm.exists():
+            try:
+                _rm_data = json.loads(_rm.read_text(encoding="utf-8"))
+                for _p in _rm_data.get("phases", []):
+                    _topic_map[_p["phase"]] = _p.get("title", "")
+            except Exception:
+                pass
+
         for ph_name in phases:
             phase_num = int(ph_name.replace("phase_", ""))
             phase_dir = proj_dir / ph_name
@@ -435,7 +456,9 @@ class Handler(BaseHTTPRequestHandler):
             if out_dir.exists():
                 output_files = [str(f.relative_to(out_dir)) for f in out_dir.rglob("*") if f.is_file()]
 
-            steps = self._pipeline_steps(phase_dir, files, cards, output_files)
+            steps = self._pipeline_steps(phase_dir, files, cards, output_files,
+                                         project=project, phase=phase_num,
+                                         topic=_topic_map.get(phase_num, ""))
             done = sum(1 for s in steps if s["done"])
             total_done += done
             total_steps_all += len(steps)
@@ -498,7 +521,9 @@ class Handler(BaseHTTPRequestHandler):
                 return
         self._send_json({"error": "media not found"}, 404)
 
-    def _pipeline_steps(self, phase_dir: Path, files: list, cards: list, output_files: list) -> list:
+    def _pipeline_steps(self, phase_dir: Path, files: list, cards: list, output_files: list,
+                        project: str = "", phase: int = 0,
+                        topic: str = "", outline: str = "") -> list:
         file_set   = {f["name"] for f in files}
         out_set    = set(output_files)
         file_sizes = {f["name"]: f["size"] for f in files}
@@ -512,58 +537,140 @@ class Handler(BaseHTTPRequestHandler):
             f.suffix in (".wav", ".mp3", ".ogg") for f in vo_dir.iterdir()
         ) if vo_dir.exists() else False
 
+        proj = project or "chain_clarity"
+        ph   = phase   or 1
+        t    = topic   or "YOUR_TOPIC_HERE"
+        ol   = outline or "key concept 1, key concept 2, key concept 3"
+
+        def _gp(only="", extra_outline=False):
+            cmd = f'python tools/generate_phase.py --project {proj} --phase {ph} --topic "{t}"'
+            if extra_outline:
+                cmd += f' --outline "{ol}"'
+            if only:
+                cmd += f' --only {only}'
+            return cmd
+
+        # ── Step 1 sub-steps ──────────────────────────────────────────────────
+        substeps = [
+            {"id": "1_1", "num": "1.1", "name": "Main Script",
+             "file": "script.md", "done": has("script.md") and sz("script.md") > 1000,
+             "needs": "topic + outline  (seed for all other files)",
+             "cmd":      f'python tools/generate_phase.py --project {proj} --phase {ph} --topic "{t}" --outline "{ol}" --only script.md',
+             "run_data": {"project": proj, "phase": ph, "topic": t, "outline": ol, "only": "script.md"}},
+
+            {"id": "1_2", "num": "1.2", "name": "Short Script (60 s)",
+             "file": "script_short.md", "done": has("script_short.md"),
+             "needs": "script.md",
+             "cmd":      _gp("script_short.md"),
+             "run_data": {"project": proj, "phase": ph, "topic": t, "outline": "", "only": "script_short.md"}},
+
+            {"id": "1_3", "num": "1.3", "name": "Subtitles (SRT)",
+             "file": "subtitles.srt", "done": has("subtitles.srt") and sz("subtitles.srt") > 100,
+             "needs": "script.md",
+             "cmd":      _gp("subtitles.srt"),
+             "run_data": {"project": proj, "phase": ph, "topic": t, "outline": "", "only": "subtitles.srt"}},
+
+            {"id": "1_4", "num": "1.4", "name": "Voiceover Brief",
+             "file": "voiceover_brief.md", "done": has("voiceover_brief.md"),
+             "needs": "script.md",
+             "cmd":      _gp("voiceover_brief.md"),
+             "run_data": {"project": proj, "phase": ph, "topic": t, "outline": "", "only": "voiceover_brief.md"}},
+
+            {"id": "1_5", "num": "1.5", "name": "Music Brief",
+             "file": "music_brief.md", "done": has("music_brief.md"),
+             "needs": "topic only",
+             "cmd":      _gp("music_brief.md"),
+             "run_data": {"project": proj, "phase": ph, "topic": t, "outline": "", "only": "music_brief.md"}},
+
+            {"id": "1_6", "num": "1.6", "name": "Infographics Brief",
+             "file": "infographics.md", "done": has("infographics.md"),
+             "needs": "script.md",
+             "cmd":      _gp("infographics.md"),
+             "run_data": {"project": proj, "phase": ph, "topic": t, "outline": "", "only": "infographics.md"}},
+
+            {"id": "1_7", "num": "1.7", "name": "Clip Brief",
+             "file": "clip_brief.md", "done": has("clip_brief.md"),
+             "needs": "script.md",
+             "cmd":      _gp("clip_brief.md"),
+             "run_data": {"project": proj, "phase": ph, "topic": t, "outline": "", "only": "clip_brief.md"}},
+
+            {"id": "1_8", "num": "1.8", "name": "Infographic Cards (×3)",
+             "file": "card_01.html", "done": len(cards) > 0,
+             "needs": "infographics.md",
+             "cmd":      _gp("card_01.html"),
+             "run_data": {"project": proj, "phase": ph, "topic": t, "outline": "", "only": "card_01.html"}},
+
+            {"id": "1_9", "num": "1.9", "name": "Content Spec",
+             "file": "content_spec.json", "done": has("content_spec.json"),
+             "needs": "script.md",
+             "cmd":      _gp("content_spec.json"),
+             "run_data": {"project": proj, "phase": ph, "topic": t, "outline": "", "only": "content_spec.json"}},
+        ]
+
         return [
             {"num": 1, "name": "Script Generation",
-             "done": has("script.md") and sz("script.md") > 1000,
+             "done": all(s["done"] for s in substeps),
              "key_files": ["script.md", "script_short.md", "voiceover_brief.md", "clip_brief.md"],
-             "action": "view:script.md"},
+             "action": "view:script.md",
+             "cmd": f'python tools/generate_phase.py --project {proj} --phase {ph} --topic "{t}" --outline "{ol}"',
+             "run_data": {"project": proj, "phase": ph, "topic": t, "outline": ol},
+             "substeps": substeps},
 
             {"num": 2, "name": "Compliance Check",
              "done": has("compliance_report_auto.md"),
              "key_files": ["compliance_report_auto.md"],
-             "action": "view:compliance_report_auto.md"},
+             "action": "view:compliance_report_auto.md",
+             "cmd": f'python tools/compliance_checker.py --project {proj} --phase {ph}'},
 
             {"num": 3, "name": "TTS / Voiceover",
              "done": has_vo,
              "key_files": ["voiceover/"],
-             "action": "run:voiceover"},
+             "action": "run:voiceover",
+             "cmd": f'python tools/tts/kokoro_voiceover.py --project {proj} --phase {ph}'},
 
             {"num": 4, "name": "Infographic Cards",
              "done": len(cards) > 0,
              "key_files": cards[:3],
-             "action": "tab:infographics"},
+             "action": "tab:infographics",
+             "cmd": f'# Cards generated in Step 1.8 above\n# python tools/generate_phase.py --project {proj} --phase {ph} --topic "{t}" --only card_01.html'},
 
             {"num": 5, "name": "Video Assembly",
              "done": out_has(".mp4"),
              "key_files": ["_output/youtube/final_1080p.mp4"],
-             "action": "run:video"},
+             "action": "run:video",
+             "cmd": f'python pipeline.py --project {proj} --phase {ph} --skip-generate --video path/to/recording.mp4'},
 
             {"num": 6, "name": "Auto-Transcribe (SRT)",
              "done": has("subtitles.srt") and sz("subtitles.srt") > 500,
              "key_files": ["subtitles.srt"],
-             "action": "view:subtitles.srt"},
+             "action": "view:subtitles.srt",
+             "cmd": f'# AI-generated in Step 1.3:\n# python tools/generate_phase.py --project {proj} --phase {ph} --topic "{t}" --only subtitles.srt'},
 
             {"num": 7, "name": "Platform Cuts",
              "done": out_has("tiktok"),
              "key_files": ["_output/tiktok/", "_output/instagram/", "_output/twitter/"],
-             "action": "run:cuts"},
+             "action": "run:cuts",
+             "cmd": f'python tools/platform_cutter.py --project {proj} --phase {ph} --video _output/phase_{ph:02d}/youtube/final_1080p.mp4'},
 
             {"num": 8, "name": "Text Content",
              "done": out_has("blog"),
              "key_files": ["_output/blog/post.md", "_output/twitter/thread.txt", "_output/linkedin/article.md"],
-             "action": "run:text"},
+             "action": "run:text",
+             "cmd": f'python tools/text_content_generator.py --project {proj} --phase {ph}'},
 
             {"num": 9, "name": "Publish Checklist",
              "done": out_has("PIPELINE_SUMMARY"),
              "key_files": ["_output/PIPELINE_SUMMARY.md"],
-             "action": "run:publish"},
+             "action": "run:publish",
+             "cmd": f'python pipeline.py --project {proj} --phase {ph} --skip-generate --skip-voiceover --skip-remotion'},
         ]
 
     def _api_phase_data(self, project: str, phase: int):
         phase_dir = PROJECT_ROOT / project / f"phase_{phase}"
         if not phase_dir.exists():
-            self._send_json({"error": "phase not found"}, 404)
-            return
+            # Auto-scaffold so the dashboard can show an empty pipeline with editors
+            phase_dir.mkdir(parents=True, exist_ok=True)
+            print(f"  [PHASE] Auto-created: {project}/phase_{phase}")
 
         files = []
         for f in sorted(phase_dir.iterdir()):
@@ -598,13 +705,39 @@ class Handler(BaseHTTPRequestHandler):
                 if f.is_file():
                     output_files.append(str(f.relative_to(output_dir)))
 
-        steps = self._pipeline_steps(phase_dir, files, cards, output_files)
+        # Brand profile + roadmap (loaded before pipeline steps — needed for CMD strings)
+        brand_profile = {}
+        bp_path = PROJECT_ROOT / project / "brand_profile.json"
+        if bp_path.exists():
+            try:
+                brand_profile = json.loads(bp_path.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+
+        roadmap_phase = {}
+        rm_path = PROJECT_ROOT / project / "roadmap.json"
+        if rm_path.exists():
+            try:
+                rm_data = json.loads(rm_path.read_text(encoding="utf-8"))
+                for ph_entry in rm_data.get("phases", []):
+                    if ph_entry.get("phase") == phase:
+                        roadmap_phase = ph_entry
+                        break
+            except Exception:
+                pass
+
+        phase_topic   = roadmap_phase.get("title", spec.get("title", ""))
+        phase_outline = ", ".join(roadmap_phase.get("learning_goals", [])[:3])
+
+        steps = self._pipeline_steps(phase_dir, files, cards, output_files,
+                                     project=project, phase=phase,
+                                     topic=phase_topic, outline=phase_outline)
         done_count = sum(1 for s in steps if s["done"])
 
         self._send_json({
             "project": project,
             "phase": phase,
-            "title": spec.get("title", f"Phase {phase}"),
+            "title": spec.get("title", roadmap_phase.get("title", f"Phase {phase}")),
             "status": spec.get("status", "unknown"),
             "duration_min": spec.get("duration_min", 12),
             "tags": spec.get("tags", []),
@@ -617,6 +750,8 @@ class Handler(BaseHTTPRequestHandler):
             "pipeline_steps": steps,
             "steps_done": done_count,
             "steps_total": len(steps),
+            "brand": brand_profile,
+            "roadmap_phase": roadmap_phase,
         })
 
     def _api_file(self, project: str, phase: int, filename: str):
@@ -644,6 +779,109 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json({"content": content, "type": ftype, "filename": filename})
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
+
+    def _api_tools_status(self):
+        def key_set(k): return bool(os.environ.get(k, "").strip())
+        status = {
+            "script": [
+                {"id": "anthropic",  "name": "Claude Sonnet 4.6",  "tier": "primary",
+                 "flag": "anthropic",  "pkg": "pip install anthropic",
+                 "note": "Best quality · auto-fallback to Gemini",
+                 "configured": key_set("ANTHROPIC_API_KEY")},
+                {"id": "gemini",     "name": "Gemini 2.5 Flash",   "tier": "fallback",
+                 "flag": "gemini",     "pkg": "pip install google-generativeai",
+                 "note": "Free tier · auto-used when Anthropic fails",
+                 "configured": key_set("GEMINI_API_KEY")},
+                {"id": "openai",     "name": "ChatGPT GPT-4o",     "tier": "optional",
+                 "flag": "openai",     "pkg": "pip install openai",
+                 "note": "Optional · ~$0.03/script",
+                 "configured": key_set("OPENAI_API_KEY")},
+                {"id": "dashscope",  "name": "Qwen3 (DashScope)",  "tier": "optional",
+                 "flag": "dashscope",  "pkg": "pip install dashscope",
+                 "note": "Optional · multilingual · Alibaba",
+                 "configured": key_set("DASHSCOPE_API_KEY")},
+            ],
+            "tts": [
+                {"id": "chatterbox", "name": "Chatterbox TTS",     "tier": "free",
+                 "local": True, "note": "Free · GPU · emotion control · MIT",
+                 "configured": True},
+                {"id": "kokoro",     "name": "Kokoro TTS",         "tier": "free",
+                 "local": True, "note": "Free · CPU · fast · Python <=3.12",
+                 "configured": True},
+                {"id": "elevenlabs", "name": "ElevenLabs",         "tier": "paid",
+                 "pkg": "pip install elevenlabs",
+                 "note": "Best quality · voice cloning · ~$0.05/1K chars",
+                 "configured": key_set("ELEVENLABS_API_KEY")},
+                {"id": "dashscope_tts","name": "Qwen-TTS (DashScope)","tier": "freemium",
+                 "pkg": "pip install dashscope",
+                 "note": "Freemium · multilingual",
+                 "configured": key_set("DASHSCOPE_API_KEY")},
+            ],
+            "transcription": [
+                {"id": "whisper",    "name": "Faster-Whisper",     "tier": "free",
+                 "local": True, "note": "Free · local · pip install faster-whisper",
+                 "configured": True},
+                {"id": "assemblyai", "name": "AssemblyAI",         "tier": "paid",
+                 "note": "Paid · auto YouTube chapters · ~$0.03/video",
+                 "configured": key_set("ASSEMBLYAI_API_KEY")},
+                {"id": "deepgram",   "name": "Deepgram",           "tier": "paid",
+                 "note": "Paid · lowest latency",
+                 "configured": key_set("DEEPGRAM_API_KEY")},
+            ],
+            "image": [
+                {"id": "bfl",        "name": "FLUX.1 Pro",         "tier": "paid",
+                 "note": "~$0.055/image", "configured": key_set("BFL_API_KEY")},
+                {"id": "ideogram",   "name": "Ideogram v2",        "tier": "paid",
+                 "note": "Best text-in-image · ~$0.08/image",
+                 "configured": key_set("IDEOGRAM_API_KEY")},
+                {"id": "dalle",      "name": "DALL-E 3 (OpenAI)",  "tier": "paid",
+                 "note": "~$0.04/image", "configured": key_set("OPENAI_API_KEY")},
+            ],
+            "video": [
+                {"id": "runway",     "name": "Runway Gen-4",       "tier": "paid",
+                 "note": "Cinematic AI b-roll · ~$0.05/sec",
+                 "configured": key_set("RUNWAY_API_KEY")},
+                {"id": "kling",      "name": "Kling AI",           "tier": "paid",
+                 "note": "Best cost/quality · $7.99/mo",
+                 "configured": key_set("KLING_API_KEY")},
+            ],
+        }
+        self._send_json(status)
+
+    def _api_run_step(self, data: dict):
+        """Run a single generate_phase.py sub-step (--only <file>)."""
+        job_id  = uuid.uuid4().hex[:8]
+        project = data.get("project", "chain_clarity")
+        phase   = int(data.get("phase", 1))
+        topic   = data.get("topic", "")
+        outline = data.get("outline", "")
+        only    = data.get("only", "")
+
+        cmd = [sys.executable, str(BASE_DIR / "tools" / "generate_phase.py"),
+               "--project", project, "--phase", str(phase)]
+        if topic:   cmd += ["--topic",   topic]
+        if outline: cmd += ["--outline", outline]
+        if only:    cmd += ["--only",    only]
+
+        q: queue.Queue = queue.Queue()
+        jobs[job_id] = {"status": "running", "output": [], "q": q, "cmd": cmd}
+        print(f"  [STEP {job_id}] {' '.join(cmd)}")
+
+        def worker():
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                    text=True, cwd=str(BASE_DIR), env=os.environ.copy())
+            for line in proc.stdout:
+                jobs[job_id]["output"].append(line)
+                q.put(line)
+            proc.wait()
+            final = "done" if proc.returncode == 0 else "failed"
+            jobs[job_id]["status"] = final
+            jobs[job_id]["returncode"] = proc.returncode
+            q.put(None)
+            print(f"  [STEP {job_id}] {final}")
+
+        threading.Thread(target=worker, daemon=True).start()
+        self._send_json({"job_id": job_id, "cmd": " ".join(cmd)})
 
     def _api_job_status(self, job_id: str):
         if job_id not in jobs:
