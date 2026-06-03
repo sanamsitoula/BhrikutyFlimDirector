@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase Dashboard — Bhrikuty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0A0E1A;
+  --bg2:       #0F1525;
+  --card:      #141B2D;
+  --card2:     #1A2238;
+  --border:    #1E2A42;
+  --teal:      #00D4AA;
+  --teal-dim:  rgba(0,212,170,0.12);
+  --gold:      #F5A623;
+  --gold-dim:  rgba(245,166,35,0.12);
+  --red:       #FF4D6A;
+  --red-dim:   rgba(255,77,106,0.12);
+  --blue:      #4D94FF;
+  --blue-dim:  rgba(77,148,255,0.12);
+  --purple:    #A855F7;
+  --green:     #22C55E;
+  --green-dim: rgba(34,197,94,0.12);
+  --text:      #E8EDF5;
+  --text2:     #8A97B0;
+  --muted:     #4A5568;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh;}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* ── TOP NAV ── */
+.topnav{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 24px;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;
+  flex-wrap:wrap;
+}
+.back-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:7px;
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text2);font-size:12px;font-weight:600;
+  cursor:pointer;text-decoration:none;font-family:'Inter',sans-serif;
+  transition:all .2s;
+}
+.back-btn:hover{border-color:var(--teal);color:var(--teal);}
+.nav-crumb{font-size:12px;color:var(--muted);}
+.nav-crumb span{color:var(--text2);}
+.nav-title{font-size:15px;font-weight:700;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.nav-right{display:flex;gap:8px;align-items:center;margin-left:auto;}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all .2s;
+}
+.btn-teal{background:var(--teal);color:var(--bg);}
+.btn-teal:hover{background:#00EDBC;transform:translateY(-1px);}
+.btn-gold{background:var(--gold);color:var(--bg);}
+.btn-gold:hover{background:#FFB83F;}
+.btn-ghost{background:var(--card);border:1px solid var(--border);color:var(--text2);}
+.btn-ghost:hover{border-color:var(--teal);color:var(--teal);}
+.badge{padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.badge-teal{background:var(--teal-dim);color:var(--teal);border:1px solid rgba(0,212,170,.3);}
+.badge-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,166,35,.3);}
+.badge-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,77,106,.3);}
+.badge-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(77,148,255,.3);}
+.badge-green{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.3);}
+
+/* ── LAYOUT ── */
+.page{max-width:1400px;margin:0 auto;padding:20px 24px 60px;}
+
+/* ── PHASE HEADER ── */
+.phase-header{
+  display:flex;align-items:flex-start;gap:16px;
+  padding:20px 24px;
+  background:linear-gradient(135deg,var(--bg2),var(--card));
+  border:1px solid var(--border);border-radius:14px;
+  margin-bottom:20px;
+}
+.phase-num-big{
+  width:56px;height:56px;border-radius:14px;flex-shrink:0;
+  background:var(--teal-dim);border:2px solid rgba(0,212,170,.4);
+  color:var(--teal);font-family:'Space Grotesk',sans-serif;
+  font-size:26px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+}
+.phase-info{flex:1;}
+.phase-info h1{font-size:22px;color:var(--text);margin-bottom:6px;line-height:1.25;}
+.phase-meta-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.meta-chip{font-size:11px;color:var(--text2);}
+.progress-bar-wrap{margin-top:10px;}
+.progress-label{font-size:11px;color:var(--text2);margin-bottom:4px;}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(to right,var(--teal),#00EDBC);transition:width 1s ease;}
+
+/* ── PIPELINE TABLE ── */
+.section-title{
+  font-size:13px;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.pipeline-table{width:100%;border-collapse:collapse;margin-bottom:20px;}
+.pipeline-table th{
+  text-align:left;padding:9px 12px;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);background:var(--bg2);
+  border-bottom:1px solid var(--border);
+}
+.pipeline-table td{
+  padding:10px 12px;
+  border-bottom:1px solid rgba(30,42,66,.6);
+  vertical-align:middle;
+}
+.pipeline-table tr:hover td{background:rgba(255,255,255,.02);}
+.step-num-cell{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;
+}
+.step-done  .step-num-cell{background:var(--teal-dim);color:var(--teal);}
+.step-pending .step-num-cell{background:var(--border);color:var(--muted);}
+.step-name{font-size:13px;font-weight:600;color:var(--text);}
+.step-files{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;}
+.step-file-chip{
+  padding:1px 7px;border-radius:5px;font-size:10px;
+  font-family:'Courier New',monospace;
+  background:var(--bg);border:1px solid var(--border);color:var(--text2);
+}
+.status-dot{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:600;white-space:nowrap;
+}
+.status-dot.done{color:var(--teal);}
+.status-dot.pending{color:var(--muted);}
+.status-dot.warn{color:var(--gold);}
+.step-action-btn{
+  padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;
+  white-space:nowrap;border:none;
+}
+.step-action-btn.view{background:var(--teal-dim);color:var(--teal);border:1px solid rgba(0,212,170,.3);}
+.step-action-btn.view:hover{background:var(--teal);color:var(--bg);}
+.step-action-btn.run{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,166,35,.3);}
+.step-action-btn.run:hover{background:var(--gold);color:var(--bg);}
+.step-action-btn.preview{background:var(--purple-dim,rgba(168,85,247,.12));color:var(--purple);border:1px solid rgba(168,85,247,.3);}
+.step-action-btn.preview:hover{background:var(--purple);color:white;}
+
+/* ── TABS ── */
+.tabs-bar{
+  display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--border);
+  scrollbar-width:none;margin-bottom:0;
+}
+.tabs-bar::-webkit-scrollbar{display:none;}
+.tab-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:10px 18px;background:none;border:none;
+  border-bottom:2px solid transparent;
+  color:var(--text2);font-size:13px;font-weight:500;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  transition:all .2s;white-space:nowrap;margin-bottom:-1px;
+}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--teal);border-bottom-color:var(--teal);}
+.tab-panel{display:none;padding:20px 0;}
+.tab-panel.active{display:block;}
+
+/* ── FILE VIEWER ── */
+.file-viewer{
+  background:#06090F;border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;
+}
+.file-viewer-header{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 14px;background:var(--bg);border-bottom:1px solid var(--border);
+}
+.file-viewer-name{font-family:'Courier New',monospace;font-size:12px;color:var(--teal);font-weight:600;}
+.file-viewer-size{font-size:11px;color:var(--muted);margin-left:auto;}
+.copy-content-btn{
+  padding:3px 10px;background:var(--teal-dim);border:1px solid rgba(0,212,170,.3);
+  border-radius:6px;color:var(--teal);font-size:11px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;
+}
+.copy-content-btn:hover{background:var(--teal);color:var(--bg);}
+.file-content{
+  padding:16px 20px;max-height:520px;overflow-y:auto;
+  font-family:'Courier New',Consolas,monospace;font-size:12.5px;
+  line-height:1.75;color:#8A97B0;white-space:pre-wrap;word-break:break-word;
+}
+.file-content .md-h1{color:var(--teal);font-size:14px;font-weight:700;}
+.file-content .md-h2{color:var(--gold);font-size:13px;font-weight:700;}
+.file-content .md-h3{color:var(--blue);font-weight:600;}
+.file-content .md-code{color:#00FF9F;background:rgba(0,255,159,.07);padding:0 4px;border-radius:3px;}
+.file-content .srt-ts{color:var(--teal);}
+.file-content .srt-idx{color:var(--muted);}
+.file-content.json{color:#A8D8A8;}
+
+/* ── INFOGRAPHICS ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+.card-frame-wrap{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;transition:all .2s;
+}
+.card-frame-wrap:hover{border-color:var(--teal);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.3);}
+.card-frame-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;border-bottom:1px solid var(--border);
+}
+.card-frame-name{font-size:11px;font-family:'Courier New',monospace;color:var(--text2);}
+.card-frame-actions{display:flex;gap:6px;}
+.card-frame-btn{
+  padding:3px 9px;border-radius:5px;font-size:10px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;border:none;
+}
+.card-frame-btn.open{background:var(--teal-dim);color:var(--teal);}
+.card-frame-btn.open:hover{background:var(--teal);color:var(--bg);}
+.card-frame-container{
+  position:relative;width:100%;padding-top:100%;/* 1:1 */
+  background:#000;overflow:hidden;
+}
+.card-frame-container iframe{
+  position:absolute;top:0;left:0;
+  width:1080px;height:1080px;
+  transform-origin:top left;
+  border:none;pointer-events:none;
+}
+
+/* ── AUDIO / VIDEO PLAYER ── */
+.media-section{
+  padding:24px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;text-align:center;
+}
+.media-placeholder{color:var(--muted);font-size:13px;}
+.media-placeholder .icon{font-size:48px;margin-bottom:12px;}
+audio,video{width:100%;border-radius:8px;outline:none;}
+video{max-height:480px;background:#000;}
+
+/* ── OVERVIEW ── */
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.overview-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.overview-card h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;}
+.yt-chapter{display:flex;gap:10px;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(30,42,66,.5);}
+.yt-chapter:last-child{border-bottom:none;}
+.yt-ts{font-size:12px;color:var(--teal);font-family:'Courier New',monospace;flex-shrink:0;}
+.yt-ch-title{font-size:12px;color:var(--text2);}
+.cut-row{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(30,42,66,.5);}
+.cut-row:last-child{border-bottom:none;}
+.cut-platform{font-size:12px;font-weight:600;color:var(--text);width:100px;flex-shrink:0;}
+.cut-info{font-size:11px;color:var(--text2);}
+.tag-cloud{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{padding:3px 9px;border-radius:8px;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text2);}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:60px;color:var(--muted);font-size:13px;}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:20px;right:20px;
+  background:var(--card);border:1px solid var(--teal);border-radius:8px;
+  padding:10px 16px;font-size:12px;font-weight:500;color:var(--teal);
+  z-index:9999;transform:translateY(60px);opacity:0;transition:all .3s;pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ── TERMINAL MINI ── */
+.mini-terminal{
+  background:#06090F;border:1px solid var(--teal);border-radius:10px;
+  margin-top:12px;overflow:hidden;display:none;
+}
+.mini-terminal.open{display:block;}
+.mini-terminal-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.mini-terminal-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;}
+.mini-terminal-body{padding:12px;font-family:'Courier New',monospace;font-size:11px;line-height:1.6;color:#8A97B0;max-height:200px;overflow-y:auto;}
+.t-teal{color:var(--teal);}
+.t-gold{color:var(--gold);}
+.t-red{color:var(--red);}
+.t-dim{color:var(--muted);}
+
+@media(max-width:768px){
+  .overview-grid{grid-template-columns:1fr;}
+  .cards-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── TOP NAV ── -->
+<nav class="topnav">
+  <a class="back-btn" href="/">← Dashboard</a>
+  <span class="nav-crumb"><span id="crumb-project">…</span> / Phase <span id="crumb-phase">…</span></span>
+  <span class="nav-title" id="nav-title">Loading…</span>
+  <div class="nav-right">
+    <span id="nav-compliance" class="badge">—</span>
+    <button class="btn btn-ghost" id="btn-open-main" onclick="window.open('/','_blank')">🔗 Main Dashboard</button>
+    <button class="btn btn-gold" id="btn-run" onclick="runPhase()">▶ Run Pipeline</button>
+  </div>
+</nav>
+
+<div class="page" id="page">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    Loading phase data…
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────
+// Parse project + phase from URL: /phase/{project}/{num}
+// ─────────────────────────────────────────────────
+const urlParts = window.location.pathname.replace(/\/$/, '').split('/');
+const PROJECT = urlParts[2] || 'chain_clarity';
+const PHASE   = parseInt(urlParts[3]) || 1;
+const API     = '';   // same origin
+
+let phaseData = null;
+let activeFile = null;
+
+// ─────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────
+async function init() {
+  document.getElementById('crumb-project').textContent = PROJECT;
+  document.getElementById('crumb-phase').textContent   = PHASE;
+  document.title = `Phase ${PHASE} — ${PROJECT}`;
+
+  try {
+    const r = await fetch(`${API}/api/phase-data?project=${PROJECT}&phase=${PHASE}`);
+    if (!r.ok) throw new Error('Phase not found');
+    phaseData = await r.json();
+    render();
+  } catch (e) {
+    document.getElementById('loading').innerHTML =
+      `<div style="color:var(--red);font-size:14px;">Error: ${e.message}<br><a href="/" style="color:var(--teal);">← Back to dashboard</a></div>`;
+  }
+}
+
+// ─────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────
+function render() {
+  const d = phaseData;
+  document.title = `Phase ${d.phase}: ${d.title}`;
+  document.getElementById('nav-title').textContent = d.title;
+
+  // Compliance badge
+  const compMap = {
+    PASS:              ['badge-teal', '✅ PASS'],
+    PASS_WITH_WARNINGS:['badge-gold', '⚠️ PASS WITH WARNINGS'],
+    FAIL:              ['badge-red',  '❌ FAIL'],
+  };
+  const [cls, label] = compMap[d.compliance_status] || ['badge-blue', d.compliance_status || 'Unknown'];
+  const nb = document.getElementById('nav-compliance');
+  nb.className = 'badge ' + cls;
+  nb.textContent = label;
+
+  const pct = Math.round((d.steps_done / d.steps_total) * 100);
+  const page = document.getElementById('page');
+  page.innerHTML = `
+    <!-- Phase header -->
+    <div class="phase-header">
+      <div class="phase-num-big">${d.phase}</div>
+      <div class="phase-info">
+        <h1>${d.title}</h1>
+        <div class="phase-meta-row">
+          <span class="meta-chip">⏱ ${d.duration_min} min</span>
+          <span class="meta-chip">📁 ${d.files.length} files</span>
+          <span class="meta-chip">🃏 ${d.cards.length} cards</span>
+          <span class="meta-chip">📋 ${d.steps_done}/${d.steps_total} steps done</span>
+          <span class="badge ${cls}" style="font-size:10px;">${label}</span>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-label">Pipeline progress — ${pct}% complete</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pipeline steps table -->
+    <div class="section-title">
+      📋 Pipeline Steps
+      <span class="badge badge-blue">${d.steps_done}/${d.steps_total} Complete</span>
+    </div>
+    ${renderPipelineTable(d.pipeline_steps)}
+
+    <!-- Tabs -->
+    <div style="margin-top:24px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+      <div class="tabs-bar" id="tabs-bar">
+        <button class="tab-btn active" onclick="switchTab('overview',this)">🗂 Overview</button>
+        <button class="tab-btn" onclick="switchTab('script',this)">📄 Script</button>
+        <button class="tab-btn" onclick="switchTab('short',this)">⚡ Short Script</button>
+        <button class="tab-btn" onclick="switchTab('infographics',this)">🃏 Infographics (${d.cards.length})</button>
+        <button class="tab-btn" onclick="switchTab('srt',this)">💬 Subtitles</button>
+        <button class="tab-btn" onclick="switchTab('audio',this)">🎧 Audio</button>
+        <button class="tab-btn" onclick="switchTab('video',this)">🎬 Video</button>
+        <button class="tab-btn" onclick="switchTab('compliance',this)">✅ Compliance</button>
+        <button class="tab-btn" onclick="switchTab('files',this)">📁 All Files</button>
+      </div>
+      <div style="padding:20px;">
+        <div id="tab-overview"     class="tab-panel active">${renderOverview(d)}</div>
+        <div id="tab-script"       class="tab-panel">${renderFileTab('script.md')}</div>
+        <div id="tab-short"        class="tab-panel">${renderFileTab('script_short.md')}</div>
+        <div id="tab-infographics" class="tab-panel">${renderInfographics(d.cards)}</div>
+        <div id="tab-srt"          class="tab-panel">${renderFileTab('subtitles.srt')}</div>
+        <div id="tab-audio"        class="tab-panel">${renderAudio()}</div>
+        <div id="tab-video"        class="tab-panel">${renderVideo(d)}</div>
+        <div id="tab-compliance"   class="tab-panel">${renderFileTab('compliance_report_auto.md')}</div>
+        <div id="tab-files"        class="tab-panel">${renderFilesTab(d.files, d.cards)}</div>
+      </div>
+    </div>
+
+    <!-- Mini terminal for Run -->
+    <div class="mini-terminal" id="mini-terminal">
+      <div class="mini-terminal-header">
+        <span class="mini-terminal-title">Pipeline Output</span>
+        <span id="mini-badge" style="margin-left:auto;font-size:10px;color:var(--gold);">RUNNING</span>
+        <button onclick="document.getElementById('mini-terminal').classList.remove('open')" style="margin-left:8px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;">✕</button>
+      </div>
+      <div class="mini-terminal-body" id="mini-body"></div>
+    </div>
+  `;
+
+  // Scale iframes after render
+  requestAnimationFrame(scaleIframes);
+}
+
+// ─────────────────────────────────────────────────
+// PIPELINE TABLE
+// ─────────────────────────────────────────────────
+function renderPipelineTable(steps) {
+  const rows = steps.map(s => {
+    const isDone = s.done;
+    const statusHtml = isDone
+      ? `<span class="status-dot done">✅ Done</span>`
+      : `<span class="status-dot pending">⬜ Pending</span>`;
+
+    const chips = (s.key_files || []).slice(0, 3).map(f =>
+      `<span class="step-file-chip">${f}</span>`
+    ).join('');
+
+    const action = s.action || '';
+    let btnClass = 'view', btnLabel = '👁 View';
+    if (action.startsWith('run:'))     { btnClass = 'run';     btnLabel = '▶ Run'; }
+    if (action.startsWith('tab:'))     { btnClass = 'preview'; btnLabel = '👀 Preview'; }
+    if (action === 'tab:infographics') { btnLabel = '🃏 Preview'; }
+
+    return `<tr class="${isDone ? 'step-done' : 'step-pending'}">
+      <td style="width:40px;padding:10px 8px;"><div class="step-num-cell">${s.num}</div></td>
+      <td>
+        <div class="step-name">${s.name}</div>
+        <div class="step-files">${chips}</div>
+      </td>
+      <td style="width:120px;">${statusHtml}</td>
+      <td style="width:110px;text-align:right;">
+        <button class="step-action-btn ${btnClass}" onclick="handleStepAction('${action}', '${s.name}')">${btnLabel}</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `<table class="pipeline-table">
+    <thead><tr>
+      <th style="width:40px;">#</th>
+      <th>Step</th>
+      <th>Status</th>
+      <th style="text-align:right;">Action</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function handleStepAction(action, stepName) {
+  if (action.startsWith('view:')) {
+    const file = action.split(':')[1];
+    switchTab('files', document.querySelector('.tab-btn:last-child'));
+    setTimeout(() => viewFile(file), 100);
+  } else if (action === 'tab:infographics') {
+    switchTab('infographics', document.querySelectorAll('.tab-btn')[3]);
+  } else if (action.startsWith('run:')) {
+    showToast(`Run pipeline to generate: ${stepName}`);
+    runPhase();
+  } else {
+    showToast(`Open: ${stepName}`);
+  }
+}
+
+// ─────────────────────────────────────────────────
+// OVERVIEW TAB
+// ─────────────────────────────────────────────────
+function renderOverview(d) {
+  const yt = d.youtube || {};
+  const chapters = (yt.chapters || []).map(c =>
+    `<div class="yt-chapter"><span class="yt-ts">${c.timestamp}</span><span class="yt-ch-title">${c.title}</span></div>`
+  ).join('') || '<div style="color:var(--muted);font-size:12px;">No chapter data</div>';
+
+  const cuts = d.platform_cuts || {};
+  const cutRows = Object.entries(cuts).map(([k, v]) =>
+    `<div class="cut-row">
+      <span class="cut-platform">${k.replace(/_/g,' ')}</span>
+      <span class="cut-info">${v.start}→${v.end} · ${v.aspect || ''}</span>
+    </div>`
+  ).join('') || '<div style="color:var(--muted);font-size:12px;">No platform cuts defined</div>';
+
+  const tags = (d.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
+
+  return `<div class="overview-grid">
+    <div class="overview-card">
+      <h4>YouTube Chapters</h4>
+      ${chapters}
+    </div>
+    <div class="overview-card">
+      <h4>Platform Cuts (from content_spec)</h4>
+      ${cutRows}
+    </div>
+    <div class="overview-card" style="grid-column:1/-1;">
+      <h4>Tags & Keywords</h4>
+      <div class="tag-cloud" style="margin-top:6px;">${tags || '<span style="color:var(--muted)">No tags</span>'}</div>
+    </div>
+    ${yt.description_hook ? `<div class="overview-card" style="grid-column:1/-1;">
+      <h4>YouTube Description Hook</h4>
+      <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-top:4px;">${esc(yt.description_hook)}</p>
+    </div>` : ''}
+  </div>`;
+}
+
+// ─────────────────────────────────────────────────
+// FILE VIEWER TAB
+// ─────────────────────────────────────────────────
+function renderFileTab(filename) {
+  return `<div id="fv-${cssId(filename)}">
+    <div class="file-viewer">
+      <div class="file-viewer-header">
+        <span class="file-viewer-name">${filename}</span>
+        <span class="file-viewer-size" id="fvsz-${cssId(filename)}"></span>
+        <button class="copy-content-btn" onclick="copyFileContent('${cssId(filename)}')">📋 Copy</button>
+      </div>
+      <div class="file-content" id="fvc-${cssId(filename)}">
+        <div style="color:var(--muted);text-align:center;padding:40px;">
+          <div style="font-size:24px;margin-bottom:8px;">📄</div>
+          Click to load file content
+          <br><button onclick="loadFileContent('${filename}','${cssId(filename)}')" style="margin-top:12px;" class="step-action-btn view">Load ${filename}</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function loadFileContent(filename, id) {
+  const container = document.getElementById(`fvc-${id}`);
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">Loading…</div>';
+  try {
+    const r = await fetch(`/api/file?project=${PROJECT}&phase=${PHASE}&file=${encodeURIComponent(filename)}`);
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    const szEl = document.getElementById(`fvsz-${id}`);
+    if (szEl) szEl.textContent = (data.content.length/1024).toFixed(1) + ' KB';
+    container.innerHTML = colorize(data.content, data.type, filename);
+    container._rawContent = data.content;
+  } catch(e) {
+    container.innerHTML = `<div style="color:var(--red);padding:20px;">Error: ${e.message}</div>`;
+  }
+}
+
+function copyFileContent(id) {
+  const el = document.getElementById(`fvc-${id}`);
+  if (!el) return;
+  const text = el._rawContent || el.textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('Copied!'));
+}
+
+// ─────────────────────────────────────────────────
+// INFOGRAPHICS TAB
+// ─────────────────────────────────────────────────
+function renderInfographics(cards) {
+  if (!cards.length) {
+    return `<div class="media-section"><div class="media-placeholder">
+      <div class="icon">🃏</div>
+      No infographic cards found for this phase.
+      <br><button class="btn btn-gold" style="margin-top:12px;" onclick="runPhase()">▶ Generate Cards</button>
+    </div></div>`;
+  }
+  const items = cards.map((c, i) => `
+    <div class="card-frame-wrap">
+      <div class="card-frame-header">
+        <span class="card-frame-name">${c}</span>
+        <div class="card-frame-actions">
+          <button class="card-frame-btn open" onclick="window.open('/media/${PROJECT}/${PHASE}/infographic_assets/${c}','_blank')">Open →</button>
+        </div>
+      </div>
+      <div class="card-frame-container" id="cfc-${i}">
+        <iframe id="cfi-${i}" src="/media/${PROJECT}/${PHASE}/infographic_assets/${c}"
+          title="${c}" loading="lazy"></iframe>
+      </div>
+    </div>`).join('');
+  return `<div class="cards-grid">${items}</div>
+    <p style="font-size:11px;color:var(--muted);margin-top:12px;">Cards are shown scaled. Click "Open →" to view full size in a new tab.</p>`;
+}
+
+function scaleIframes() {
+  const cards = phaseData?.cards || [];
+  cards.forEach((_, i) => {
+    const wrap = document.getElementById(`cfc-${i}`);
+    const frame = document.getElementById(`cfi-${i}`);
+    if (!wrap || !frame) return;
+    const scale = wrap.offsetWidth / 1080;
+    frame.style.transform = `scale(${scale})`;
+    wrap.style.paddingTop = `${wrap.offsetWidth}px`;
+  });
+}
+
+// ─────────────────────────────────────────────────
+// AUDIO TAB
+// ─────────────────────────────────────────────────
+function renderAudio() {
+  // Check via voiceover_brief.md existence as proxy — real audio would be in voiceover/
+  return `<div class="media-section" id="audio-section">
+    <div class="media-placeholder">
+      <div class="icon">🎧</div>
+      <strong style="color:var(--text2);">Voiceover Audio</strong><br>
+      <p style="margin-top:8px;">No voiceover audio found for Phase ${PHASE}.</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:6px;">
+        Generate with: <code style="background:var(--bg);padding:2px 6px;border-radius:3px;color:var(--teal);">python tools/tts/kokoro_voiceover.py --phase ${PHASE}</code>
+      </p>
+      <button class="btn btn-gold" style="margin-top:14px;" onclick="runVoiceover()">▶ Generate Voiceover</button>
+    </div>
+  </div>
+  <div style="margin-top:16px;">
+    <div class="section-title" style="margin-bottom:8px;">📄 Voiceover Brief</div>
+    ${renderFileTab('voiceover_brief.md')}
+  </div>`;
+}
+
+// ─────────────────────────────────────────────────
+// VIDEO TAB
+// ─────────────────────────────────────────────────
+function renderVideo(d) {
+  const hasVideo = d.output_files && d.output_files.some(f => f.includes('.mp4'));
+  if (hasVideo) {
+    const mp4 = d.output_files.find(f => f.includes('.mp4'));
+    return `<video controls preload="metadata" style="width:100%;border-radius:8px;background:#000;">
+      <source src="/media/${PROJECT}/${PHASE}/${mp4}" type="video/mp4">
+      Your browser does not support the video element.
+    </video>`;
+  }
+  return `<div class="media-section">
+    <div class="media-placeholder">
+      <div class="icon">🎬</div>
+      <strong style="color:var(--text2);">No Video Found</strong><br>
+      <p style="margin-top:8px;">The final video hasn't been rendered yet.</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:6px;">Steps needed: Voiceover → Video Assembly → Platform Cuts</p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="runVoiceover()">🎧 1. Generate VO</button>
+        <button class="btn btn-gold" onclick="runPhase()">▶ 2. Full Pipeline</button>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:16px;">
+    <div class="section-title" style="margin-bottom:8px;">🎬 Clip Brief</div>
+    ${renderFileTab('clip_brief.md')}
+  </div>`;
+}
+
+// ─────────────────────────────────────────────────
+// ALL FILES TAB
+// ─────────────────────────────────────────────────
+function renderFilesTab(files, cards) {
+  const fileIconMap = { md:'📄', srt:'💬', json:'⚙️', html:'🎨' };
+
+  const rows = files.map(f => {
+    const ext  = f.name.split('.').pop();
+    const icon = fileIconMap[ext] || '📁';
+    const kb   = (f.size / 1024).toFixed(1);
+    return `<tr>
+      <td style="padding:9px 12px;width:28px;">${icon}</td>
+      <td style="padding:9px 12px;font-family:'Courier New',monospace;font-size:12px;color:var(--teal);">${f.name}</td>
+      <td style="padding:9px 12px;font-size:11px;color:var(--muted);">${kb} KB</td>
+      <td style="padding:9px 12px;text-align:right;">
+        <button class="step-action-btn view" onclick="viewFile('${f.name}')">👁 View</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const cardRows = cards.map(c => `<tr>
+    <td style="padding:9px 12px;width:28px;">🃏</td>
+    <td style="padding:9px 12px;font-family:'Courier New',monospace;font-size:12px;color:var(--purple);">${c}</td>
+    <td style="padding:9px 12px;font-size:11px;color:var(--muted);">card</td>
+    <td style="padding:9px 12px;text-align:right;">
+      <button class="step-action-btn preview" onclick="window.open('/media/${PROJECT}/${PHASE}/infographic_assets/${c}','_blank')">🃏 Open</button>
+    </td>
+  </tr>`).join('');
+
+  return `<table style="width:100%;border-collapse:collapse;">
+      <thead><tr>
+        <th style="padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:left;border-bottom:1px solid var(--border);width:28px;"></th>
+        <th style="padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:left;border-bottom:1px solid var(--border);">File</th>
+        <th style="padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:left;border-bottom:1px solid var(--border);">Size</th>
+        <th style="padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:right;border-bottom:1px solid var(--border);"></th>
+      </tr></thead>
+      <tbody>${rows}${cardRows}</tbody>
+    </table>
+
+    <!-- Inline file viewer -->
+    <div id="inline-viewer" style="margin-top:16px;display:none;">
+      <div class="file-viewer">
+        <div class="file-viewer-header">
+          <span class="file-viewer-name" id="iv-name">—</span>
+          <span class="file-viewer-size" id="iv-size"></span>
+          <button class="copy-content-btn" onclick="copyInlineContent()">📋 Copy</button>
+          <button onclick="closeInlineViewer()" style="margin-left:8px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;">✕</button>
+        </div>
+        <div class="file-content" id="iv-content"></div>
+      </div>
+    </div>`;
+}
+
+let _inlineRaw = '';
+async function viewFile(filename) {
+  const viewer = document.getElementById('inline-viewer');
+  if (!viewer) return;
+  viewer.style.display = 'block';
+  document.getElementById('iv-name').textContent = filename;
+  document.getElementById('iv-content').innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);">Loading…</div>';
+  try {
+    const r = await fetch(`/api/file?project=${PROJECT}&phase=${PHASE}&file=${encodeURIComponent(filename)}`);
+    const data = await r.json();
+    _inlineRaw = data.content;
+    document.getElementById('iv-size').textContent = (data.content.length/1024).toFixed(1)+' KB';
+    document.getElementById('iv-content').innerHTML = colorize(data.content, data.type, filename);
+    viewer.scrollIntoView({behavior:'smooth'});
+  } catch(e) {
+    document.getElementById('iv-content').innerHTML = `<span style="color:var(--red);">Error: ${e.message}</span>`;
+  }
+}
+function closeInlineViewer() { document.getElementById('inline-viewer').style.display='none'; }
+function copyInlineContent() { navigator.clipboard.writeText(_inlineRaw).then(()=>showToast('Copied!')); }
+
+// ─────────────────────────────────────────────────
+// COLORIZE FILE CONTENT
+// ─────────────────────────────────────────────────
+function colorize(content, type, filename) {
+  if (type === 'json') {
+    try {
+      const pretty = JSON.stringify(JSON.parse(content), null, 2);
+      return `<span class="json">${esc(pretty)}</span>`;
+    } catch { return esc(content); }
+  }
+  if (type === 'srt') {
+    return content.split('\n').map(line => {
+      if (/^\d+$/.test(line.trim())) return `<span class="srt-idx">${esc(line)}</span>`;
+      if (line.includes('-->'))       return `<span class="srt-ts">${esc(line)}</span>`;
+      return esc(line);
+    }).join('\n');
+  }
+  // markdown / text
+  return content.split('\n').map(line => {
+    if (/^# /.test(line))   return `<span class="md-h1">${esc(line)}</span>`;
+    if (/^## /.test(line))  return `<span class="md-h2">${esc(line)}</span>`;
+    if (/^### /.test(line)) return `<span class="md-h3">${esc(line)}</span>`;
+    return esc(line).replace(/`([^`]+)`/g, '<span class="md-code">$1</span>');
+  }).join('\n');
+}
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function cssId(s) { return s.replace(/[^a-zA-Z0-9]/g,'_'); }
+
+// ─────────────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      if (b.getAttribute('onclick')?.includes(`'${id}'`)) b.classList.add('active');
+    });
+  }
+  const panel = document.getElementById('tab-' + id);
+  if (panel) panel.classList.add('active');
+
+  // Auto-load file content for file tabs
+  const autoLoad = { script:'script.md', short:'script_short.md', srt:'subtitles.srt', compliance:'compliance_report_auto.md' };
+  if (autoLoad[id]) {
+    const fid = cssId(autoLoad[id]);
+    const el = document.getElementById(`fvc-${fid}`);
+    if (el && !el._rawContent && !el._loading) {
+      el._loading = true;
+      loadFileContent(autoLoad[id], fid);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────
+// RUN PIPELINE
+// ─────────────────────────────────────────────────
+async function runPhase() {
+  const term = document.getElementById('mini-terminal');
+  const body = document.getElementById('mini-body');
+  if (!term || !body) return;
+  term.classList.add('open');
+  body.innerHTML = '';
+  document.getElementById('mini-badge').textContent = 'RUNNING';
+  document.getElementById('mini-badge').style.color = 'var(--gold)';
+  appendMini(`$ python pipeline.py --project ${PROJECT} --phase ${PHASE} --skip-generate\n\n`, 't-teal');
+  try {
+    const res = await fetch('/api/run', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ project:PROJECT, phase:PHASE, skip_generate:true })
+    });
+    const { job_id } = await res.json();
+    streamJob(job_id);
+  } catch(e) {
+    appendMini(`[ERROR] ${e.message}\n`, 't-red');
+  }
+}
+
+async function runVoiceover() {
+  showToast('Install TTS engine first — see README Step 3');
+}
+
+function streamJob(job_id) {
+  const es = new EventSource(`/api/jobs/${job_id}/stream`);
+  es.onmessage = e => {
+    const d = JSON.parse(e.data);
+    if (d.ping) return;
+    if (d.line) appendMiniAuto(d.line);
+    if (d.done) {
+      es.close();
+      const ok = d.status === 'done';
+      appendMini(ok ? '\n✅ Done!\n' : '\n❌ Failed\n', ok ? 't-teal' : 't-red');
+      document.getElementById('mini-badge').textContent = ok ? 'DONE' : 'FAILED';
+      document.getElementById('mini-badge').style.color = ok ? 'var(--teal)' : 'var(--red)';
+      if (ok) setTimeout(() => location.reload(), 1500);
+    }
+  };
+}
+
+function appendMini(text, cls) {
+  const body = document.getElementById('mini-body');
+  if (!body) return;
+  const s = document.createElement('span');
+  if (cls) s.className = cls;
+  s.textContent = text;
+  body.appendChild(s);
+  body.scrollTop = body.scrollHeight;
+}
+function appendMiniAuto(line) {
+  const l = line.toLowerCase();
+  let cls = '';
+  if (l.includes('error') || l.includes('fail'))     cls = 't-red';
+  else if (l.includes('✓') || l.includes('pass'))    cls = 't-teal';
+  else if (l.includes('step') || l.includes('▶'))    cls = 't-gold';
+  else if (l.includes('[warn]') || l.includes('─'))  cls = 't-dim';
+  appendMini(line, cls);
+}
+
+// ─────────────────────────────────────────────────
+// UTILITIES
+// ─────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+window.addEventListener('resize', scaleIframes);
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

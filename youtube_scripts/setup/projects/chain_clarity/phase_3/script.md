@@ -89,7 +89,7 @@ On the other side: borrowers.
 Someone else deposits collateral and borrows from that same pool.
 They pay interest to borrow. That interest flows to you, the lender.
 
-The protocol matches them automatically. No intermediary. Just code.
+The protocol matches them automatically. No intermediary. Pure code.
 
 Here is the critical detail: DeFi loans are overcollateralized.
 If you want to borrow 100 dollars in USDC,

@@ -1,0 +1,43 @@
+{
+  "project": "chain_clarity",
+  "phase": 5,
+  "title": "Blockchain Is Not Just Crypto — Real Use Cases",
+  "slug": "blockchain-real-use-cases-beyond-crypto",
+  "duration_min": 12,
+  "pillar": "Real-World Blockchain Applications",
+  "status": "complete",
+  "tags": ["blockchain use cases", "supply chain blockchain", "NFT explained", "Layer 2", "digital identity", "blockchain real world", "Polygon", "Ethereum scaling"],
+  "hashtags": ["#blockchain", "#NFT", "#web3", "#Layer2", "#supplychain", "#digitalidentity", "#chainclarity", "#blockchaineducation"],
+  "youtube": {
+    "title": "Blockchain Is Not Just Crypto — Real Use Cases | Chain Clarity Phase 5",
+    "description_hook": "In 2021, a shipping company moved $14 billion in cargo using a blockchain. No cryptocurrency changed hands. Today: the real industries blockchain is transforming — supply chain, identity, NFTs, and Layer 2 scaling.",
+    "chapters": [
+      {"timestamp": "0:00", "title": "$14B Cargo on a Blockchain"},
+      {"timestamp": "0:12", "title": "The Multi-Party Record Problem"},
+      {"timestamp": "2:30", "title": "Supply Chain: Walmart & Maersk"},
+      {"timestamp": "4:30", "title": "Digital Identity for 1.1 Billion"},
+      {"timestamp": "6:30", "title": "NFTs — The Accurate Explanation"},
+      {"timestamp": "8:30", "title": "Layer 2 & the Scaling Problem"},
+      {"timestamp": "10:30", "title": "Series Complete"}
+    ]
+  },
+  "platform_cuts": {
+    "tiktok_hook":    {"start": "0:00", "end": "0:15", "aspect": "9:16", "caption": "$14B moved on a blockchain. Zero crypto involved. #blockchain #supplychain"},
+    "tiktok_main":    {"start": "6:30", "end": "7:30", "aspect": "9:16", "caption": "What NFTs actually are — no hype, no JPEGs. #NFT #blockchain #web3"},
+    "instagram_reel": {"start": "0:00", "end": "1:00", "aspect": "9:16", "caption": "Blockchain is infrastructure, not just crypto. 🌐 Full series in bio. #blockchain #NFT #web3 #chainclarity"},
+    "twitter_clip":   {"start": "2:30", "end": "3:15", "aspect": "16:9", "caption": "Walmart traced mangoes in 2.2 seconds. It took 6 days before blockchain. Thread 👇"},
+    "linkedin_clip":  {"start": "4:30", "end": "5:15", "aspect": "16:9", "caption": "1.1 billion people have no legal identity. Blockchain can change that."}
+  },
+  "text_overlays": [
+    {"time": "0:00", "text": "Chain Clarity | Phase 5 of 5", "position": "top-left", "color": "#8B9BB4"},
+    {"time": "0:05", "text": "#blockchain #web3 #NFT", "position": "bottom-left", "color": "#8B9BB4"},
+    {"time": "0:00", "text": "$14B in cargo — tracked on a blockchain", "position": "lower-third", "color": "#00D4AA"},
+    {"time": "2:30", "text": "6 days → 2.2 seconds", "position": "lower-third", "color": "#F5A623"},
+    {"time": "6:30", "text": "NFT = ownership record on a blockchain", "position": "lower-third", "color": "#00D4AA"},
+    {"time": "11:00", "text": "Chain Clarity · Series Complete ✓", "position": "end-card", "color": "#00D4AA"}
+  ],
+  "tags_file": "tags_and_metadata.json",
+  "infographic_cards": 3,
+  "subtitle_cues": 101,
+  "compliance_status": "PASS"
+}

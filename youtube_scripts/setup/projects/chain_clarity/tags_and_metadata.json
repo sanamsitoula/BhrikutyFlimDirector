@@ -1,0 +1,66 @@
+{
+  "project": "chain_clarity",
+  "shared_tags": {
+    "youtube_tags": [
+      "blockchain", "crypto education", "bitcoin", "ethereum", "web3",
+      "DeFi", "smart contracts", "blockchain explained", "crypto basics",
+      "blockchain tutorial", "chain clarity", "cryptocurrency", "blockchain for beginners",
+      "how blockchain works", "crypto security", "NFT explained", "Layer 2"
+    ],
+    "instagram_hashtags": [
+      "#blockchain", "#crypto", "#web3", "#bitcoin", "#ethereum",
+      "#DeFi", "#smartcontracts", "#chainclarity", "#blockchaineducation",
+      "#cryptoexplained", "#nft", "#layer2", "#cryptosecurity", "#hardwarewallet"
+    ],
+    "twitter_hashtags": [
+      "#blockchain", "#crypto", "#web3", "#bitcoin", "#ethereum",
+      "#DeFi", "#chainclarity", "#cryptoeducation"
+    ],
+    "linkedin_tags": [
+      "blockchain", "cryptocurrency", "web3", "decentralized finance",
+      "digital assets", "fintech", "blockchain education"
+    ],
+    "tiktok_hashtags": [
+      "#blockchain", "#crypto", "#web3", "#learnontiktok",
+      "#chainclarity", "#cryptoeducation", "#bitcoin", "#ethereum"
+    ]
+  },
+  "per_phase_tags": {
+    "phase_1": {
+      "focus_tags": ["how blockchain works", "blockchain explained", "distributed ledger", "Byzantine Generals", "immutability"],
+      "seo_title_keywords": ["blockchain explained", "how blockchain works", "what is blockchain"],
+      "primary_hashtags": ["#blockchain", "#howblockchainworks", "#crypto", "#chainclarity"]
+    },
+    "phase_2": {
+      "focus_tags": ["bitcoin vs ethereum", "proof of work", "proof of stake", "bitcoin halving", "21 million", "smart contracts"],
+      "seo_title_keywords": ["bitcoin vs ethereum", "proof of work explained", "bitcoin halving"],
+      "primary_hashtags": ["#bitcoin", "#ethereum", "#proofofwork", "#chainclarity"]
+    },
+    "phase_3": {
+      "focus_tags": ["DeFi", "decentralized finance", "smart contracts", "liquidity pools", "AMM", "yield farming", "Aave", "Uniswap"],
+      "seo_title_keywords": ["DeFi explained", "smart contracts explained", "decentralized finance"],
+      "primary_hashtags": ["#DeFi", "#smartcontracts", "#decentralizedfinance", "#chainclarity"]
+    },
+    "phase_4": {
+      "focus_tags": ["crypto security", "hardware wallet", "seed phrase", "phishing crypto", "SIM swap", "self-custody", "Ledger Trezor"],
+      "seo_title_keywords": ["crypto security", "hardware wallet guide", "seed phrase safety"],
+      "primary_hashtags": ["#cryptosecurity", "#hardwarewallet", "#seedphrase", "#chainclarity"]
+    },
+    "phase_5": {
+      "focus_tags": ["blockchain use cases", "NFT explained", "supply chain blockchain", "Layer 2", "digital identity", "Polygon", "Maersk blockchain"],
+      "seo_title_keywords": ["blockchain use cases", "NFT explained simply", "Layer 2 blockchain"],
+      "primary_hashtags": ["#blockchain", "#NFT", "#layer2", "#supplychain", "#chainclarity"]
+    }
+  },
+  "channel_metadata": {
+    "channel_name": "Chain Clarity",
+    "channel_handle": "@chainclarity",
+    "channel_description": "Blockchain education without the noise. Technical depth, real analogies, zero hype.",
+    "default_cta": "Subscribe for weekly blockchain breakdowns.",
+    "website": "chainclarity.io",
+    "end_screen_duration_sec": 20,
+    "card_timestamps": [8, 5],
+    "default_category": "Education",
+    "default_language": "en"
+  }
+}

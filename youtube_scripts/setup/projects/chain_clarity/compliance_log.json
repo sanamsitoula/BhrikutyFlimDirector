@@ -7,9 +7,9 @@
       "agent": "BRAND ARCHITECT",
       "file": "brand_profile.json",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
-        "Schema complete — all required fields present",
+        "Schema complete \u2014 all required fields present",
         "All 5 HEX codes defined and distinct",
         "Typography min sizes specified (48px body, 72px header)",
         "Max 7 words per line rule documented",
@@ -26,13 +26,13 @@
       "agent": "ROADMAP PLANNER",
       "file": "roadmap.json",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
-        "5 phases defined — within max limit",
+        "5 phases defined \u2014 within max limit",
         "Each phase has learning goals (4 per phase)",
         "Content breakdown includes long-form, short-form, and infographic per phase",
         "No forbidden words used in phase titles or descriptions",
-        "Tone matches brand voice — educational, no hype language",
+        "Tone matches brand voice \u2014 educational, no hype language",
         "Phase 1 begins with fundamentals (correct learning progression)",
         "All content pillars covered across 5 phases"
       ]
@@ -43,20 +43,20 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_1/* (all 13 files)",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
         "Tone: zero forbidden words found across all script files",
-        "All sentences ≤ 15 words in scripts",
+        "All sentences \u2264 15 words in scripts",
         "Analogy-first principle followed: 5 analogies used",
         "HEX codes: all 5 brand colors correctly applied in all HTML cards",
-        "No CSS color names used — hex-only throughout",
-        "Typography: Space Grotesk headers, Inter body, JetBrains Mono code — all correct",
-        "Font sizes: min 88px headers, min 48px body — both within spec",
+        "No CSS color names used \u2014 hex-only throughout",
+        "Typography: Space Grotesk headers, Inter body, JetBrains Mono code \u2014 all correct",
+        "Font sizes: min 88px headers, min 48px body \u2014 both within spec",
         "Max 7 words per line: all subtitle cues and card text verified",
         "Animation sequence: all 6 steps present in all 4 HTML cards",
         "Sound identity: BPM 88-112, forbidden genres avoided",
         "Logo usage: correct on all 4 cards",
-        "One intentional exception: #EF4444 on card_04 for danger/invalid block state — documented and approved"
+        "One intentional exception: #EF4444 on card_04 for danger/invalid block state \u2014 documented and approved"
       ]
     },
     {
@@ -65,14 +65,14 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_2/script.md",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
         "Zero forbidden words found",
-        "All sentences ≤ 15 words",
+        "All sentences \u2264 15 words",
         "Analogy-first: combination lock (PoW), gold mine (halving), vending machine vs computer (BTC/ETH), mailbox (wallet)",
         "Technical accuracy verified: SHA-256 nonce, 210,000 blocks/halving, 32 ETH min stake, slashing, The Merge Sept 15 2022",
-        "All on-screen text labels ≤ 7 words per line",
-        "HEX codes in text specs: #00D4AA, #8B9BB4, #F5A623, #7B5CF0 — all correct"
+        "All on-screen text labels \u2264 7 words per line",
+        "HEX codes in text specs: #00D4AA, #8B9BB4, #F5A623, #7B5CF0 \u2014 all correct"
       ]
     },
     {
@@ -81,12 +81,12 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_2/script_short.md",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
         "Zero forbidden words found",
-        "All sentences ≤ 15 words",
-        "65s target format — private key 3-layer explanation",
-        "All on-screen text ≤ 7 words per line",
+        "All sentences \u2264 15 words",
+        "65s target format \u2014 private key 3-layer explanation",
+        "All on-screen text \u2264 7 words per line",
         "HEX codes correct"
       ]
     },
@@ -96,15 +96,15 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_2/infographics.md + card_01.html + card_02.html + card_03.html",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
-        "All card text ≤ 7 words per line",
+        "All card text \u2264 7 words per line",
         "All HEX codes match brand palette",
         "No CSS color names used",
         "Google Fonts CDN loaded: Space Grotesk, Inter, JetBrains Mono",
-        "Canvas dimensions: 1080×1080px on all 3 cards",
+        "Canvas dimensions: 1080\u00d71080px on all 3 cards",
         "6-step animation sequence present on all 3 cards",
-        "3 layout-justified typography exceptions documented: EXC-P2-01, EXC-P2-02, EXC-P2-03 — approved"
+        "3 layout-justified typography exceptions documented: EXC-P2-01, EXC-P2-02, EXC-P2-03 \u2014 approved"
       ]
     },
     {
@@ -113,11 +113,11 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_2/infographic_assets/text_layers.json + lottie_spec.json",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
-        "All HEX values match brand palette — no CSS color names",
-        "Font families: Space Grotesk, Inter, JetBrains Mono — correct",
-        "Animation timing in lottie_spec.json matches HTML card delays ±20ms",
+        "All HEX values match brand palette \u2014 no CSS color names",
+        "Font families: Space Grotesk, Inter, JetBrains Mono \u2014 correct",
+        "Animation timing in lottie_spec.json matches HTML card delays \u00b120ms",
         "Frame rate: 30fps",
         "Export targets: After Effects, CapCut, DaVinci Resolve, Premiere Pro"
       ]
@@ -128,13 +128,13 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_2/clip_brief.md",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
         "All HEX references in shot notes correct",
         "Infographic cue points correctly reference card_01, card_02, card_03",
-        "All on-screen overlay text ≤ 7 words per line",
+        "All on-screen overlay text \u2264 7 words per line",
         "No forbidden words in shot descriptions",
-        "52 shots across 14 minutes — appropriate density"
+        "52 shots across 14 minutes \u2014 appropriate density"
       ]
     },
     {
@@ -143,11 +143,11 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_2/subtitles.srt",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
-        "161 cues — appropriate for 14-minute video",
-        "All cues ≤ 7 words per line",
-        "All cues ≤ 2 lines",
+        "161 cues \u2014 appropriate for 14-minute video",
+        "All cues \u2264 7 words per line",
+        "All cues \u2264 2 lines",
         "All cue durations between 1.5s and 4.5s",
         "Zero forbidden words detected",
         "SRT timecode format correct throughout"
@@ -159,12 +159,12 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_2/voiceover_brief.md + music_brief.md",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
         "Voiceover brief: non-hype delivery directions maintained",
         "No investment language in any brief",
         "Music brief: BPM 88-112 range maintained, no forbidden genres",
-        "Phase 2 energy levels (6–7/10) correctly elevated from Phase 1 (5–6/10)"
+        "Phase 2 energy levels (6\u20137/10) correctly elevated from Phase 1 (5\u20136/10)"
       ]
     },
     {
@@ -173,14 +173,14 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_3/script.md + phase_3/script_short.md",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
         "Zero forbidden words found across all script content",
         "Analogy-first: vending machine (smart contracts), pawn shop (DeFi lending), constant product formula visual",
-        "Technical accuracy: Terra UST May 2022 $40B, Harvest Finance 2020 $34M, Uniswap x×y=k, Aave/Compound 150% collateral",
-        "All on-screen text labels ≤ 7 words per line",
-        "Script runtime: 14 min long-form, 65s short-form — within target",
-        "Educational content only — no investment advice, no price predictions"
+        "Technical accuracy: Terra UST May 2022 $40B, Harvest Finance 2020 $34M, Uniswap x\u00d7y=k, Aave/Compound 150% collateral",
+        "All on-screen text labels \u2264 7 words per line",
+        "Script runtime: 14 min long-form, 65s short-form \u2014 within target",
+        "Educational content only \u2014 no investment advice, no price predictions"
       ]
     },
     {
@@ -189,10 +189,10 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_3/voiceover_brief.md + phase_3/music_brief.md",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
         "Voiceover brief: non-hype, no investment language, key pause/emphasis markers correct",
-        "Music brief: BPM 90–112 range (Phase 3 appropriate — DeFi risk section drops to 90–96 BPM)",
+        "Music brief: BPM 90\u2013112 range (Phase 3 appropriate \u2014 DeFi risk section drops to 90\u201396 BPM)",
         "Near-silence cues marked for $40B Terra and 'walk away' moments",
         "No forbidden words or genres referenced"
       ]
@@ -203,16 +203,16 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_3/infographics.md + card_01.html + card_02.html + card_03.html",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
-        "All card text ≤ 7 words per line — verified across all 3 cards",
-        "All HEX codes match brand palette — no CSS color names",
-        "Google Fonts CDN: Space Grotesk, Inter, JetBrains Mono — present on all cards",
-        "Canvas: 1080×1080px on all 3 cards",
+        "All card text \u2264 7 words per line \u2014 verified across all 3 cards",
+        "All HEX codes match brand palette \u2014 no CSS color names",
+        "Google Fonts CDN: Space Grotesk, Inter, JetBrains Mono \u2014 present on all cards",
+        "Canvas: 1080\u00d71080px on all 3 cards",
         "6-step animation sequence present on all 3 cards",
         "Logo SVG (dual hex + gold diamond) present on all 3 cards",
-        "Wordmark present on all 3 cards — bottom-right",
-        "Typography layout exceptions documented: EXC-P3-01, EXC-P3-02 — approved"
+        "Wordmark present on all 3 cards \u2014 bottom-right",
+        "Typography layout exceptions documented: EXC-P3-01, EXC-P3-02 \u2014 approved"
       ]
     },
     {
@@ -221,12 +221,12 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_3/infographic_assets/text_layers.json + lottie_spec.json",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
-        "All HEX values match brand palette — no CSS color names",
-        "Font families: Space Grotesk, Inter, JetBrains Mono — correct throughout",
+        "All HEX values match brand palette \u2014 no CSS color names",
+        "Font families: Space Grotesk, Inter, JetBrains Mono \u2014 correct throughout",
         "lottie_spec: frame rate 60fps, easing curves expressed as cubic-bezier",
-        "Animation timing matches HTML card delays ±20ms",
+        "Animation timing matches HTML card delays \u00b120ms",
         "Export targets: After Effects, CapCut, DaVinci Resolve, Premiere Pro"
       ]
     },
@@ -236,11 +236,11 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_3/clip_brief.md",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
-        "83 shots across 14 minutes — appropriate density",
+        "83 shots across 14 minutes \u2014 appropriate density",
         "All 3 infographic cue points referenced: card_01@0:55, card_02@3:30, card_03@5:28",
-        "All on-screen overlay text ≤ 7 words per line",
+        "All on-screen overlay text \u2264 7 words per line",
         "No forbidden words in shot descriptions or notes",
         "Color grade references use brand HEX values",
         "Music sync points cross-referenced with music_brief.md"
@@ -252,30 +252,30 @@
       "agent": "BRAND COMPLIANCE OFFICER",
       "file": "phase_3/subtitles.srt",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
-        "174 cues — appropriate for 14-minute video",
-        "All cues ≤ 7 words per line (3 pre-submission corrections applied: FIX-P3-01, FIX-P3-02, FIX-P3-03)",
-        "All cues ≤ 2 lines",
+        "174 cues \u2014 appropriate for 14-minute video",
+        "All cues \u2264 7 words per line (3 pre-submission corrections applied: FIX-P3-01, FIX-P3-02, FIX-P3-03)",
+        "All cues \u2264 2 lines",
         "All cue durations between 1.5s and 4.5s after correction",
         "Zero forbidden words detected",
         "SRT timecode format correct throughout",
-        "Timestamp coverage: 0:00–12:38 of 14:00 (end card uses on-screen text, no subtitle needed)"
+        "Timestamp coverage: 0:00\u201312:38 of 14:00 (end card uses on-screen text, no subtitle needed)"
       ]
     },
     {
       "check_id": "CHK-017",
       "date": "2026-05-27",
       "agent": "BRAND COMPLIANCE OFFICER",
-      "file": "phase_3/* (all 13 files — bundle review)",
+      "file": "phase_3/* (all 13 files \u2014 bundle review)",
       "result": "PASS",
-      "stamp": "✅ BRAND COMPLIANT",
+      "stamp": "\u2705 BRAND COMPLIANT",
       "notes": [
-        "Full Phase 3 bundle reviewed — 13 production files",
-        "Technical accuracy audit complete — all DeFi claims verified",
+        "Full Phase 3 bundle reviewed \u2014 13 production files",
+        "Technical accuracy audit complete \u2014 all DeFi claims verified",
         "Tone: educational, analogy-first, no investment advice throughout",
-        "Brand consistency maintained across script → infographics → subtitles pipeline",
-        "Exceptions on record: EXC-P3-01 (typography layout), EXC-P3-02 (label annotation) — both approved",
+        "Brand consistency maintained across script \u2192 infographics \u2192 subtitles pipeline",
+        "Exceptions on record: EXC-P3-01 (typography layout), EXC-P3-02 (label annotation) \u2014 both approved",
         "Phase 3 approved for production release"
       ]
     }
@@ -285,15 +285,118 @@
     "passed": 17,
     "failed": 0,
     "pending": 0,
-    "phases_complete": ["phase_1", "phase_2", "phase_3"],
-    "phases_pending": ["phase_4", "phase_5"],
+    "phases_complete": [
+      "phase_1",
+      "phase_2",
+      "phase_3"
+    ],
+    "phases_pending": [
+      "phase_4",
+      "phase_5"
+    ],
     "exceptions": [
-      { "id": "EXC-P1-01", "phase": "phase_1", "file": "card_04.html", "type": "color", "approved": true },
-      { "id": "EXC-P2-01", "phase": "phase_2", "file": "card_01.html", "type": "typography", "approved": true },
-      { "id": "EXC-P2-02", "phase": "phase_2", "file": "card_02.html", "type": "typography", "approved": true },
-      { "id": "EXC-P2-03", "phase": "phase_2", "file": "card_03.html", "type": "typography", "approved": true },
-      { "id": "EXC-P3-01", "phase": "phase_3", "file": "card_01.html + card_02.html + card_03.html", "type": "typography", "approved": true },
-      { "id": "EXC-P3-02", "phase": "phase_3", "file": "card_03.html", "type": "typography_label", "approved": true }
+      {
+        "id": "EXC-P1-01",
+        "phase": "phase_1",
+        "file": "card_04.html",
+        "type": "color",
+        "approved": true
+      },
+      {
+        "id": "EXC-P2-01",
+        "phase": "phase_2",
+        "file": "card_01.html",
+        "type": "typography",
+        "approved": true
+      },
+      {
+        "id": "EXC-P2-02",
+        "phase": "phase_2",
+        "file": "card_02.html",
+        "type": "typography",
+        "approved": true
+      },
+      {
+        "id": "EXC-P2-03",
+        "phase": "phase_2",
+        "file": "card_03.html",
+        "type": "typography",
+        "approved": true
+      },
+      {
+        "id": "EXC-P3-01",
+        "phase": "phase_3",
+        "file": "card_01.html + card_02.html + card_03.html",
+        "type": "typography",
+        "approved": true
+      },
+      {
+        "id": "EXC-P3-02",
+        "phase": "phase_3",
+        "file": "card_03.html",
+        "type": "typography_label",
+        "approved": true
+      }
     ]
+  },
+  "phase_4_auto": {
+    "date": "2026-06-02",
+    "overall": "PASS_WITH_WARNINGS",
+    "checks": {
+      "tone_of_voice": "PASS",
+      "color_codes": "PASS",
+      "typography": "WARN",
+      "animation_sequence": "WARN",
+      "subtitles": "WARN",
+      "sound_identity": "PASS"
+    }
+  },
+  "phase_5_auto": {
+    "date": "2026-06-02",
+    "overall": "PASS_WITH_WARNINGS",
+    "checks": {
+      "tone_of_voice": "PASS",
+      "color_codes": "PASS",
+      "typography": "WARN",
+      "animation_sequence": "WARN",
+      "subtitles": "WARN",
+      "sound_identity": "PASS"
+    }
+  },
+  "phase_1_auto": {
+    "date": "2026-06-02",
+    "overall": "PASS_WITH_WARNINGS",
+    "checks": {
+      "tone_of_voice": "PASS",
+      "color_codes": "PASS",
+      "typography": "WARN",
+      "animation_sequence": "WARN",
+      "subtitles": "WARN",
+      "sound_identity": "PASS"
+    }
+  },
+  "phase_2_auto": {
+    "date": "2026-06-02",
+    "overall": "PASS_WITH_WARNINGS",
+    "checks": {
+      "tone_of_voice": "PASS",
+      "color_codes": "PASS",
+      "typography": "WARN",
+      "animation_sequence": "WARN",
+      "subtitles": "WARN",
+      "sound_identity": "PASS"
+    }
+  },
+  "phase_3_auto": {
+    "date": "2026-06-02",
+    "overall": "PASS_WITH_WARNINGS",
+    "checks": {
+      "tone_of_voice": "PASS",
+      "color_codes": "PASS",
+      "typography": "WARN",
+      "animation_sequence": "WARN",
+      "subtitles": "WARN",
+      "sound_identity": "PASS"
+    }
   }
 }

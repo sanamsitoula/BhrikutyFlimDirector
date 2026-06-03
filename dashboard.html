@@ -1,0 +1,3214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bhrikuty Film Director — Chain Clarity Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0A0E1A;
+    --bg-secondary: #0F1525;
+    --bg-card: #141B2D;
+    --bg-card-hover: #1A2238;
+    --border: #1E2A42;
+    --border-active: #00D4AA;
+    --teal: #00D4AA;
+    --teal-dim: rgba(0,212,170,0.12);
+    --teal-mid: rgba(0,212,170,0.25);
+    --gold: #F5A623;
+    --gold-dim: rgba(245,166,35,0.12);
+    --text-primary: #E8EDF5;
+    --text-secondary: #8A97B0;
+    --text-muted: #4A5568;
+    --red: #FF4D6A;
+    --red-dim: rgba(255,77,106,0.12);
+    --blue: #4D94FF;
+    --blue-dim: rgba(77,148,255,0.12);
+    --purple: #A855F7;
+    --purple-dim: rgba(168,85,247,0.12);
+    --green: #22C55E;
+    --green-dim: rgba(34,197,94,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+  }
+
+  /* ---- SCROLLBAR ---- */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--teal); }
+
+  /* ---- LAYOUT ---- */
+  .app-shell {
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    min-height: 100vh;
+  }
+
+  .main-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 24px 48px;
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 16px 0;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+
+  .brand-mark {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  .brand-text h1 {
+    font-size: 18px;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .brand-text p {
+    font-size: 11px;
+    color: var(--teal);
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .header-status {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+
+  .phase-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .phase-pill.complete {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: var(--teal-dim);
+  }
+
+  .phase-pill.in-progress {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: var(--gold-dim);
+  }
+
+  .phase-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .phase-pill.in-progress .dot {
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ---- SECTION TITLES ---- */
+  .section {
+    margin-top: 32px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .section-header h2 {
+    font-size: 20px;
+    color: var(--text-primary);
+  }
+
+  .section-header .badge {
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .badge-teal { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(0,212,170,0.3); }
+  .badge-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(245,166,35,0.3); }
+  .badge-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,77,106,0.3); }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(77,148,255,0.3); }
+  .badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(168,85,247,0.3); }
+  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .badge-free { background: rgba(34,197,94,0.12); color: #22C55E; border: 1px solid rgba(34,197,94,0.3); }
+  .badge-paid { background: rgba(245,166,35,0.12); color: #F5A623; border: 1px solid rgba(245,166,35,0.3); }
+  .badge-freemium { background: rgba(77,148,255,0.12); color: #4D94FF; border: 1px solid rgba(77,148,255,0.3); }
+
+  /* ---- CARD ---- */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .card:hover { border-color: var(--border-active); background: var(--bg-card-hover); }
+
+  /* ---- NEW PROJECT PANEL ---- */
+  .project-panel {
+    background: linear-gradient(135deg, #0F1525 0%, #141B2D 100%);
+    border: 1px solid var(--teal);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .project-panel::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(0,212,170,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .project-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    left: -60px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(245,166,35,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .steps-nav {
+    display: flex;
+    gap: 0;
+    margin-bottom: 28px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .step-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .step-btn:first-child { border-radius: 8px 0 0 8px; }
+  .step-btn:last-child { border-radius: 0 8px 8px 0; }
+  .step-btn + .step-btn { border-left: none; }
+
+  .step-btn.active {
+    background: var(--teal-dim);
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+
+  .step-btn.done {
+    background: rgba(34,197,94,0.08);
+    border-color: rgba(34,197,94,0.4);
+    color: var(--green);
+  }
+
+  .step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--border);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  .step-btn.active .step-num {
+    background: var(--teal);
+    color: var(--bg-primary);
+  }
+
+  .step-btn.done .step-num {
+    background: var(--green);
+    color: var(--bg-primary);
+  }
+
+  .step-panel { display: none; }
+  .step-panel.active { display: block; }
+
+  /* ---- FORM ELEMENTS ---- */
+  .form-group { margin-bottom: 16px; }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 8px;
+  }
+
+  .form-input, .form-textarea {
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus, .form-textarea:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(0,212,170,0.1);
+  }
+
+  .form-textarea { min-height: 90px; resize: vertical; }
+
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+
+  /* ---- RADIO OPTIONS ---- */
+  .radio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+  }
+
+  .radio-option {
+    position: relative;
+  }
+
+  .radio-option input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .radio-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .radio-option input:checked + .radio-label {
+    border-color: var(--teal);
+    background: var(--teal-dim);
+  }
+
+  .radio-label-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .radio-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .radio-meta {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .radio-cost {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .quality-stars {
+    display: flex;
+    gap: 2px;
+  }
+
+  .star {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+
+  .star-full { background: var(--gold); }
+  .star-empty { background: var(--border); }
+  .star-half { background: linear-gradient(to right, var(--gold) 50%, var(--border) 50%); }
+
+  /* ---- CHECKBOXES ---- */
+  .checkbox-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .checkbox-option {
+    position: relative;
+  }
+
+  .checkbox-option input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .checkbox-option input:checked + .checkbox-label {
+    border-color: var(--teal);
+    background: var(--teal-dim);
+    color: var(--teal);
+  }
+
+  .platform-icon { font-size: 16px; }
+
+  /* ---- COMMAND BOX ---- */
+  .command-box {
+    background: #06090F;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .command-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .command-header span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'Space Grotesk', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: var(--teal-dim);
+    border: 1px solid rgba(0,212,170,0.3);
+    border-radius: 6px;
+    color: var(--teal);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .copy-btn:hover { background: var(--teal); color: var(--bg-primary); }
+
+  .command-code {
+    padding: 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #00FF9F;
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.7;
+    min-height: 80px;
+  }
+
+  /* ---- STEP NAV BUTTONS ---- */
+  .step-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-end;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    outline: none;
+  }
+
+  .btn-primary {
+    background: var(--teal);
+    color: var(--bg-primary);
+  }
+
+  .btn-primary:hover { background: #00EDBC; transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+
+  .btn-secondary:hover { border-color: var(--teal); color: var(--teal); }
+
+  .btn-gold {
+    background: var(--gold);
+    color: var(--bg-primary);
+  }
+
+  .btn-gold:hover { background: #FFB83F; transform: translateY(-1px); }
+
+  /* ---- TABS ---- */
+  .tabs-container { position: relative; }
+
+  .tabs-scroll {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+
+  .tabs-scroll::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    margin-bottom: -1px;
+  }
+
+  .tab-btn:hover { color: var(--text-primary); }
+
+  .tab-btn.active {
+    color: var(--teal);
+    border-bottom-color: var(--teal);
+  }
+
+  .tab-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tab-btn.active .tab-num {
+    background: var(--teal);
+    color: var(--bg-primary);
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ---- TOOL CARDS GRID ---- */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  .tool-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+
+  .tool-card:hover {
+    border-color: var(--border-active);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .tool-card.recommended {
+    border-color: var(--teal);
+  }
+
+  .tool-card.recommended::after {
+    content: '★ RECOMMENDED';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--teal);
+    letter-spacing: 0.1em;
+    background: var(--teal-dim);
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,212,170,0.3);
+  }
+
+  .tool-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .tool-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .tool-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+
+  .tool-quality {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .tool-cost {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  .tool-description {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+
+  .install-preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #06090F;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #00FF9F;
+    overflow: hidden;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .try-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: var(--teal-dim);
+    border: 1px solid rgba(0,212,170,0.3);
+    border-radius: 7px;
+    color: var(--teal);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .try-btn:hover { background: var(--teal); color: var(--bg-primary); }
+
+  /* ---- UPGRADE BADGE ---- */
+  .upgrade-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .upgrade-critical { background: rgba(255,77,106,0.15); color: var(--red); border: 1px solid rgba(255,77,106,0.3); }
+  .upgrade-high { background: rgba(245,166,35,0.15); color: var(--gold); border: 1px solid rgba(245,166,35,0.3); }
+  .upgrade-medium { background: rgba(77,148,255,0.15); color: var(--blue); border: 1px solid rgba(77,148,255,0.3); }
+  .upgrade-low { background: rgba(138,151,176,0.15); color: var(--text-secondary); border: 1px solid rgba(138,151,176,0.3); }
+
+  /* ---- PHASE GRID ---- */
+  .phase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .phase-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.2s;
+  }
+
+  .phase-card:hover { border-color: var(--border-active); }
+
+  .phase-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .phase-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--teal-dim);
+    border: 1px solid rgba(0,212,170,0.3);
+    color: var(--teal);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .phase-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .phase-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+  }
+
+  .phase-stats {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--teal);
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  .phase-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 14px 0 10px;
+    overflow: hidden;
+  }
+
+  .phase-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(to right, var(--teal), #00EDBC);
+    transition: width 1s ease;
+  }
+
+  .phase-links {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .link-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: none;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .link-chip:hover { border-color: var(--teal); color: var(--teal); }
+
+  /* ---- OUTPUT PREVIEW ---- */
+  .output-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+
+  .output-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .output-card:hover {
+    border-color: var(--border-active);
+    transform: translateY(-2px);
+  }
+
+  .output-preview-area {
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .output-preview-area.yt { background: linear-gradient(135deg, #1a0000 0%, #2a0a0a 100%); }
+  .output-preview-area.tt { background: linear-gradient(135deg, #000a1a 0%, #0a0a2a 100%); }
+  .output-preview-area.ig { background: linear-gradient(135deg, #1a0a1a 0%, #2a0a2a 100%); }
+  .output-preview-area.tw { background: linear-gradient(135deg, #000d1a 0%, #001a2a 100%); }
+  .output-preview-area.li { background: linear-gradient(135deg, #000a16 0%, #001628 100%); }
+  .output-preview-area.bl { background: linear-gradient(135deg, #0a0d00 0%, #1a1a0a 100%); }
+  .output-preview-area.gh { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); }
+
+  .output-card-info {
+    padding: 10px 12px;
+  }
+
+  .output-platform {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .output-specs {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .output-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    animation: pulse 2s infinite;
+  }
+
+  /* ---- TTS COMPARISON ---- */
+  .tts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .tts-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    transition: all 0.2s;
+  }
+
+  .tts-card:hover { border-color: var(--border-active); background: var(--bg-card-hover); }
+  .tts-card.tts-top { border-color: var(--teal); }
+
+  .tts-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 10px;
+  }
+
+  .tts-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .tts-attr {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .tts-attr-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .clone-badge {
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .clone-yes { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(0,212,170,0.3); }
+  .clone-no { background: var(--border); color: var(--text-muted); }
+
+  .sample-box {
+    background: #06090F;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 10px 0;
+    max-height: 80px;
+    overflow-y: auto;
+  }
+
+  /* ---- MODAL ---- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg-card);
+    border: 1px solid var(--teal);
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 540px;
+    width: 100%;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: var(--border);
+    border: none;
+    color: var(--text-secondary);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .modal-close:hover { background: var(--red); color: white; }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    padding-right: 36px;
+  }
+
+  /* ---- TOAST ---- */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--teal);
+    border-radius: 10px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--teal);
+    z-index: 2000;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ---- DIVIDER ---- */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0;
+  }
+
+  /* ---- COLLAPSIBLE ---- */
+  .collapse-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    padding: 12px 0;
+    user-select: none;
+  }
+
+  .collapse-trigger:hover .collapse-arrow { color: var(--teal); }
+
+  .collapse-arrow {
+    color: var(--text-muted);
+    transition: transform 0.2s, color 0.2s;
+    font-size: 12px;
+  }
+
+  .collapse-arrow.open { transform: rotate(180deg); }
+
+  .collapse-body { display: none; padding-top: 4px; }
+  .collapse-body.open { display: block; }
+
+  /* ---- FOOTER ---- */
+  .footer {
+    margin-top: 48px;
+    padding: 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  /* ---- SERVER STATUS ---- */
+  .server-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: default;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.05em;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .server-pill.online { border-color: var(--teal); color: var(--teal); background: var(--teal-dim); }
+  .server-pill.offline { border-color: var(--border); color: var(--text-muted); }
+
+  /* ---- TERMINAL DRAWER ---- */
+  .terminal-drawer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 340px;
+    background: #06090F;
+    border-top: 2px solid var(--teal);
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
+  }
+  .terminal-drawer.open { transform: translateY(0); }
+
+  .terminal-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    background: #0A0E1A;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .terminal-dots { display: flex; gap: 6px; }
+  .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .terminal-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .terminal-badge {
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--teal-dim);
+    color: var(--teal);
+    border: 1px solid rgba(0,212,170,0.3);
+  }
+  .terminal-close-btn {
+    padding: 3px 10px;
+    background: rgba(255,77,106,0.12);
+    border: 1px solid rgba(255,77,106,0.3);
+    border-radius: 6px;
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+  .terminal-close-btn:hover { background: var(--red); color: white; }
+
+  .terminal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 20px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #8A97B0;
+    scrollbar-width: thin;
+  }
+  .terminal-body::-webkit-scrollbar { width: 4px; }
+  .terminal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .t-green { color: #00FF9F; }
+  .t-teal  { color: var(--teal); }
+  .t-gold  { color: var(--gold); }
+  .t-red   { color: var(--red); }
+  .t-dim   { color: var(--text-muted); }
+  .t-white { color: var(--text-primary); }
+
+  /* ---- PROJECTS EXPLORER ---- */
+  .explorer-project-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .project-selector-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+  .project-selector-btn.active,
+  .project-selector-btn:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: var(--teal-dim);
+  }
+
+  .explorer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .epc {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .epc::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, var(--teal), #00EDBC);
+  }
+  .epc:hover { border-color: var(--teal); background: var(--bg-card-hover); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
+
+  .epc-top { display: flex; align-items: center; justify-content: space-between; }
+  .epc-num {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--teal-dim); border: 1px solid rgba(0,212,170,0.3);
+    color: var(--teal); font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .epc-compliance {
+    padding: 3px 9px; border-radius: 10px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+  }
+  .epc-compliance.pass    { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(0,212,170,0.3); }
+  .epc-compliance.warn    { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(245,166,35,0.3); }
+  .epc-compliance.fail    { background: var(--red-dim);  color: var(--red);  border: 1px solid rgba(255,77,106,0.3); }
+  .epc-compliance.unknown { background: var(--border);   color: var(--text-muted); }
+
+  .epc-title { font-size: 14px; font-weight: 700; color: var(--text-primary); line-height: 1.35; }
+  .epc-meta  { font-size: 11px; color: var(--text-muted); }
+
+  .epc-file-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .epc-chip {
+    padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 500;
+    background: var(--bg-primary); border: 1px solid var(--border);
+    color: var(--text-secondary); font-family: 'Courier New', monospace;
+  }
+  .epc-chip.md  { border-color: rgba(77,148,255,0.4); color: var(--blue); }
+  .epc-chip.srt { border-color: rgba(0,212,170,0.4); color: var(--teal); }
+  .epc-chip.json{ border-color: rgba(245,166,35,0.4); color: var(--gold); }
+  .epc-chip.html{ border-color: rgba(168,85,247,0.4); color: var(--purple); }
+
+  .epc-open-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 8px; border-radius: 8px;
+    background: var(--teal-dim); border: 1px solid rgba(0,212,170,0.3);
+    color: var(--teal); font-size: 12px; font-weight: 700;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: all 0.2s; margin-top: 4px;
+  }
+  .epc-open-btn:hover { background: var(--teal); color: var(--bg-primary); }
+
+  /* ── EXPLORER TABLE ── */
+  .explorer-table-wrap {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .explorer-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .explorer-table th {
+    padding: 10px 14px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-muted);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .explorer-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(30,42,66,.5);
+    vertical-align: middle;
+  }
+  .explorer-table tr:last-child td { border-bottom: none; }
+  .explorer-table tr:hover td { background: rgba(255,255,255,.02); }
+  .et-phase-num {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--teal-dim); border: 1px solid rgba(0,212,170,.3);
+    color: var(--teal); font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .et-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .et-meta  { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .et-status-icon { font-size: 15px; text-align: center; }
+  .et-progress-cell { min-width: 80px; }
+  .et-mini-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 3px; }
+  .et-mini-fill { height: 100%; border-radius: 2px; background: linear-gradient(to right, var(--teal), #00EDBC); }
+  .open-dash-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 7px;
+    background: var(--teal-dim); border: 1px solid rgba(0,212,170,.3);
+    color: var(--teal); font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: all .2s; text-decoration: none; white-space: nowrap;
+  }
+  .open-dash-btn:hover { background: var(--teal); color: var(--bg-primary); }
+
+  .explorer-offline {
+    padding: 28px;
+    background: var(--bg-card);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  /* ---- PHASE VIEWER MODAL ---- */
+  .pv-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    z-index: 1100;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+  }
+  .pv-overlay.open { display: flex; }
+
+  .pv-modal {
+    background: var(--bg-secondary);
+    border: 1px solid var(--teal);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 1100px;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  }
+
+  .pv-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .pv-header-left { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+  .pv-header-title { font-size: 17px; font-weight: 700; color: var(--text-primary); font-family: 'Space Grotesk', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pv-header-meta  { font-size: 11px; color: var(--text-muted); }
+  .pv-close-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--border); border: none;
+    color: var(--text-secondary); font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s;
+  }
+  .pv-close-btn:hover { background: var(--red); color: white; }
+
+  .pv-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .pv-sidebar {
+    width: 200px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    background: var(--bg-primary);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pv-sidebar-section {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 8px 8px 4px;
+    margin-top: 4px;
+  }
+  .pv-file-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: all 0.15s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pv-file-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+  .pv-file-btn.active { background: var(--teal-dim); color: var(--teal); }
+  .pv-file-icon { font-size: 13px; flex-shrink: 0; }
+
+  .pv-content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-primary);
+  }
+  .pv-content-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .pv-content-filename {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--teal);
+    font-weight: 600;
+  }
+  .pv-content-size { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+  .pv-copy-btn {
+    padding: 3px 10px;
+    background: var(--teal-dim); border: 1px solid rgba(0,212,170,0.3);
+    border-radius: 6px; color: var(--teal);
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all 0.2s;
+  }
+  .pv-copy-btn:hover { background: var(--teal); color: var(--bg-primary); }
+
+  .pv-file-display {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.75;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .pv-file-display.json-view { color: #A8D8A8; }
+  .pv-file-display .md-h1    { color: var(--teal); font-size: 15px; font-weight: 700; }
+  .pv-file-display .md-h2    { color: var(--gold); font-size: 13px; font-weight: 700; }
+  .pv-file-display .md-h3    { color: var(--blue); font-size: 12.5px; font-weight: 600; }
+  .pv-file-display .md-code  { color: #00FF9F; background: rgba(0,255,159,0.07); padding: 0 4px; border-radius: 3px; }
+  .pv-file-display .srt-ts   { color: var(--teal); }
+  .pv-file-display .srt-idx  { color: var(--text-muted); }
+  .pv-file-display .pv-placeholder {
+    color: var(--text-muted); font-family: 'Inter', sans-serif;
+    text-align: center; margin-top: 80px; font-size: 13px;
+  }
+
+  .pv-tag-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg-card); }
+  .pv-tag { padding: 2px 10px; border-radius: 10px; font-size: 10px; background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-muted); }
+
+  @media (max-width: 768px) {
+    .pv-sidebar { width: 140px; }
+    .explorer-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 768px) {
+    .header-inner { gap: 12px; }
+    .header-status { display: none; }
+    .project-panel { padding: 20px; }
+    .radio-grid { grid-template-columns: 1fr; }
+    .tools-grid { grid-template-columns: 1fr; }
+    .tts-grid { grid-template-columns: 1fr; }
+    .phase-grid { grid-template-columns: 1fr 1fr; }
+    .output-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* ---- WAVEFORM ANIMATION ---- */
+  .waveform {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 24px;
+  }
+
+  .wave-bar {
+    width: 3px;
+    border-radius: 2px;
+    background: var(--teal);
+    animation: wave 1.2s ease-in-out infinite;
+  }
+
+  .wave-bar:nth-child(1) { animation-delay: 0s; height: 8px; }
+  .wave-bar:nth-child(2) { animation-delay: 0.1s; height: 14px; }
+  .wave-bar:nth-child(3) { animation-delay: 0.2s; height: 20px; }
+  .wave-bar:nth-child(4) { animation-delay: 0.3s; height: 12px; }
+  .wave-bar:nth-child(5) { animation-delay: 0.4s; height: 18px; }
+  .wave-bar:nth-child(6) { animation-delay: 0.2s; height: 10px; }
+  .wave-bar:nth-child(7) { animation-delay: 0.1s; height: 16px; }
+
+  @keyframes wave {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.4); }
+  }
+
+  /* ---- INSIGHT ROW ---- */
+  .insights-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .insight-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .insight-icon {
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+
+  .insight-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--teal);
+    line-height: 1;
+  }
+
+  .insight-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ======== HEADER ======== -->
+  <header class="header">
+    <div class="header-inner">
+      <a class="brand" href="/">
+        <svg class="brand-mark" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="10" fill="#0A0E1A"/>
+          <rect x="4" y="15" width="12" height="10" rx="3" stroke="#00D4AA" stroke-width="2" fill="none"/>
+          <rect x="24" y="15" width="12" height="10" rx="3" stroke="#F5A623" stroke-width="2" fill="none"/>
+          <line x1="16" y1="20" x2="24" y2="20" stroke="#00D4AA" stroke-width="2"/>
+          <path d="M17 23 L17 17 L23 20 Z" fill="#00D4AA"/>
+        </svg>
+        <div class="brand-text">
+          <h1>Bhrikuty Film Director</h1>
+          <p>Chain Clarity · Topic → 7-Platform Content Package</p>
+        </div>
+      </a>
+
+      <!-- NAV LINKS -->
+      <nav style="display:flex;gap:2px;align-items:center;">
+        <a href="/" style="padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;color:var(--teal);background:var(--teal-dim);text-decoration:none;">Dashboard</a>
+        <a href="/projects" style="padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:all .2s;" onmouseover="this.style.color='var(--teal)'" onmouseout="this.style.color='var(--text-secondary)'">Projects</a>
+        <a href="/brand" style="padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:all .2s;" onmouseover="this.style.color='var(--teal)'" onmouseout="this.style.color='var(--text-secondary)'">Brand</a>
+      </nav>
+
+      <div class="header-status">
+        <div class="phase-pill complete"><span class="dot"></span>Script Gen</div>
+        <div class="phase-pill complete"><span class="dot"></span>TTS</div>
+        <div class="phase-pill in-progress"><span class="dot"></span>Video Render</div>
+        <div class="phase-pill"><span class="dot"></span>Subtitles</div>
+        <div class="phase-pill"><span class="dot"></span>Publish</div>
+        <div class="server-pill offline" id="server-pill" title="Start server: python server.py">○ Server</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======== MAIN ======== -->
+  <main class="main-content">
+
+    <!-- INSIGHT ROW -->
+    <div class="section">
+      <div class="insights-row">
+        <div class="insight-card">
+          <div class="insight-icon">🎬</div>
+          <div class="insight-value">7</div>
+          <div class="insight-label">Pipeline Stages</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-icon">🛠️</div>
+          <div class="insight-value">38</div>
+          <div class="insight-label">Tools Evaluated</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-icon">💰</div>
+          <div class="insight-value">~$0.20</div>
+          <div class="insight-label">Est. Cost/Video (OSS)</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-icon">⚡</div>
+          <div class="insight-value">2</div>
+          <div class="insight-label">Critical Upgrades</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-icon">🌍</div>
+          <div class="insight-value">7</div>
+          <div class="insight-label">Target Platforms</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== EXISTING PROJECTS EXPLORER ======== -->
+    <div class="section" id="section-explorer">
+      <div class="section-header">
+        <h2>Existing Projects</h2>
+        <span class="badge badge-blue" id="explorer-count">Loading...</span>
+        <div id="project-selector-bar" class="explorer-project-bar" style="margin-left:auto;margin-bottom:0;"></div>
+      </div>
+      <div class="explorer-grid" id="explorer-grid">
+        <div class="explorer-offline" id="explorer-offline">
+          <div style="font-size:28px;margin-bottom:8px;">🗂️</div>
+          <strong style="color:var(--text-secondary);">Start the server to browse project files</strong><br>
+          <code style="color:var(--teal);font-size:12px;margin-top:8px;display:inline-block;">python server.py</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== NEW PROJECT PANEL ======== -->
+    <div class="section">
+      <div class="section-header">
+        <h2>New Video Project</h2>
+        <span class="badge badge-teal">Quick Start</span>
+      </div>
+
+      <div class="project-panel">
+        <div class="steps-nav">
+          <button class="step-btn active" onclick="goStep(1)" id="step-btn-1">
+            <span class="step-num">1</span>Topic & Outline
+          </button>
+          <button class="step-btn" onclick="goStep(2)" id="step-btn-2">
+            <span class="step-num">2</span>TTS Engine
+          </button>
+          <button class="step-btn" onclick="goStep(3)" id="step-btn-3">
+            <span class="step-num">3</span>Render Engine
+          </button>
+          <button class="step-btn" onclick="goStep(4)" id="step-btn-4">
+            <span class="step-num">4</span>Platforms
+          </button>
+          <button class="step-btn" onclick="goStep(5)" id="step-btn-5">
+            <span class="step-num">5</span>Generate Command
+          </button>
+        </div>
+
+        <!-- STEP 1 -->
+        <div class="step-panel active" id="step-1">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="form-group">
+              <label>Project Name</label>
+              <input class="form-input" id="inp-project" type="text" value="chain_clarity" placeholder="e.g. chain_clarity" oninput="updateCommand()">
+            </div>
+            <div class="form-group">
+              <label>Phase Number</label>
+              <input class="form-input" id="inp-phase" type="number" value="6" min="1" max="99" placeholder="e.g. 6" oninput="updateCommand()">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>Video Topic</label>
+              <input class="form-input" id="inp-topic" type="text" placeholder="e.g. How Bitcoin Mining Works — A Complete Guide" oninput="updateCommand()">
+            </div>
+            <div class="form-group">
+              <label>Duration (minutes)</label>
+              <input class="form-input" id="inp-duration" type="number" value="12" min="1" max="60" placeholder="12" oninput="updateCommand()">
+            </div>
+            <div class="form-group">
+              <label>Tags (comma-separated)</label>
+              <input class="form-input" id="inp-tags" type="text" value="blockchain,crypto,web3,chainclarity" oninput="updateCommand()">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>Outline / Key Points</label>
+              <textarea class="form-textarea" id="inp-outline" placeholder="1. What is Bitcoin Mining&#10;2. Proof of Work explained&#10;3. Mining hardware overview&#10;4. Economics of mining&#10;5. Future of mining" oninput="updateCommand()"></textarea>
+            </div>
+            <div class="form-group" style="grid-column:1/-1;display:flex;gap:20px;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);font-weight:400;text-transform:none;letter-spacing:0;cursor:pointer;">
+                <input type="checkbox" id="chk-skip-generate" onchange="updateCommand()" style="width:15px;height:15px;accent-color:var(--teal);">
+                Skip content generation (--skip-generate)
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);font-weight:400;text-transform:none;letter-spacing:0;cursor:pointer;">
+                <input type="checkbox" id="chk-skip-voiceover" onchange="updateCommand()" style="width:15px;height:15px;accent-color:var(--teal);">
+                Skip voiceover (--skip-voiceover)
+              </label>
+            </div>
+          </div>
+          <div class="step-actions">
+            <button class="btn btn-primary" onclick="goStep(2)">Next: Choose TTS →</button>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step-panel" id="step-2">
+          <div class="form-group">
+            <label>Text-to-Speech Engine</label>
+            <div class="radio-grid">
+              <div class="radio-option">
+                <input type="radio" name="tts" id="tts-elevenlabs" value="elevenlabs" onchange="updateCommand()">
+                <label class="radio-label" for="tts-elevenlabs">
+                  <div class="radio-label-top">
+                    <span class="radio-name">ElevenLabs</span>
+                    <span class="badge badge-paid">Paid</span>
+                  </div>
+                  <div class="radio-meta">
+                    <span class="quality-stars" id="stars-el"></span>
+                    <span class="radio-cost">~$0.05/1K chars</span>
+                  </div>
+                  <span style="font-size:11px;color:var(--text-muted)">Voice cloning · 32+ languages</span>
+                </label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" name="tts" id="tts-chatterbox" value="chatterbox" checked onchange="updateCommand()">
+                <label class="radio-label" for="tts-chatterbox">
+                  <div class="radio-label-top">
+                    <span class="radio-name">Chatterbox TTS</span>
+                    <span class="badge badge-free">Free</span>
+                  </div>
+                  <div class="radio-meta">
+                    <span class="quality-stars" id="stars-cb"></span>
+                    <span class="radio-cost">Free (MIT)</span>
+                  </div>
+                  <span style="font-size:11px;color:var(--text-muted)">GPU · Emotion control · MIT</span>
+                </label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" name="tts" id="tts-kokoro" value="kokoro" onchange="updateCommand()">
+                <label class="radio-label" for="tts-kokoro">
+                  <div class="radio-label-top">
+                    <span class="radio-name">Kokoro-TTS</span>
+                    <span class="badge badge-free">Free</span>
+                  </div>
+                  <div class="radio-meta">
+                    <span class="quality-stars" id="stars-ko"></span>
+                    <span class="radio-cost">Free (Apache 2.0)</span>
+                  </div>
+                  <span style="font-size:11px;color:var(--text-muted)">CPU-friendly · #1 TTS Arena</span>
+                </label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" name="tts" id="tts-qwen" value="qwen" onchange="updateCommand()">
+                <label class="radio-label" for="tts-qwen">
+                  <div class="radio-label-top">
+                    <span class="radio-name">Qwen3-TTS (current)</span>
+                    <span class="badge badge-freemium">Freemium</span>
+                  </div>
+                  <div class="radio-meta">
+                    <span class="quality-stars" id="stars-qw"></span>
+                    <span class="radio-cost">Pay-per-use</span>
+                  </div>
+                  <span style="font-size:11px;color:var(--text-muted)">DashScope · multilingual</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+            <button class="btn btn-primary" onclick="goStep(3)">Next: Render Engine →</button>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step-panel" id="step-3">
+          <div class="form-group">
+            <label>Video Render Engine</label>
+            <div class="radio-grid">
+              <div class="radio-option">
+                <input type="radio" name="render" id="render-remotion" value="remotion" checked onchange="updateCommand()">
+                <label class="radio-label" for="render-remotion">
+                  <div class="radio-label-top">
+                    <span class="radio-name">Remotion</span>
+                    <span class="badge badge-freemium">Freemium</span>
+                  </div>
+                  <div class="radio-meta">
+                    <span class="quality-stars" id="stars-rm"></span>
+                    <span class="radio-cost">Free ≤3 people</span>
+                  </div>
+                  <span style="font-size:11px;color:var(--text-muted)">React-based · Spring physics</span>
+                </label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" name="render" id="render-moviepy" value="moviepy" onchange="updateCommand()">
+                <label class="radio-label" for="render-moviepy">
+                  <div class="radio-label-top">
+                    <span class="radio-name">MoviePy</span>
+                    <span class="badge badge-free">Free</span>
+                  </div>
+                  <div class="radio-meta">
+                    <span class="quality-stars" id="stars-mp"></span>
+                    <span class="radio-cost">Free (MIT)</span>
+                  </div>
+                  <span style="font-size:11px;color:var(--text-muted)">Python-native · FFmpeg-backed</span>
+                </label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" name="render" id="render-ffmpeg" value="ffmpeg" onchange="updateCommand()">
+                <label class="radio-label" for="render-ffmpeg">
+                  <div class="radio-label-top">
+                    <span class="radio-name">FFmpeg (current)</span>
+                    <span class="badge badge-free">Free</span>
+                  </div>
+                  <div class="radio-meta">
+                    <span class="quality-stars" id="stars-ff"></span>
+                    <span class="radio-cost">Free (LGPL)</span>
+                  </div>
+                  <span style="font-size:11px;color:var(--text-muted)">Current setup · already running</span>
+                </label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" name="render" id="render-creatomate" value="creatomate" onchange="updateCommand()">
+                <label class="radio-label" for="render-creatomate">
+                  <div class="radio-label-top">
+                    <span class="radio-name">Creatomate</span>
+                    <span class="badge badge-paid">Paid</span>
+                  </div>
+                  <div class="radio-meta">
+                    <span class="quality-stars" id="stars-cm"></span>
+                    <span class="radio-cost">~$4.50/video</span>
+                  </div>
+                  <span style="font-size:11px;color:var(--text-muted)">JSON templates · no code</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
+            <button class="btn btn-primary" onclick="goStep(4)">Next: Platforms →</button>
+          </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="step-panel" id="step-4">
+          <div class="form-group">
+            <label>Target Platforms</label>
+            <div class="checkbox-grid">
+              <div class="checkbox-option">
+                <input type="checkbox" id="plat-yt" checked onchange="updateCommand()">
+                <label class="checkbox-label" for="plat-yt"><span class="platform-icon">▶️</span>YouTube</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="plat-tt" onchange="updateCommand()">
+                <label class="checkbox-label" for="plat-tt"><span class="platform-icon">🎵</span>TikTok</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="plat-ig" onchange="updateCommand()">
+                <label class="checkbox-label" for="plat-ig"><span class="platform-icon">📸</span>Instagram</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="plat-tw" onchange="updateCommand()">
+                <label class="checkbox-label" for="plat-tw"><span class="platform-icon">🐦</span>Twitter/X</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="plat-li" onchange="updateCommand()">
+                <label class="checkbox-label" for="plat-li"><span class="platform-icon">💼</span>LinkedIn</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="plat-bl" onchange="updateCommand()">
+                <label class="checkbox-label" for="plat-bl"><span class="platform-icon">✍️</span>Blog</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="plat-gh" onchange="updateCommand()">
+                <label class="checkbox-label" for="plat-gh"><span class="platform-icon">⚙️</span>GitHub</label>
+              </div>
+            </div>
+          </div>
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="goStep(3)">← Back</button>
+            <button class="btn btn-primary" onclick="goStep(5)">Generate Command →</button>
+          </div>
+        </div>
+
+        <!-- STEP 5 -->
+        <div class="step-panel" id="step-5">
+          <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Copy this command to start your video pipeline. Ensure your <code style="color:var(--teal);background:var(--teal-dim);padding:1px 5px;border-radius:3px;">.env</code> file has the required API keys.</p>
+
+          <div class="command-box">
+            <div class="command-header">
+              <span>Terminal Command</span>
+              <button class="copy-btn" onclick="copyCommand()">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H6zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1H2z"/></svg>
+                Copy
+              </button>
+            </div>
+            <div class="command-code" id="generated-command">python pipeline.py \
+  --topic "Enter topic in Step 1" \
+  --tts chatterbox \
+  --render remotion \
+  --platforms youtube</div>
+          </div>
+
+          <div style="margin-top:16px;padding:14px;background:var(--teal-dim);border:1px solid rgba(0,212,170,0.2);border-radius:8px;">
+            <p style="font-size:12px;color:var(--teal);font-weight:600;margin-bottom:6px;">Required Environment Variables</p>
+            <div style="font-family:'Courier New',monospace;font-size:11px;color:var(--text-secondary);line-height:2;">
+              <span id="env-vars">ANTHROPIC_API_KEY=sk-ant-...<br>CHATTERBOX_MODEL_PATH=./models/chatterbox</span>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;padding:12px 14px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;">🖥️</span>
+            <div>
+              <p style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:2px;">Run from Browser</p>
+              <p style="font-size:11px;color:var(--text-secondary);">Start the backend once: <code style="background:var(--bg-card);padding:1px 6px;border-radius:3px;color:var(--teal);">python server.py</code> → then use <strong style="color:var(--gold);">▶ Run on Server</strong> to execute the pipeline and see live output below.</p>
+            </div>
+            <div id="step5-server-indicator" style="margin-left:auto;font-size:11px;font-weight:600;color:var(--text-muted);white-space:nowrap;">○ Server offline</div>
+          </div>
+
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="goStep(4)">← Back</button>
+            <button class="btn btn-secondary" onclick="copyCommand()">📋 Copy Command</button>
+            <button class="btn btn-gold" id="run-server-btn" onclick="runOnServer()">▶ Run on Server</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== TOOL MATRIX TABS ======== -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Tool Matrix</h2>
+        <span class="badge badge-gold">7 Stages · 38 Tools</span>
+      </div>
+
+      <div class="tabs-container">
+        <div class="tabs-scroll" id="matrix-tabs">
+          <button class="tab-btn active" onclick="switchTab('matrix','stage-0',this)"><span class="tab-num">1</span>Script Gen</button>
+          <button class="tab-btn" onclick="switchTab('matrix','stage-1',this)"><span class="tab-num">2</span>TTS / Voice</button>
+          <button class="tab-btn" onclick="switchTab('matrix','stage-2',this)"><span class="tab-num">3</span>Video Render</button>
+          <button class="tab-btn" onclick="switchTab('matrix','stage-3',this)"><span class="tab-num">4</span>Subtitles</button>
+          <button class="tab-btn" onclick="switchTab('matrix','stage-4',this)"><span class="tab-num">5</span>Thumbnails</button>
+          <button class="tab-btn" onclick="switchTab('matrix','stage-5',this)"><span class="tab-num">6</span>Orchestration</button>
+          <button class="tab-btn" onclick="switchTab('matrix','stage-6',this)"><span class="tab-num">7</span>Publishing</button>
+        </div>
+
+        <div id="matrix-stage-0" class="tab-panel active"></div>
+        <div id="matrix-stage-1" class="tab-panel"></div>
+        <div id="matrix-stage-2" class="tab-panel"></div>
+        <div id="matrix-stage-3" class="tab-panel"></div>
+        <div id="matrix-stage-4" class="tab-panel"></div>
+        <div id="matrix-stage-5" class="tab-panel"></div>
+        <div id="matrix-stage-6" class="tab-panel"></div>
+      </div>
+    </div>
+
+    <!-- ======== PHASE PROGRESS ======== -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Phase Progress</h2>
+        <span class="badge badge-blue">Production Status</span>
+      </div>
+
+      <div class="phase-grid">
+        <div class="phase-card">
+          <div class="phase-card-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="phase-number">1</div>
+              <div>
+                <div class="phase-title">Script Generation</div>
+                <div class="phase-desc">Claude API · Educational Scripts</div>
+              </div>
+            </div>
+            <span class="badge badge-teal">Complete</span>
+          </div>
+          <div class="phase-bar"><div class="phase-bar-fill" style="width:100%"></div></div>
+          <div class="phase-stats">
+            <div class="stat-item"><div class="stat-value">12</div><div class="stat-label">Scripts</div></div>
+            <div class="stat-item"><div class="stat-value">100%</div><div class="stat-label">Progress</div></div>
+            <div class="stat-item"><div class="stat-value">$0.87</div><div class="stat-label">API Cost</div></div>
+          </div>
+          <div class="phase-links" style="margin-top:12px;">
+            <button class="link-chip">📄 Scripts Folder</button>
+            <button class="link-chip">⚙️ Config</button>
+          </div>
+        </div>
+
+        <div class="phase-card">
+          <div class="phase-card-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="phase-number">2</div>
+              <div>
+                <div class="phase-title">TTS / Voiceover</div>
+                <div class="phase-desc">Qwen3-TTS · Audio Generation</div>
+              </div>
+            </div>
+            <span class="badge badge-teal">Complete</span>
+          </div>
+          <div class="phase-bar"><div class="phase-bar-fill" style="width:100%"></div></div>
+          <div class="phase-stats">
+            <div class="stat-item"><div class="stat-value">12</div><div class="stat-label">Audio Files</div></div>
+            <div class="stat-item"><div class="stat-value">2.4h</div><div class="stat-label">Total Audio</div></div>
+            <div class="stat-item"><div class="stat-value">MP3</div><div class="stat-label">Format</div></div>
+          </div>
+          <div class="phase-links" style="margin-top:12px;">
+            <button class="link-chip">🎧 Audio Files</button>
+            <button class="link-chip">🔊 Voice Config</button>
+          </div>
+        </div>
+
+        <div class="phase-card">
+          <div class="phase-card-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="phase-number">3</div>
+              <div>
+                <div class="phase-title">Video Rendering</div>
+                <div class="phase-desc">FFmpeg + PIL · In Progress</div>
+              </div>
+            </div>
+            <span class="badge badge-gold">In Progress</span>
+          </div>
+          <div class="phase-bar"><div class="phase-bar-fill" style="width:42%"></div></div>
+          <div class="phase-stats">
+            <div class="stat-item"><div class="stat-value">5</div><div class="stat-label">Rendered</div></div>
+            <div class="stat-item"><div class="stat-value">7</div><div class="stat-label">Remaining</div></div>
+            <div class="stat-item"><div class="stat-value">42%</div><div class="stat-label">Progress</div></div>
+          </div>
+          <div class="phase-links" style="margin-top:12px;">
+            <button class="link-chip">🎬 Output Videos</button>
+            <button class="link-chip">📋 Render Queue</button>
+          </div>
+        </div>
+
+        <div class="phase-card">
+          <div class="phase-card-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="phase-number">4</div>
+              <div>
+                <div class="phase-title">Transcription</div>
+                <div class="phase-desc">Manual SRT · Needs Upgrade</div>
+              </div>
+            </div>
+            <span class="badge badge-red">Pending</span>
+          </div>
+          <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+          <div class="phase-stats">
+            <div class="stat-item"><div class="stat-value">0</div><div class="stat-label">SRT Files</div></div>
+            <div class="stat-item"><div class="stat-value">12</div><div class="stat-label">Needed</div></div>
+            <div class="stat-item"><div class="stat-value">—</div><div class="stat-label">Tool Set</div></div>
+          </div>
+          <div class="phase-links" style="margin-top:12px;">
+            <button class="link-chip" onclick="showToast('Upgrade to WhisperX — see Tool Matrix Tab 4')">⚡ Upgrade Now</button>
+          </div>
+        </div>
+
+        <div class="phase-card">
+          <div class="phase-card-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="phase-number">5</div>
+              <div>
+                <div class="phase-title">Publishing</div>
+                <div class="phase-desc">Manual Upload · Needs Automation</div>
+              </div>
+            </div>
+            <span class="badge badge-red">Pending</span>
+          </div>
+          <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+          <div class="phase-stats">
+            <div class="stat-item"><div class="stat-value">0</div><div class="stat-label">Published</div></div>
+            <div class="stat-item"><div class="stat-value">5</div><div class="stat-label">Ready</div></div>
+            <div class="stat-item"><div class="stat-value">—</div><div class="stat-label">Scheduled</div></div>
+          </div>
+          <div class="phase-links" style="margin-top:12px;">
+            <button class="link-chip" onclick="showToast('Set up YouTube Data API v3 — see Stage 7')">⚡ Automate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== OUTPUT PREVIEW ======== -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Platform Output Preview</h2>
+        <span class="badge badge-purple">7 Formats</span>
+      </div>
+
+      <div class="output-grid">
+        <div class="output-card" onclick="showOutputModal('youtube')">
+          <div class="output-preview-area yt">
+            ▶️
+            <div class="output-status-dot"></div>
+          </div>
+          <div class="output-card-info">
+            <div class="output-platform">YouTube</div>
+            <div class="output-specs">1920×1080 · MP4 · SRT captions · Thumbnail 1280×720</div>
+          </div>
+        </div>
+
+        <div class="output-card" onclick="showOutputModal('tiktok')">
+          <div class="output-preview-area tt">🎵</div>
+          <div class="output-card-info">
+            <div class="output-platform">TikTok</div>
+            <div class="output-specs">1080×1920 · 60s clip · Vertical · Auto-captions</div>
+          </div>
+        </div>
+
+        <div class="output-card" onclick="showOutputModal('instagram')">
+          <div class="output-preview-area ig">📸</div>
+          <div class="output-card-info">
+            <div class="output-platform">Instagram</div>
+            <div class="output-specs">1080×1080 Reel · Story 1080×1920 · Carousel</div>
+          </div>
+        </div>
+
+        <div class="output-card" onclick="showOutputModal('twitter')">
+          <div class="output-preview-area tw">🐦</div>
+          <div class="output-card-info">
+            <div class="output-platform">Twitter/X</div>
+            <div class="output-specs">1280×720 · 2:20 clip · Thread text · Thumbnail</div>
+          </div>
+        </div>
+
+        <div class="output-card" onclick="showOutputModal('linkedin')">
+          <div class="output-preview-area li">💼</div>
+          <div class="output-card-info">
+            <div class="output-platform">LinkedIn</div>
+            <div class="output-specs">1920×1080 · Native video · Article version</div>
+          </div>
+        </div>
+
+        <div class="output-card" onclick="showOutputModal('blog')">
+          <div class="output-preview-area bl">✍️</div>
+          <div class="output-card-info">
+            <div class="output-platform">Blog</div>
+            <div class="output-specs">Markdown · Transcript · Infographic images</div>
+          </div>
+        </div>
+
+        <div class="output-card" onclick="showOutputModal('github')">
+          <div class="output-preview-area gh">⚙️</div>
+          <div class="output-card-info">
+            <div class="output-platform">GitHub</div>
+            <div class="output-specs">README · Code samples · Notebook · Resources</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== TTS COMPARISON ======== -->
+    <div class="section">
+      <div class="section-header">
+        <h2>TTS Engine Comparison</h2>
+        <span class="badge badge-green">6 Engines Reviewed</span>
+        <div class="waveform" style="margin-left:auto;">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+      </div>
+
+      <div class="tts-grid" id="tts-grid"></div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    Bhrikuty Film Director · Chain Clarity Pipeline Dashboard · Built for <strong style="color:var(--teal)">ashma@beamlab.dev</strong> · 2026-06-02
+  </footer>
+</div>
+
+<!-- ======== PHASE VIEWER MODAL ======== -->
+<div class="pv-overlay" id="pv-overlay" onclick="pvOverlayClick(event)">
+  <div class="pv-modal" id="pv-modal">
+
+    <!-- header -->
+    <div class="pv-header">
+      <div class="pv-header-left">
+        <div class="pv-header-title" id="pv-title">Phase</div>
+        <div class="pv-header-meta" id="pv-meta"></div>
+      </div>
+      <div id="pv-badges" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"></div>
+      <button class="btn btn-gold" id="pv-run-btn" onclick="" style="font-size:12px;padding:7px 14px;">▶ Run This Phase</button>
+      <button class="pv-close-btn" onclick="closePhaseViewer()">✕</button>
+    </div>
+
+    <!-- tag row -->
+    <div class="pv-tag-row" id="pv-tag-row" style="display:none;"></div>
+
+    <!-- body: sidebar + content -->
+    <div class="pv-body">
+      <div class="pv-sidebar" id="pv-sidebar">
+        <div class="pv-sidebar-section">Source Files</div>
+        <!-- populated by JS -->
+      </div>
+      <div class="pv-content-area">
+        <div class="pv-content-topbar" id="pv-content-topbar">
+          <span class="pv-content-filename" id="pv-filename">Select a file</span>
+          <span class="pv-content-size" id="pv-filesize"></span>
+          <button class="pv-copy-btn" id="pv-copy-btn" onclick="pvCopyContent()" style="display:none;">📋 Copy</button>
+        </div>
+        <div class="pv-file-display" id="pv-display">
+          <div class="pv-placeholder">← Select a file from the sidebar to view its contents</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======== TERMINAL DRAWER ======== -->
+<div class="terminal-drawer" id="terminal-drawer">
+  <div class="terminal-topbar">
+    <div class="terminal-dots">
+      <div class="terminal-dot" style="background:#FF5F57;cursor:pointer;" onclick="closeTerminal()" title="Close"></div>
+      <div class="terminal-dot" style="background:#FEBC2E;"></div>
+      <div class="terminal-dot" style="background:#28C840;"></div>
+    </div>
+    <span class="terminal-title">Pipeline Terminal</span>
+    <span class="terminal-badge" id="terminal-badge">READY</span>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <button class="terminal-close-btn" onclick="clearTerminal()">🗑 Clear</button>
+      <button class="terminal-close-btn" onclick="closeTerminal()">✕ Close</button>
+    </div>
+  </div>
+  <div class="terminal-body" id="terminal-body">
+    <span class="t-dim">Pipeline output will appear here. Start the server first: </span><span class="t-teal">python server.py</span><span class="t-dim"> → then click ▶ Run on Server.</span>
+  </div>
+</div>
+
+<!-- ======== MODAL ======== -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/></svg>
+  <span id="toast-msg">Copied!</span>
+</div>
+
+<script>
+// ======== DATA ========
+const toolData = [
+  {
+    stage_num: 1,
+    stage_name: "Script Generation",
+    upgrade_priority: "low",
+    tools: [
+      {
+        name: "Claude API (claude-sonnet-4-6)",
+        type: "paid",
+        cost: "~$0.05–$0.10 per 12-min script",
+        quality: 9.5,
+        install_cmd: "pip install anthropic",
+        why_choose: "Best reasoning + instruction-following for structured educational scripts. Already integrated. Handles technical accuracy for blockchain topics. Supports system prompts for consistent brand voice.",
+        output_sample_desc: "Structured script with hook, 8–10 sections with timestamps, narration prose at ~150 wpm, transition cues, B-roll suggestions in [brackets], and CTA outro.",
+        recommended: true
+      }
+    ]
+  },
+  {
+    stage_num: 2,
+    stage_name: "TTS / Voiceover",
+    upgrade_priority: "high",
+    tools: [
+      { name: "ElevenLabs", type: "paid", cost: "Free 10k chars/mo. Starter $5/mo. Creator $22/mo.", quality: 9.5, install_cmd: "pip install elevenlabs", why_choose: "Industry gold standard. Lowest latency (75ms Flash model). 32+ languages. Voice cloning on Creator plan.", output_sample_desc: "24kHz MP3 with near-human prosody, natural pauses, correct stress on technical terms, consistent ~150 wpm pacing.", recommended: true },
+      { name: "Chatterbox TTS", type: "free", cost: "Free (MIT). One-time model download ~2GB.", quality: 9.0, install_cmd: "pip install chatterbox-tts torch torchaudio", why_choose: "Best open-source voice cloning. MIT commercial license. Emotion exaggeration control unique among open models.", output_sample_desc: "23kHz WAV with zero-shot voice cloning from 5-sec reference. Emotion exaggeration parameter adds natural emphasis.", recommended: false },
+      { name: "Kokoro-TTS", type: "free", cost: "Free (Apache 2.0). CPU-capable.", quality: 8.8, install_cmd: "pip install kokoro soundfile", why_choose: "#1 on TTS Arena leaderboard (Jan 2026). Best CPU option. Apache 2.0 commercial license.", output_sample_desc: "24kHz WAV at 36x real-time on GPU. Clean English narration with natural US/UK accent options.", recommended: false },
+      { name: "Qwen3-TTS (current)", type: "freemium", cost: "DashScope API: pay-per-use.", quality: 8.7, install_cmd: "pip install dashscope", why_choose: "Current baseline. Best for Chinese/multilingual content. Local open weights (1.7B) offer a free path.", output_sample_desc: "Streaming MP3 with 10 language support. Strong on Chinese/Japanese content.", recommended: false },
+      { name: "F5-TTS", type: "free", cost: "Free (MIT). Requires GPU.", quality: 8.2, install_cmd: "pip install f5-tts", why_choose: "Good backup if Chatterbox has GPU memory issues. MIT commercial-safe. Strong EN/ZH bilingual support.", output_sample_desc: "16kHz WAV at 7x real-time. Zero-shot clone from 5–10 sec reference. Good EN/ZH fidelity.", recommended: false },
+      { name: "XTTS-v2", type: "free", cost: "Free for non-commercial. Commercial requires agreement.", quality: 8.0, install_cmd: "pip install TTS", why_choose: "Best multilingual voice cloning breadth (17 languages). Use for localization across many languages.", output_sample_desc: "24kHz WAV with voice cloning from 6-second reference. 17-language support.", recommended: false }
+    ]
+  },
+  {
+    stage_num: 3,
+    stage_name: "Video Rendering",
+    upgrade_priority: "critical",
+    tools: [
+      { name: "Remotion", type: "freemium", cost: "Free ≤3 people. Company $100/mo.", quality: 9.0, install_cmd: "npx create-video@latest my-blockchain-video", why_choose: "Best for programmatic video production at scale. Once React template is built, new videos need only changed script props. Lambda renders fast.", output_sample_desc: "1080p MP4 with React-component-driven animated text, SVG chain diagrams, synchronized TTS, dynamic progress bar, smooth scene transitions.", recommended: true },
+      { name: "MoviePy", type: "free", cost: "Free (MIT). Python wrapping FFmpeg.", quality: 7.8, install_cmd: "pip install moviepy", why_choose: "Best immediate upgrade from FFmpeg+PIL within Python ecosystem. Lower learning curve than Remotion.", output_sample_desc: "Python-scripted compositing of TTS audio, PNG assets, text overlays. 1080p MP4 output.", recommended: false },
+      { name: "FFmpeg (current)", type: "free", cost: "Free (LGPL). Zero ongoing cost.", quality: 7.5, install_cmd: "winget install ffmpeg", why_choose: "Keep as base layer for transcoding, audio normalization, format conversion. Use Remotion/MoviePy on top.", output_sample_desc: "1080p MP4 using drawtext, overlay, fade transitions, audio normalization. Technically correct but visually static.", recommended: false },
+      { name: "Runway Gen-4", type: "paid", cost: "API: $0.05/sec. 20×5s B-roll clips = $5.", quality: 9.5, install_cmd: "pip install requests  # REST API", why_choose: "Eliminates stock footage licensing. Unique branded B-roll generated on-demand. Gen-4 Turbo maintains scene consistency.", output_sample_desc: "20 cinematic 5-second AI-generated clips — blockchain nodes glowing, futuristic server rooms, digital currency flowing.", recommended: false },
+      { name: "Creatomate", type: "paid", cost: "~$0.38/min. 12-min video ≈ $4.50.", quality: 8.5, install_cmd: "pip install requests  # REST API", why_choose: "Lowest-effort path to consistent video branding. JSON template means pipeline only needs text+audio variables.", output_sample_desc: "Fully rendered 1080p MP4 from JSON template — pre-designed blockchain education layout with animated lower thirds.", recommended: false },
+      { name: "Motion Canvas", type: "free", cost: "Free (MIT).", quality: 9.0, install_cmd: "npm create motion-canvas@latest my-animation", why_choose: "Best for signature explainer animations. 3Blue1Brown-quality mathematical animation style. Not for full video assembly.", output_sample_desc: "Hand-crafted animated sequences — blockchain built block-by-block, hash function visualization, consensus mechanism voting.", recommended: false }
+    ]
+  },
+  {
+    stage_num: 4,
+    stage_name: "Transcription / Subtitles",
+    upgrade_priority: "critical",
+    tools: [
+      { name: "WhisperX", type: "free", cost: "Free (BSD-4). HuggingFace token for diarization.", quality: 9.0, install_cmd: "pip install whisperx && pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118", why_choose: "Best open-source subtitle generation. Word-level timestamps enable animated karaoke captions. Diarization separates host/guest voices.", output_sample_desc: "SRT with 180–220 entries, word-level timestamps accurate to ±20ms. Speaker labels. Blockchain terms transcribed accurately.", recommended: true },
+      { name: "faster-whisper", type: "free", cost: "Free (MIT). CPU-capable.", quality: 8.8, install_cmd: "pip install faster-whisper", why_choose: "Easiest drop-in for manual SRT replacement. No GPU required for basic use. Backbone of WhisperX.", output_sample_desc: "SRT file same accuracy as Whisper large-v3-turbo. CPU: ~5–8 min for 12-min audio. GPU: ~1–2 min.", recommended: false },
+      { name: "Whisper.cpp", type: "free", cost: "Free (MIT). Runs on Apple Silicon, CPU, CUDA.", quality: 8.7, install_cmd: "git clone https://github.com/ggerganov/whisper.cpp && cd whisper.cpp && make", why_choose: "Best for Mac/Apple Silicon workflows. No Python dependency. Sub-90-second transcription for 12-min video.", output_sample_desc: "SRT generated in ~36–72 seconds on M2 MacBook. Identical accuracy to large-v3-turbo. Word timestamps via DTW.", recommended: false },
+      { name: "Gladia (Solaria-1)", type: "paid", cost: "Free 10hr/mo. Growth $0.20/hr. 12-min = $0.04.", quality: 9.0, install_cmd: "pip install requests", why_choose: "Best value paid option — diarization, NER, sentiment, and 100+ language translation bundled at $0.20/hr.", output_sample_desc: "SRT + JSON with word timestamps, speaker labels, entity detection, sentiment, auto-translation to 100+ languages.", recommended: false },
+      { name: "Deepgram Nova-3", type: "paid", cost: "$0.0077/min PAYG. 12-min ≈ $0.09.", quality: 9.0, install_cmd: "pip install deepgram-sdk", why_choose: "Lowest latency cloud transcription. Nova-3 handles blockchain technical vocabulary excellently. Best for live streaming.", output_sample_desc: "SRT returned in ~8–15 seconds. Word-level timestamps, speaker diarization, automatic punctuation.", recommended: false },
+      { name: "AssemblyAI Universal-2", type: "paid", cost: "$0.0025/min. 12-min = $0.03. Cheapest paid.", quality: 8.8, install_cmd: "pip install assemblyai", why_choose: "Cheapest paid cloud ($0.03/video) with most AI features. Auto-chapters automatically generate YouTube chapter timestamps.", output_sample_desc: "SRT + JSON with auto-detected chapters, speaker labels, sentiment, PII redaction. 21% better alphanumeric accuracy.", recommended: false }
+    ]
+  },
+  {
+    stage_num: 5,
+    stage_name: "Thumbnails / Images",
+    upgrade_priority: "high",
+    tools: [
+      { name: "FLUX.1 [schnell] (ComfyUI)", type: "free", cost: "Free (Apache 2.0). One-time model ~23GB.", quality: 9.2, install_cmd: "git clone https://github.com/comfyanonymous/ComfyUI && pip install -r requirements.txt", why_choose: "Best open-source thumbnail generator. Superior text rendering vs all SD models. Zero per-image cost after setup.", output_sample_desc: "1280x720 JPEG with photorealistic split scene, dramatic rim lighting, sharp legible text. Generated in ~8s on RTX 3090.", recommended: true },
+      { name: "Ideogram v2", type: "paid", cost: "Free 10/day. API ~$0.08/image.", quality: 8.8, install_cmd: "pip install requests", why_choose: "Best-in-class text rendering. Only model that reliably renders multi-word text legibly in images.", output_sample_desc: "1280x720 thumbnail with perfectly rendered 'BLOCKCHAIN EXPLAINED IN 12 MINUTES' in bold red — no smudging.", recommended: false },
+      { name: "FLUX.1 [pro] via BFL API", type: "paid", cost: "~$0.055/image. No GPU required.", quality: 9.2, install_cmd: "pip install requests", why_choose: "Same quality as local FLUX.1 schnell via cloud API — eliminates GPU requirement.", output_sample_desc: "Photorealistic blockchain visualization with readable bold text. 28-step inference for maximum quality.", recommended: false },
+      { name: "Midjourney v6.1", type: "paid", cost: "Basic $10/mo (200 gen). Standard $30/mo.", quality: 9.5, install_cmd: "N/A — Discord bot or web UI only", why_choose: "Highest raw aesthetic quality. Use for hero images where visual impact > text legibility. Add text in Canva post.", output_sample_desc: "Cinematic editorial-quality blockchain network in deep space with volumetric light shafts. Style references lock brand.", recommended: false },
+      { name: "Recraft v3", type: "paid", cost: "Free 50 credits/day. Starter $12/mo.", quality: 8.6, install_cmd: "pip install requests", why_choose: "Only tool with native SVG output. Best for diagram-heavy educational thumbnails. Topped HuggingFace leaderboard.", output_sample_desc: "Flat vector infographic thumbnail — bold colorful node diagram, modern tech illustration, crisp SVG-quality lines.", recommended: false },
+      { name: "DALL-E 3", type: "paid", cost: "$0.040/image standard. $0.080 HD 1792x1024.", quality: 8.5, install_cmd: "pip install openai", why_choose: "Best if already using OpenAI API. Integrated GPT-4 → DALL-E 3 pipeline generates thumbnail from script automatically.", output_sample_desc: "1792x1024 HD thumbnail. Strong prompt adherence. Decent text rendering. Good for concept art thumbnails.", recommended: false },
+      { name: "Adobe Firefly 3", type: "paid", cost: "CC plan 500 credits/mo. API $0.01–$0.04/image.", quality: 8.2, install_cmd: "pip install requests  # OAuth2 flow required", why_choose: "Only enterprise-safe option with IP indemnification. Legally defensible for monetized content at scale.", output_sample_desc: "Commercially safe 1280x720 thumbnails. Structure Reference enables consistent composition across Bhrikuty brand.", recommended: false }
+    ]
+  },
+  {
+    stage_num: 6,
+    stage_name: "Workflow Orchestration",
+    upgrade_priority: "medium",
+    tools: [
+      { name: "n8n (self-hosted)", type: "free", cost: "Free self-hosted. VPS ~$5–20/mo.", quality: 9.0, install_cmd: "npx n8n", why_choose: "Best immediate upgrade from pipeline.py. Visual canvas, 400+ integrations, parallel execution, AI Agent node.", output_sample_desc: "12-node visual workflow: Webhook → Claude → ElevenLabs → Remotion → WhisperX → FLUX.1 → YouTube → Slack.", recommended: true },
+      { name: "Dify (self-hosted)", type: "free", cost: "Free (Apache 2.0). Docker deployment.", quality: 9.0, install_cmd: "git clone https://github.com/langgenius/dify && cd dify/docker && docker compose up -d", why_choose: "Best visual AI pipeline builder for LLM-heavy workflows. Built-in RAG for blockchain knowledge base. Cost observability.", output_sample_desc: "Dify workflow with LLM nodes, HTTP nodes, code nodes, conditional branches, and built-in RAG fact-checking.", recommended: false },
+      { name: "CrewAI", type: "free", cost: "Free (MIT). Python library.", quality: 8.5, install_cmd: "pip install crewai", why_choose: "Best for role-based AI agents. Natural Python extension. ResearchAgent gathers blockchain news automatically.", output_sample_desc: "5-agent crew: ResearchAgent → ScriptAgent → ReviewAgent → ProductionAgent → PublishAgent.", recommended: false },
+      { name: "Prefect", type: "freemium", cost: "Free core (Apache 2.0). Cloud from $19.99/mo.", quality: 8.0, install_cmd: "pip install prefect", why_choose: "Best for Python-native teams wanting production reliability. Auto-retry with backoff. Caching avoids re-processing.", output_sample_desc: "Decorated Python tasks with retries, caching, parallel maps. UI shows flow history, durations, failure rates.", recommended: false },
+      { name: "Temporal", type: "freemium", cost: "Free self-hosted MIT SDK. Cloud: consumption-based.", quality: 8.5, install_cmd: "docker run --rm -p 7233:7233 temporalio/auto-setup:latest", why_choose: "Best for production reliability. If render crashes mid-way, Temporal resumes from last checkpoint. Essential for GPU workloads.", output_sample_desc: "Durable workflow where each Activity has automatic retry, timeout, heartbeat. Human approval gate before publishing.", recommended: false },
+      { name: "pipeline.py (enhanced)", type: "free", cost: "Free. Zero infrastructure overhead.", quality: 7.5, install_cmd: "pip install tenacity structlog pydantic", why_choose: "Lowest migration cost. Add asyncio parallelism and retry logic in ~2 hours. Sufficient for 1–10 videos/week.", output_sample_desc: "Enhanced Python with asyncio.gather(), tenacity retries, structlog JSON logging, Pydantic models, SQLite run log.", recommended: false }
+    ]
+  },
+  {
+    stage_num: 7,
+    stage_name: "Platform Publishing",
+    upgrade_priority: "high",
+    tools: [
+      { name: "YouTube Data API v3 (Python)", type: "free", cost: "Free. 10,000 units/day quota (~6 uploads/day).", quality: 9.0, install_cmd: "pip install google-api-python-client google-auth-oauthlib google-auth-httplib2", why_choose: "Direct, free API with full control over all metadata. Subtitle upload via captions.insert(). Schedule via publishAt.", output_sample_desc: "Automated upload sets title, description, tags, category, thumbnail, SRT subtitles, and scheduled publish time.", recommended: true },
+      { name: "n8n YouTube Node", type: "freemium", cost: "Free self-hosted. YouTube node included.", quality: 8.5, install_cmd: "npx n8n  # YouTube node built-in", why_choose: "If n8n chosen for orchestration, YouTube node is the natural publishing step. Combines pipeline + publishing.", output_sample_desc: "n8n node uploads video, sets metadata, attaches thumbnail, uploads SRT, posts to Twitter/LinkedIn simultaneously.", recommended: false },
+      { name: "Metricool", type: "paid", cost: "Starter ~$22/mo. Advanced ~$59/mo.", quality: 8.0, install_cmd: "pip install requests  # REST API", why_choose: "Best for multi-platform publishing strategy. Optimal posting time recommendations increase early engagement.", output_sample_desc: "Scheduled publishing to YouTube + Twitter + LinkedIn + TikTok from one API call. Analytics across all platforms.", recommended: false }
+    ]
+  }
+];
+
+// TTS DETAILED DATA
+const ttsData = [
+  { name: "ElevenLabs", type: "paid", costPer1k: "$0.50", quality: 9.5, cloning: true, install: "pip install elevenlabs", sample: "Near-human prosody with natural pauses at punctuation. Correct stress on 'decentralization', 'smart contracts'. Zero robotic artifacts. 75ms Flash latency.", top: true },
+  { name: "Chatterbox TTS", type: "free", costPer1k: "Free", quality: 9.0, cloning: true, install: "pip install chatterbox-tts torch torchaudio", sample: "Zero-shot voice cloning from 5-sec reference clip. Emotion exaggeration (0.5 default) adds emphasis. Embeds imperceptible Perth watermark. Beats ElevenLabs in 63.75% blind tests.", top: false },
+  { name: "Kokoro-TTS", type: "free", costPer1k: "Free", quality: 8.8, cloning: false, install: "pip install kokoro soundfile", sample: "#1 TTS Arena leaderboard Jan 2026. 36x real-time on GPU. af_heart voice is warm and clear, ideal for educational content. CPU-friendly.", top: false },
+  { name: "Qwen3-TTS", type: "freemium", costPer1k: "Varies", quality: 8.7, cloning: true, install: "pip install dashscope", sample: "Streaming MP3 output with 10 language support. Strong on Chinese/Japanese. Voice cloning via qwen3-tts-vc variant. Current pipeline baseline.", top: false },
+  { name: "F5-TTS", type: "free", costPer1k: "Free", quality: 8.2, cloning: true, install: "pip install f5-tts", sample: "16kHz WAV at 7x real-time. Zero-shot clone from 5–10 sec reference. Flow-matching architecture. Strong EN/ZH bilingual support.", top: false },
+  { name: "XTTS-v2", type: "free", costPer1k: "Free*", quality: 8.0, cloning: true, install: "pip install TTS", sample: "24kHz WAV with voice cloning from 6-second reference. 17-language support. Non-commercial license — verify before monetizing YouTube content.", top: false }
+];
+
+// ======== STARS ========
+function starsHTML(score, size = 12) {
+  const full = Math.floor(score / 2);
+  const half = (score / 2 - full) >= 0.5 ? 1 : 0;
+  const empty = 5 - full - half;
+  let html = '<span style="display:flex;gap:2px;align-items:center;">';
+  for (let i = 0; i < full; i++) html += `<svg width="${size}" height="${size}" viewBox="0 0 16 16" fill="#F5A623"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>`;
+  for (let i = 0; i < half; i++) html += `<svg width="${size}" height="${size}" viewBox="0 0 16 16"><defs><linearGradient id="hg"><stop offset="50%" stop-color="#F5A623"/><stop offset="50%" stop-color="#1E2A42"/></linearGradient></defs><path fill="url(#hg)" d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>`;
+  for (let i = 0; i < empty; i++) html += `<svg width="${size}" height="${size}" viewBox="0 0 16 16" fill="#1E2A42"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>`;
+  return html + '</span>';
+}
+
+// ======== BADGE HTML ========
+function typeBadge(type) {
+  const map = { free: 'badge-free', paid: 'badge-paid', freemium: 'badge-freemium' };
+  const labels = { free: 'Open Source', paid: 'Paid', freemium: 'Freemium' };
+  return `<span class="badge ${map[type] || 'badge-blue'}">${labels[type] || type}</span>`;
+}
+
+function upgradeBadge(priority) {
+  const map = { critical: 'upgrade-critical', high: 'upgrade-high', medium: 'upgrade-medium', low: 'upgrade-low' };
+  const icons = { critical: '🔴', high: '🟠', medium: '🔵', low: '⚪' };
+  return `<span class="upgrade-badge ${map[priority] || 'upgrade-low'}">${icons[priority] || ''} ${priority.toUpperCase()}</span>`;
+}
+
+// ======== RENDER TOOL MATRIX ========
+function renderMatrix() {
+  toolData.forEach((stage, idx) => {
+    const panel = document.getElementById(`matrix-stage-${idx}`);
+    if (!panel) return;
+
+    let html = `<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;">
+      <div style="font-size:22px;">${['📝','🎙️','🎬','💬','🖼️','⚙️','📤'][idx]}</div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text-primary);font-family:'Space Grotesk',sans-serif;">Stage ${stage.stage_num}: ${stage.stage_name}</div>
+      </div>
+      <div style="margin-left:auto;">${upgradeBadge(stage.upgrade_priority)}</div>
+    </div>`;
+
+    html += '<div class="tools-grid">';
+    stage.tools.forEach(tool => {
+      const scoreStr = (tool.quality / 10 * 5).toFixed(1);
+      html += `<div class="tool-card${tool.recommended ? ' recommended' : ''}">
+        <div class="tool-card-header">
+          <div class="tool-name">${tool.name}</div>
+        </div>
+        <div class="tool-badges">
+          ${typeBadge(tool.type)}
+          <span style="font-size:12px;color:var(--text-secondary);">${tool.quality}/10</span>
+          ${starsHTML(tool.quality)}
+        </div>
+        <div class="tool-cost">💰 ${tool.cost}</div>
+        <div class="tool-description">${tool.why_choose}</div>
+        <div class="install-preview">$ ${tool.install_cmd}</div>
+        <button class="try-btn" onclick='showInstallModal(${JSON.stringify(tool)})'>⚡ Try This Tool</button>
+      </div>`;
+    });
+    html += '</div>';
+    panel.innerHTML = html;
+  });
+}
+
+// ======== RENDER TTS GRID ========
+function renderTTS() {
+  const grid = document.getElementById('tts-grid');
+  let html = '';
+  ttsData.forEach(t => {
+    html += `<div class="tts-card${t.top ? ' tts-top' : ''}">
+      <div class="tts-header">
+        <div>
+          <div class="tts-name">${t.name}</div>
+          <div style="margin-top:4px;">${typeBadge(t.type)}</div>
+        </div>
+        ${t.top ? '<span class="badge badge-teal">★ Top Pick</span>' : ''}
+      </div>
+
+      <div class="tts-attr"><span class="tts-attr-label">Quality</span>${starsHTML(t.quality)} <span style="font-size:12px;color:var(--text-secondary);margin-left:4px;">${t.quality}/10</span></div>
+      <div class="tts-attr"><span class="tts-attr-label">Cost/1K chars</span><span style="font-size:13px;color:var(--text-primary);">${t.costPer1k}</span></div>
+      <div class="tts-attr"><span class="tts-attr-label">Voice Cloning</span><span class="clone-badge ${t.cloning ? 'clone-yes' : 'clone-no'}">${t.cloning ? 'Yes' : 'No'}</span></div>
+
+      <div class="sample-box">${t.sample}</div>
+
+      <div class="install-preview">$ ${t.install}</div>
+      <button class="try-btn" onclick="copyText('${t.install}')">📋 Copy Install Command</button>
+    </div>`;
+  });
+  grid.innerHTML = html;
+}
+
+// ======== RENDER STEP STARS ========
+function renderStepStars() {
+  const pairs = [
+    ['stars-el', 9.5], ['stars-cb', 9.0], ['stars-ko', 8.8], ['stars-qw', 8.7],
+    ['stars-rm', 9.0], ['stars-mp', 7.8], ['stars-ff', 7.5], ['stars-cm', 8.5]
+  ];
+  pairs.forEach(([id, score]) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = starsHTML(score, 10);
+  });
+}
+
+// ======== TABS ========
+function switchTab(group, id, btn) {
+  document.querySelectorAll(`#${group}-tabs .tab-btn`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll(`[id^="${group}-"]`).forEach(p => {
+    if (p.classList.contains('tab-panel')) p.classList.remove('active');
+  });
+  const panel = document.getElementById(`${group}-${id}`);
+  if (panel) panel.classList.add('active');
+}
+
+// ======== STEPS ========
+let currentStep = 1;
+function goStep(n) {
+  // Mark previous steps as done
+  for (let i = 1; i < n; i++) {
+    const b = document.getElementById(`step-btn-${i}`);
+    if (b) { b.classList.remove('active'); b.classList.add('done'); b.querySelector('.step-num').textContent = '✓'; }
+  }
+  // Active step
+  const activeBtn = document.getElementById(`step-btn-${n}`);
+  if (activeBtn) { activeBtn.classList.add('active'); activeBtn.classList.remove('done'); activeBtn.querySelector('.step-num').textContent = n; }
+  // Future steps
+  for (let i = n + 1; i <= 5; i++) {
+    const b = document.getElementById(`step-btn-${i}`);
+    if (b) { b.classList.remove('active', 'done'); b.querySelector('.step-num').textContent = i; }
+  }
+  // Panels
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById(`step-${n}`);
+  if (panel) panel.classList.add('active');
+  currentStep = n;
+  if (n === 5) updateCommand();
+}
+
+// ======== COMMAND GENERATOR ========
+function updateCommand() {
+  const project  = (document.getElementById('inp-project')?.value  || 'chain_clarity').trim();
+  const phase    = document.getElementById('inp-phase')?.value    || '6';
+  const topic    = (document.getElementById('inp-topic')?.value   || '').trim();
+  const outline  = (document.getElementById('inp-outline')?.value || '').trim();
+  const duration = parseInt(document.getElementById('inp-duration')?.value) || 12;
+  const tags     = (document.getElementById('inp-tags')?.value    || '').trim();
+  const skipGen  = document.getElementById('chk-skip-generate')?.checked;
+  const skipVO   = document.getElementById('chk-skip-voiceover')?.checked;
+
+  const topicSafe   = (topic   || 'Your Topic Here').replace(/"/g, '\\"');
+  const outlineSafe = outline.replace(/"/g, '\\"').replace(/\n+/g, ', ');
+
+  let lines = [`python pipeline.py \\`, `  --project ${project} \\`, `  --phase ${phase}`];
+  if (topic)   lines.push(`  --topic "${topicSafe}" \\`);
+  if (outline) lines.push(`  --outline "${outlineSafe}" \\`);
+  if (duration !== 12) lines.push(`  --duration ${duration} \\`);
+  if (tags && tags !== 'blockchain,crypto,web3,chainclarity') lines.push(`  --tags "${tags}" \\`);
+  if (skipGen) lines.push(`  --skip-generate \\`);
+  if (skipVO)  lines.push(`  --skip-voiceover \\`);
+
+  // Fix trailing backslash on last real line
+  const cmd = lines.map((l, i) => {
+    const isLast = i === lines.length - 1;
+    return isLast ? l.replace(/ \\$/, '') : l;
+  }).join('\n');
+
+  const cmdEl = document.getElementById('generated-command');
+  if (cmdEl) cmdEl.textContent = cmd;
+
+  // Env vars keyed by TTS selection
+  const tts = document.querySelector('input[name="tts"]:checked')?.value || 'chatterbox';
+  const envMap = {
+    elevenlabs: 'ANTHROPIC_API_KEY=sk-ant-...\nELEVENLABS_API_KEY=sk-...',
+    chatterbox: 'ANTHROPIC_API_KEY=sk-ant-...\n# optional: CHATTERBOX_MODEL_PATH=./models/chatterbox',
+    kokoro:     'ANTHROPIC_API_KEY=sk-ant-...\n# optional: KOKORO_VOICE=af_heart',
+    qwen:       'ANTHROPIC_API_KEY=sk-ant-...\nDASHSCOPE_API_KEY=sk-...'
+  };
+  const envEl = document.getElementById('env-vars');
+  if (envEl) envEl.innerHTML = (envMap[tts] || envMap.chatterbox).replace(/\n/g, '<br>');
+}
+
+// ======== COPY ========
+function copyText(text) {
+  navigator.clipboard.writeText(text).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  showToast('Copied to clipboard!');
+}
+
+function copyCommand() {
+  const cmd = document.getElementById('generated-command')?.textContent || '';
+  copyText(cmd);
+}
+
+// ======== TOAST ========
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+// ======== MODALS ========
+function showInstallModal(tool) {
+  document.getElementById('modal-body').innerHTML = `
+    <h2 class="modal-title">${tool.name}</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      ${typeBadge(tool.type)}
+      <span style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">${starsHTML(tool.quality)} ${tool.quality}/10</span>
+    </div>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.7;">${tool.why_choose}</p>
+    <div style="background:#06090F;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px;">
+      <p style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Sample Output</p>
+      <p style="font-size:12px;color:var(--text-secondary);line-height:1.7;">${tool.output_sample_desc}</p>
+    </div>
+    <div style="margin-bottom:14px;">
+      <p style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Install Command</p>
+      <div class="command-box">
+        <div class="command-header">
+          <span>Shell</span>
+          <button class="copy-btn" onclick="copyText(${JSON.stringify(tool.install_cmd)})">Copy</button>
+        </div>
+        <div class="command-code">${tool.install_cmd}</div>
+      </div>
+    </div>
+    <div style="padding:12px;background:var(--gold-dim);border:1px solid rgba(245,166,35,0.2);border-radius:8px;">
+      <p style="font-size:12px;color:var(--gold);font-weight:600;margin-bottom:4px;">💰 Cost</p>
+      <p style="font-size:12px;color:var(--text-secondary);">${tool.cost}</p>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+const outputInfo = {
+  youtube: { title: 'YouTube Output', icon: '▶️', details: ['1920×1080 MP4 (H.264, AAC)', 'Duration: up to 15 min (verified) or longer', 'Thumbnail: 1280×720 JPEG (generated by FLUX)', 'SRT captions uploaded via Data API v3', 'Description auto-generated from script summary', 'Tags: blockchain, bitcoin, defi, crypto education', 'Category: Education (ID: 27)', 'scheduledPublishTime: next Thu 2pm EST'] },
+  tiktok: { title: 'TikTok Output', icon: '🎵', details: ['1080×1920 vertical MP4', 'Duration: 15–60 seconds (highlight clip)', 'Auto-generated captions burned in', 'Hook in first 3 seconds', 'Trending audio layer (optional)', 'Description: 150 chars + hashtags'] },
+  instagram: { title: 'Instagram Output', icon: '📸', details: ['Reel: 1080×1920, 15–90 sec vertical', 'Story: 1080×1920, 15 sec clips', 'Post: 1080×1080 square thumbnail', 'Carousel: 10-frame infographic version', 'Caption: 2,200 chars max with hashtags', 'Alt text for accessibility'] },
+  twitter: { title: 'Twitter/X Output', icon: '🐦', details: ['1280×720 MP4, max 2:20', 'Video compressed for platform limits', 'Thread: 10-tweet breakdown with timestamps', 'Thumbnail attached to first tweet', 'Character count: 280 per tweet'] },
+  linkedin: { title: 'LinkedIn Output', icon: '💼', details: ['1920×1080 native video', 'Duration: up to 10 min', 'Article version: full transcript as long-form post', 'Professional hashtags (#blockchain #web3 #crypto)', 'Auto-subtitles enabled', 'Custom thumbnail 1200×627'] },
+  blog: { title: 'Blog / Website Output', icon: '✍️', details: ['Markdown file (.md) with full transcript', 'Embedded YouTube video', 'Infographic images (FLUX-generated)', 'SEO metadata: title, description, keywords', 'Code snippets for technical sections', 'Internal linking suggestions'] },
+  github: { title: 'GitHub Output', icon: '⚙️', details: ['README.md with video embed', 'Code samples from script examples', 'Jupyter notebook version', 'Resources/links section', 'Blockchain glossary', 'MIT license file'] }
+};
+
+function showOutputModal(platform) {
+  const info = outputInfo[platform];
+  if (!info) return;
+  document.getElementById('modal-body').innerHTML = `
+    <h2 class="modal-title">${info.icon} ${info.title}</h2>
+    <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
+      ${info.details.map(d => `<li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text-secondary);"><span style="color:var(--teal);margin-top:1px;flex-shrink:0;">✓</span>${d}</li>`).join('')}
+    </ul>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ======== PROJECTS EXPLORER ========
+let _explorerProjects = [];
+let _currentProject = 'chain_clarity';
+let _pvProject = null, _pvPhase = null, _pvContent = '';
+
+async function loadProjects() {
+  if (!serverOnline) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/projects`);
+    const projects = await res.json();
+    _explorerProjects = projects;
+
+    // Populate project selector buttons
+    const bar = document.getElementById('project-selector-bar');
+    if (bar) {
+      bar.innerHTML = projects.map(p =>
+        `<button class="project-selector-btn${p.name === _currentProject ? ' active' : ''}"
+          onclick="selectProject('${p.name}')">${p.name}</button>`
+      ).join('');
+    }
+
+    const count = projects.reduce((a, p) => a + p.phases.length, 0);
+    const countEl = document.getElementById('explorer-count');
+    if (countEl) countEl.textContent = `${projects.length} project${projects.length !== 1 ? 's' : ''} · ${count} phases`;
+
+    const first = projects.find(p => p.name === _currentProject) || projects[0];
+    if (first) { _currentProject = first.name; await renderProjectPhases(first); }
+  } catch (e) { console.warn('loadProjects:', e); }
+}
+
+function selectProject(name) {
+  _currentProject = name;
+  document.querySelectorAll('.project-selector-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === name);
+  });
+  const proj = _explorerProjects.find(p => p.name === name);
+  if (proj) renderProjectPhases(proj);
+}
+
+async function renderProjectPhases(project) {
+  const grid = document.getElementById('explorer-grid');
+  if (!grid) return;
+
+  // Loading skeleton — table shape
+  grid.innerHTML = `<div class="explorer-table-wrap">
+    <table class="explorer-table">
+      <thead><tr>
+        <th style="width:44px;">#</th>
+        <th>Title</th>
+        <th style="width:60px;">Min</th>
+        <th style="width:72px;">Script</th>
+        <th style="width:72px;">SRT</th>
+        <th style="width:72px;">Cards</th>
+        <th style="width:90px;">Compliance</th>
+        <th style="width:72px;">Voice</th>
+        <th style="width:72px;">Video</th>
+        <th style="width:100px;">Progress</th>
+        <th style="width:70px;">Next Step</th>
+        <th></th>
+      </tr></thead>
+      <tbody>${project.phases.map((_,i) => `<tr>
+        <td><div class="et-phase-num" style="opacity:.3;">${i+1}</div></td>
+        <td colspan="10"><div style="height:12px;background:var(--border);border-radius:4px;opacity:.3;"></div></td>
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+
+  // Load all phases in parallel
+  const allData = await Promise.all(
+    project.phases.map(async (ph) => {
+      const num = parseInt(ph.replace('phase_', ''));
+      try {
+        const r = await fetch(`${API_BASE}/api/phase-data?project=${project.name}&phase=${num}`);
+        return r.ok ? await r.json() : null;
+      } catch { return null; }
+    })
+  );
+
+  const icon = (done) => done
+    ? `<span class="et-status-icon">✅</span>`
+    : `<span class="et-status-icon" style="opacity:.35;">⬜</span>`;
+
+  const compBadge = (s) => {
+    if (s === 'PASS')              return `<span class="badge badge-teal" style="font-size:9px;">✅ PASS</span>`;
+    if (s === 'PASS_WITH_WARNINGS') return `<span class="badge badge-gold" style="font-size:9px;">⚠️ PASS</span>`;
+    if (s === 'FAIL')              return `<span class="badge badge-red"  style="font-size:9px;">❌ FAIL</span>`;
+    return `<span class="badge" style="font-size:9px;background:var(--border);color:var(--text-muted);">—</span>`;
+  };
+
+  const rows = allData.filter(Boolean).map(d => {
+    const steps = d.pipeline_steps || [];
+    const scriptDone = steps.find(s=>s.num===1)?.done;
+    const srtDone    = steps.find(s=>s.num===6)?.done;
+    const cardsDone  = steps.find(s=>s.num===4)?.done;
+    const voDone     = steps.find(s=>s.num===3)?.done;
+    const vidDone    = steps.find(s=>s.num===5)?.done;
+    const pct = d.steps_done && d.steps_total ? Math.round(d.steps_done/d.steps_total*100) : 0;
+
+    // Next pending step
+    const nextStep = steps.find(s => !s.done);
+    const nextLabel = nextStep
+      ? `<span style="font-size:10px;color:var(--gold);">Step ${nextStep.num}: ${nextStep.name}</span>`
+      : `<span style="font-size:10px;color:var(--teal);">✅ All done</span>`;
+
+    return `<tr>
+      <td><div class="et-phase-num">${d.phase}</div></td>
+      <td>
+        <div class="et-title">${d.title}</div>
+        <div class="et-meta">${d.duration_min} min · ${d.files.length} files · ${d.cards.length} cards</div>
+      </td>
+      <td style="color:var(--text-secondary);font-size:13px;">${d.duration_min}</td>
+      <td>${icon(scriptDone)}</td>
+      <td>${icon(srtDone)}</td>
+      <td>${d.cards.length > 0 ? `<span class="et-status-icon">✅ ${d.cards.length}</span>` : icon(false)}</td>
+      <td>${compBadge(d.compliance_status)}</td>
+      <td>${icon(voDone)}</td>
+      <td>${icon(vidDone)}</td>
+      <td class="et-progress-cell">
+        <div style="font-size:10px;color:var(--text-muted);">${pct}%</div>
+        <div class="et-mini-bar"><div class="et-mini-fill" style="width:${pct}%"></div></div>
+      </td>
+      <td>${nextLabel}</td>
+      <td>
+        <a class="open-dash-btn" href="/phase/${project.name}/${d.phase}" target="_blank">
+          ↗ Open
+        </a>
+      </td>
+    </tr>`;
+  }).join('');
+
+  grid.innerHTML = `<div class="explorer-table-wrap">
+    <table class="explorer-table">
+      <thead><tr>
+        <th style="width:44px;">#</th>
+        <th>Phase Title</th>
+        <th>Min</th>
+        <th>Script</th>
+        <th>SRT</th>
+        <th>Cards</th>
+        <th>Comply</th>
+        <th>Voice</th>
+        <th>Video</th>
+        <th>Progress</th>
+        <th>Next Step</th>
+        <th></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+// ======== PHASE VIEWER ========
+async function openPhaseViewer(project, phase) {
+  _pvProject = project; _pvPhase = phase; _pvContent = '';
+
+  document.getElementById('pv-overlay').classList.add('open');
+  document.getElementById('pv-title').textContent = `${project} / phase_${phase}`;
+  document.getElementById('pv-meta').textContent = 'Loading…';
+  document.getElementById('pv-badges').innerHTML = '';
+  document.getElementById('pv-tag-row').style.display = 'none';
+  document.getElementById('pv-sidebar').innerHTML = '<div class="pv-sidebar-section">Loading…</div>';
+  document.getElementById('pv-display').innerHTML = '<div class="pv-placeholder">Loading phase data…</div>';
+  document.getElementById('pv-copy-btn').style.display = 'none';
+
+  // Wire up the Run button
+  const runBtn = document.getElementById('pv-run-btn');
+  runBtn.onclick = () => {
+    closePhaseViewer();
+    document.getElementById('inp-project').value = project;
+    document.getElementById('inp-phase').value = phase;
+    updateCommand();
+    goStep(1);
+    document.getElementById('section-explorer').scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => runOnServer(), 300);
+  };
+
+  try {
+    const r = await fetch(`${API_BASE}/api/phase-data?project=${project}&phase=${phase}`);
+    if (!r.ok) throw new Error('Phase not found');
+    const data = await r.json();
+
+    document.getElementById('pv-title').textContent = data.title || `Phase ${phase}`;
+    document.getElementById('pv-meta').textContent =
+      `${project} · Phase ${phase} · ${data.duration_min} min · ${data.files.length} files`;
+
+    // Badges
+    const compClass = data.compliance_status === 'PASS' ? 'badge-teal'
+      : data.compliance_status === 'PASS_WITH_WARNINGS' ? 'badge-gold'
+      : data.compliance_status === 'FAIL' ? 'badge-red' : 'badge-blue';
+    const compLabel = data.compliance_status === 'PASS_WITH_WARNINGS' ? '⚠️ PASS WITH WARNINGS'
+      : data.compliance_status || 'Unknown';
+    document.getElementById('pv-badges').innerHTML =
+      `<span class="badge ${compClass}">${compLabel}</span>
+       <span class="badge badge-blue">${data.status}</span>`;
+
+    // Tags
+    if (data.tags && data.tags.length) {
+      const tagRow = document.getElementById('pv-tag-row');
+      tagRow.style.display = 'flex';
+      tagRow.innerHTML = data.tags.map(t => `<span class="pv-tag">${t}</span>`).join('');
+    }
+
+    // Sidebar: source files
+    const fileIconMap = { md: '📄', srt: '💬', json: '⚙️', html: '🎨' };
+    const sidebar = document.getElementById('pv-sidebar');
+    let sidebarHTML = '<div class="pv-sidebar-section">Source Files</div>';
+    data.files.forEach(f => {
+      const ext = f.name.split('.').pop();
+      const icon = fileIconMap[ext] || '📁';
+      sidebarHTML += `<button class="pv-file-btn" id="pvbtn-${f.name}"
+          onclick="viewFile('${project}', ${phase}, '${f.name}')">
+          <span class="pv-file-icon">${icon}</span>${f.name}
+        </button>`;
+    });
+    if (data.cards.length) {
+      sidebarHTML += '<div class="pv-sidebar-section">Infographic Cards</div>';
+      data.cards.forEach(c => {
+        sidebarHTML += `<button class="pv-file-btn" id="pvbtn-${c}"
+            onclick="viewFile('${project}', ${phase}, '${c}')">
+            <span class="pv-file-icon">🃏</span>${c}
+          </button>`;
+      });
+    }
+    if (data.output_files.length) {
+      sidebarHTML += '<div class="pv-sidebar-section">Output Files</div>';
+      data.output_files.forEach(f => {
+        const name = f.split(/[/\\]/).pop();
+        sidebarHTML += `<button class="pv-file-btn" style="font-size:11px;color:var(--text-muted);">
+            <span class="pv-file-icon">📦</span>${name}
+          </button>`;
+      });
+    }
+    sidebar.innerHTML = sidebarHTML;
+
+    // Auto-open script.md
+    viewFile(project, phase, 'script.md');
+
+  } catch (e) {
+    document.getElementById('pv-display').innerHTML =
+      `<div class="pv-placeholder" style="color:var(--red);">Error loading phase: ${e.message}</div>`;
+  }
+}
+
+async function viewFile(project, phase, filename) {
+  // Update active state in sidebar
+  document.querySelectorAll('.pv-file-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.getElementById(`pvbtn-${filename}`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  document.getElementById('pv-filename').textContent = filename;
+  document.getElementById('pv-filesize').textContent = '';
+  document.getElementById('pv-display').innerHTML = '<div class="pv-placeholder">Loading…</div>';
+  document.getElementById('pv-copy-btn').style.display = 'none';
+
+  try {
+    const r = await fetch(`${API_BASE}/api/file?project=${project}&phase=${phase}&file=${encodeURIComponent(filename)}`);
+    if (!r.ok) throw new Error(`${r.status}`);
+    const data = await r.json();
+    _pvContent = data.content;
+
+    const kb = (_pvContent.length / 1024).toFixed(1);
+    document.getElementById('pv-filesize').textContent = `${kb} KB`;
+    document.getElementById('pv-copy-btn').style.display = '';
+
+    renderFileContent(data.content, data.type, filename);
+  } catch (e) {
+    document.getElementById('pv-display').innerHTML =
+      `<div class="pv-placeholder" style="color:var(--red);">Could not load file: ${e.message}</div>`;
+  }
+}
+
+function renderFileContent(content, type, filename) {
+  const display = document.getElementById('pv-display');
+  display.className = 'pv-file-display';
+
+  if (type === 'html') {
+    // Show raw HTML source (don't render it)
+    display.textContent = content;
+    return;
+  }
+
+  if (type === 'json') {
+    try {
+      const pretty = JSON.stringify(JSON.parse(content), null, 2);
+      display.className = 'pv-file-display json-view';
+      display.textContent = pretty;
+    } catch { display.textContent = content; }
+    return;
+  }
+
+  if (type === 'srt') {
+    // Color-code SRT: index lines, timestamps, text
+    const html = content.split('\n').map(line => {
+      if (/^\d+$/.test(line.trim())) return `<span class="srt-idx">${escHtml(line)}</span>`;
+      if (line.includes('-->')) return `<span class="srt-ts">${escHtml(line)}</span>`;
+      return escHtml(line);
+    }).join('\n');
+    display.innerHTML = html;
+    return;
+  }
+
+  // Markdown / text — basic colorization
+  const html = content.split('\n').map(line => {
+    if (/^# /.test(line))   return `<span class="md-h1">${escHtml(line)}</span>`;
+    if (/^## /.test(line))  return `<span class="md-h2">${escHtml(line)}</span>`;
+    if (/^### /.test(line)) return `<span class="md-h3">${escHtml(line)}</span>`;
+    // Inline code
+    const coded = escHtml(line).replace(/`([^`]+)`/g,
+      '<span class="md-code">$1</span>');
+    return coded;
+  }).join('\n');
+  display.innerHTML = html;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function pvCopyContent() {
+  copyText(_pvContent);
+}
+
+function closePhaseViewer() {
+  document.getElementById('pv-overlay').classList.remove('open');
+}
+
+function pvOverlayClick(e) {
+  if (e.target === document.getElementById('pv-overlay')) closePhaseViewer();
+}
+
+// ======== SERVER / TERMINAL ========
+const API_BASE = 'http://localhost:8080';
+let serverOnline = false;
+
+async function checkServer() {
+  try {
+    const r = await fetch(`${API_BASE}/api/projects`, {
+      signal: AbortSignal.timeout(1000)
+    });
+    serverOnline = r.ok;
+  } catch {
+    serverOnline = false;
+  }
+  _updateServerUI();
+}
+
+function _updateServerUI() {
+  const pill = document.getElementById('server-pill');
+  if (pill) {
+    if (serverOnline) {
+      pill.textContent = '● Server';
+      pill.className = 'server-pill online';
+      pill.title = 'Backend server running at http://localhost:8080';
+    } else {
+      pill.textContent = '○ Server';
+      pill.className = 'server-pill offline';
+      pill.title = 'Backend offline — run: python server.py';
+    }
+  }
+  const ind = document.getElementById('step5-server-indicator');
+  if (ind) {
+    ind.textContent = serverOnline ? '● Server online' : '○ Server offline';
+    ind.style.color = serverOnline ? 'var(--teal)' : 'var(--text-muted)';
+  }
+}
+
+function _getFormData() {
+  return {
+    project:       (document.getElementById('inp-project')?.value  || 'chain_clarity').trim(),
+    phase:         parseInt(document.getElementById('inp-phase')?.value)    || 1,
+    topic:         (document.getElementById('inp-topic')?.value    || '').trim(),
+    outline:       (document.getElementById('inp-outline')?.value  || '').trim(),
+    duration:      parseInt(document.getElementById('inp-duration')?.value) || 12,
+    tags:          (document.getElementById('inp-tags')?.value     || '').trim(),
+    skip_generate: document.getElementById('chk-skip-generate')?.checked || false,
+    skip_voiceover:document.getElementById('chk-skip-voiceover')?.checked || false,
+  };
+}
+
+async function runOnServer() {
+  if (!serverOnline) {
+    showToast('Server offline — run: python server.py');
+    openTerminal();
+    appendLine('$ python server.py\n', 't-teal');
+    appendLine('Then reload this page and click ▶ Run on Server again.\n', 't-dim');
+    return;
+  }
+  const data = _getFormData();
+  if (!data.topic && !data.skip_generate) {
+    showToast('Enter a Video Topic in Step 1 first');
+    return;
+  }
+
+  openTerminal();
+  setBadge('RUNNING', 'rgba(245,166,35,0.15)', 'var(--gold)', 'rgba(245,166,35,0.3)');
+
+  const shortCmd = `python pipeline.py --project ${data.project} --phase ${data.phase}${data.topic ? ` --topic "${data.topic}"` : ''}`;
+  appendLine(`$ ${shortCmd}\n\n`, 't-teal');
+
+  try {
+    const res = await fetch(`${API_BASE}/api/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    const { job_id, cmd } = await res.json();
+    appendLine(`[job ${job_id}] ${cmd}\n\n`, 't-dim');
+    _streamJob(job_id);
+  } catch (e) {
+    appendLine(`[ERROR] ${e.message}\n`, 't-red');
+    setBadge('ERROR', 'var(--red-dim)', 'var(--red)', 'rgba(255,77,106,0.3)');
+  }
+}
+
+function _streamJob(job_id) {
+  const es = new EventSource(`${API_BASE}/api/jobs/${job_id}/stream`);
+  es.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    if (d.ping) return;
+    if (d.line) appendLineAuto(d.line);
+    if (d.done) {
+      es.close();
+      if (d.status === 'done') {
+        appendLine('\n✅  Pipeline complete!\n', 't-teal');
+        setBadge('DONE', 'var(--teal-dim)', 'var(--teal)', 'rgba(0,212,170,0.3)');
+        showToast('Pipeline complete!');
+      } else {
+        appendLine('\n❌  Pipeline failed — check output above.\n', 't-red');
+        setBadge('FAILED', 'var(--red-dim)', 'var(--red)', 'rgba(255,77,106,0.3)');
+      }
+    }
+  };
+  es.onerror = () => {
+    es.close();
+    appendLine('\n[Stream closed]\n', 't-dim');
+  };
+}
+
+function openTerminal() {
+  document.getElementById('terminal-drawer').classList.add('open');
+  document.getElementById('terminal-body').innerHTML = '';
+}
+
+function closeTerminal() {
+  document.getElementById('terminal-drawer').classList.remove('open');
+}
+
+function clearTerminal() {
+  document.getElementById('terminal-body').innerHTML = '';
+}
+
+function setBadge(text, bg, color, border) {
+  const badge = document.getElementById('terminal-badge');
+  if (!badge) return;
+  badge.textContent = text;
+  badge.style.cssText = `background:${bg};color:${color};border:1px solid ${border};padding:2px 10px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;`;
+}
+
+function appendLine(text, cssClass) {
+  const body = document.getElementById('terminal-body');
+  const span = document.createElement('span');
+  if (cssClass) span.className = cssClass;
+  span.textContent = text;
+  body.appendChild(span);
+  body.scrollTop = body.scrollHeight;
+}
+
+function appendLineAuto(line) {
+  let cls = '';
+  const l = line.toLowerCase();
+  if (l.includes('[error]') || l.includes('error') || l.includes('failed') || l.includes('traceback')) cls = 't-red';
+  else if (l.includes('✓') || l.includes('complete') || l.includes('pass') || l.includes('done')) cls = 't-teal';
+  else if (l.includes('▶') || l.includes('step') || l.includes('═') || l.includes('╔') || l.includes('╚')) cls = 't-gold';
+  else if (l.includes('─') || l.includes('[warn]') || l.includes('[skip]') || l.includes('[info]')) cls = 't-dim';
+  appendLine(line, cls);
+}
+
+// ======== INIT ========
+document.addEventListener('DOMContentLoaded', () => {
+  renderMatrix();
+  renderTTS();
+  renderStepStars();
+  updateCommand();
+  checkServer().then(() => { if (serverOnline) loadProjects(); });
+  setInterval(() => { checkServer().then(() => { if (serverOnline && _explorerProjects.length === 0) loadProjects(); }); }, 5000);
+});
+</script>
+</body>
+</html>

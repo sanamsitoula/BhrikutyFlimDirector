@@ -3,1126 +3,1153 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chain Clarity — Project Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>Bhrikuty — Film Director Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
       --teal:   #00D4AA;
       --gold:   #F5A623;
       --slate:  #8B9BB4;
       --navy:   #0A0E1A;
-      --navy2:  #111827;
-      --navy3:  #1A2235;
       --violet: #7B5CF0;
       --white:  #FFFFFF;
+      --card:   #0F1625;
+      --border: rgba(139,155,180,0.15);
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
-    body { background: var(--navy); color: var(--white); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.6; }
-
-    /* ── Nav ── */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(10,14,26,0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(139,155,180,0.12);
-      display: flex; align-items: center;
-      padding: 0 2rem; height: 60px; gap: 2rem;
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
     }
-    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .nav-brand-text { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--white); }
-    .nav-brand-text span { font-weight: 300; color: var(--teal); }
-    nav a { font-size: 13px; color: var(--slate); text-decoration: none; transition: color 0.2s; }
-    nav a:hover { color: var(--teal); }
-    .nav-status { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--teal); }
+
+    /* ── Header ── */
+    .header {
+      background: rgba(15,22,37,0.95);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .header-brand { display: flex; align-items: center; gap: 14px; }
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px; font-weight: 700;
+    }
+    .brand-name span { color: var(--teal); font-weight: 300; }
+    .brand-tag {
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--slate); margin-top: 2px;
+    }
+    .header-stats {
+      display: flex; gap: 24px; align-items: center;
+    }
+    .stat-chip {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid;
+    }
+    .stat-chip.green { color: var(--teal); border-color: rgba(0,212,170,0.3); background: rgba(0,212,170,0.08); }
+    .stat-chip.gold { color: var(--gold); border-color: rgba(245,166,35,0.3); background: rgba(245,166,35,0.08); }
+    .stat-chip.violet { color: var(--violet); border-color: rgba(123,92,240,0.3); background: rgba(123,92,240,0.08); }
 
     /* ── Layout ── */
-    .page { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem 8rem; }
-    section { margin-bottom: 5rem; }
-    .section-tag { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--violet); margin-bottom: 0.4rem; }
-    h2 { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; margin-bottom: 0.4rem; }
-    .section-desc { color: var(--slate); margin-bottom: 2rem; max-width: 580px; }
+    .page { max-width: 1400px; margin: 0 auto; padding: 32px 40px 80px; }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px; font-weight: 700;
+      color: var(--white);
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title::before {
+      content: ''; width: 3px; height: 20px;
+      background: var(--teal); border-radius: 2px;
+    }
 
-    /* ── Cards ── */
-    .card { background: var(--navy3); border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); padding: 1.5rem; }
-    .card-sm { padding: 1.2rem; }
+    /* ── New Project Wizard ── */
+    .wizard {
+      background: var(--card);
+      border: 1px solid rgba(0,212,170,0.2);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+    .wizard-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px; font-weight: 700;
+      color: var(--teal);
+      margin-bottom: 8px;
+    }
+    .wizard-sub {
+      font-size: 15px; color: var(--slate);
+      margin-bottom: 32px;
+    }
 
-    /* ── Grid helpers ── */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem; }
-    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
+    /* Step progress bar */
+    .steps-bar {
+      display: flex; gap: 0;
+      margin-bottom: 36px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .step-tab {
+      flex: 1; padding: 12px 8px;
+      text-align: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      background: rgba(255,255,255,0.02);
+      border-right: 1px solid var(--border);
+      color: var(--slate);
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .step-tab:last-child { border-right: none; }
+    .step-tab.active {
+      background: rgba(0,212,170,0.12);
+      color: var(--teal);
+    }
+    .step-tab.done {
+      background: rgba(0,212,170,0.06);
+      color: rgba(0,212,170,0.6);
+    }
+    .step-num {
+      display: block;
+      font-size: 18px; font-weight: 700;
+      margin-bottom: 2px;
+    }
 
-    /* ── SECTION 1: Brand ── */
-    .brand-hero { display: flex; align-items: center; gap: 2rem; margin-bottom: 2.5rem; }
-    .brand-wordmark h1 { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; line-height: 1; letter-spacing: -1.5px; }
-    .brand-wordmark h1 span { font-weight: 300; color: var(--teal); }
-    .brand-tagline { font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase; color: var(--slate); margin-top: 0.5rem; }
+    /* Step panels */
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
 
-    .swatch-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; }
-    .swatch { border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.06); }
-    .swatch:hover { transform: translateY(-2px); }
-    .swatch-color { height: 60px; }
-    .swatch-body { padding: 0.6rem 0.8rem; background: var(--navy3); }
-    .swatch-name { font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 600; }
-    .swatch-hex { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--teal); }
-    .copied-msg { font-size: 0.65rem; color: var(--teal); font-weight: 600; display: none; margin-top: 2px; }
-
-    .type-row { display: flex; flex-direction: column; gap: 1rem; }
-    .type-item { background: var(--navy3); border-radius: 10px; padding: 1.2rem 1.5rem; border: 1px solid rgba(255,255,255,0.06); }
-    .type-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--slate); margin-bottom: 0.5rem; }
-    .type-sample-h { font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700; color: var(--white); }
-    .type-sample-b { font-family: 'Inter', sans-serif; font-size: 1rem; color: var(--slate); }
-    .type-sample-c { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--gold); }
-
-    .tone-before { background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 1rem 1.2rem; }
-    .tone-after  { background: rgba(0,212,170,0.05); border: 1px solid rgba(0,212,170,0.2); border-radius: 10px; padding: 1rem 1.2rem; }
-    .tone-badge  { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem; }
-    .tone-before .tone-badge { color: #F87171; }
-    .tone-after  .tone-badge { color: var(--teal); }
-    .tone-text { font-size: 0.9rem; line-height: 1.6; color: var(--white); }
-    .tone-before .tone-text { text-decoration: line-through; opacity: 0.5; }
-
-    .forbidden-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; }
-    .fchip { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #F87171; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 5px; padding: 0.2rem 0.5rem; }
-
-    .sound-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .schip { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; background: rgba(123,92,240,0.1); color: var(--violet); border: 1px solid rgba(123,92,240,0.25); border-radius: 5px; padding: 0.2rem 0.55rem; cursor: pointer; }
-    .mchip { font-size: 0.78rem; background: rgba(0,212,170,0.08); color: var(--teal); border: 1px solid rgba(0,212,170,0.2); border-radius: 20px; padding: 0.25rem 0.7rem; }
-    .bpm-big { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: var(--teal); line-height: 1; }
-
-    /* ── SECTION 2: Roadmap ── */
-    .phase-list { display: flex; flex-direction: column; gap: 1rem; }
-    .phase-row {
-      background: var(--navy3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);
-      overflow: hidden; cursor: pointer;
+    .input-group { margin-bottom: 20px; }
+    .input-label {
+      font-size: 13px; font-weight: 600;
+      color: var(--slate); text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 8px;
+      display: block;
+    }
+    .input-field {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      outline: none;
       transition: border-color 0.2s;
     }
-    .phase-row:hover { border-color: rgba(0,212,170,0.3); }
-    .phase-header { display: flex; align-items: center; gap: 1rem; padding: 1.2rem 1.5rem; }
-    .phase-num { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--teal); background: rgba(0,212,170,0.1); border-radius: 6px; padding: 0.2rem 0.5rem; flex-shrink: 0; }
-    .phase-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 600; }
-    .phase-subtitle { font-size: 0.85rem; color: var(--slate); }
-    .phase-status { margin-left: auto; }
-    .badge { font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 5px; }
-    .badge-done { background: rgba(0,212,170,0.12); color: var(--teal); border: 1px solid rgba(0,212,170,0.3); }
-    .badge-pending { background: rgba(139,155,180,0.1); color: var(--slate); border: 1px solid rgba(139,155,180,0.2); }
-    .phase-body { display: none; padding: 0 1.5rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.06); }
-    .phase-body.open { display: block; }
-    .goal-list { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
-    .goal-item { font-size: 0.875rem; color: var(--slate); padding-left: 1rem; border-left: 2px solid rgba(0,212,170,0.3); }
+    .input-field:focus { border-color: rgba(0,212,170,0.5); }
+    .input-field::placeholder { color: rgba(139,155,180,0.5); }
+    textarea.input-field { min-height: 80px; resize: vertical; }
 
-    /* ── SECTION 3: Scripts ── */
-    .script-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-    .stab { font-size: 0.8rem; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); color: var(--slate); background: transparent; transition: all 0.2s; }
-    .stab.active { background: rgba(0,212,170,0.1); border-color: var(--teal); color: var(--teal); }
-    .script-panel { display: none; }
-    .script-panel.active { display: block; }
-    .script-section { margin-bottom: 1.5rem; }
-    .script-section-head { font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--teal); margin-bottom: 0.5rem; }
-    .script-spoken { background: var(--navy3); border-radius: 10px; padding: 1.2rem; border-left: 3px solid var(--teal); font-size: 0.875rem; color: var(--white); line-height: 1.7; }
-    .script-onscreen { font-size: 0.8rem; color: var(--gold); font-family: 'JetBrains Mono', monospace; margin-top: 0.5rem; padding: 0.6rem 0.8rem; background: rgba(245,166,35,0.06); border-radius: 6px; }
+    /* Radio options */
+    .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .radio-card {
+      padding: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(255,255,255,0.02);
+    }
+    .radio-card:hover { border-color: rgba(0,212,170,0.3); background: rgba(0,212,170,0.04); }
+    .radio-card.selected {
+      border-color: var(--teal);
+      background: rgba(0,212,170,0.08);
+    }
+    .radio-card input { display: none; }
+    .radio-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px; font-weight: 600;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .radio-meta {
+      font-size: 12px; color: var(--slate);
+      line-height: 1.5;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .badge-free  { background: rgba(0,212,170,0.15); color: var(--teal); border: 1px solid rgba(0,212,170,0.3); }
+    .badge-paid  { background: rgba(245,166,35,0.12); color: var(--gold); border: 1px solid rgba(245,166,35,0.3); }
+    .badge-best  { background: rgba(123,92,240,0.15); color: var(--violet); border: 1px solid rgba(123,92,240,0.3); }
 
-    /* ── SECTION 4: Infographic Cards ── */
-    .card-selector { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-    .card-btn { font-size: 0.8rem; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); color: var(--slate); background: transparent; transition: all 0.2s; font-family: 'Space Grotesk', sans-serif; }
-    .card-btn.active { background: rgba(0,212,170,0.1); border-color: var(--teal); color: var(--teal); }
-    .card-preview { width: 100%; aspect-ratio: 1/1; max-width: 600px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
-    .card-preview iframe { width: 1080px; height: 1080px; border: none; transform-origin: top left; }
-    .record-btn {
-      margin-top: 1rem; display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.6rem 1.2rem; border-radius: 8px;
-      background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3);
-      color: var(--gold); font-size: 0.82rem; cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+    /* Checkbox grid for platforms */
+    .checkbox-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .checkbox-pill {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 14px; font-weight: 500;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .checkbox-pill input { display: none; }
+    .checkbox-pill.checked {
+      border-color: var(--teal);
+      background: rgba(0,212,170,0.1);
+      color: var(--teal);
+    }
+    .platform-icon { font-size: 16px; }
+
+    /* Command output */
+    .cmd-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(0,212,170,0.2);
+      border-radius: 12px;
+      padding: 20px 24px;
+      position: relative;
+    }
+    .cmd-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px; color: var(--teal);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    .cmd-copy {
+      position: absolute; top: 12px; right: 12px;
+      padding: 6px 14px;
+      background: rgba(0,212,170,0.12);
+      border: 1px solid rgba(0,212,170,0.3);
+      border-radius: 8px;
+      color: var(--teal);
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
       transition: background 0.2s;
     }
-    .record-btn:hover { background: rgba(245,166,35,0.2); }
+    .cmd-copy:hover { background: rgba(0,212,170,0.22); }
 
-    /* Screen-record overlay */
-    #srOverlay {
-      display: none; position: fixed; inset: 0; z-index: 9999;
-      background: var(--navy); align-items: center; justify-content: center;
-      flex-direction: column;
+    /* Wizard navigation */
+    .wizard-nav {
+      display: flex; justify-content: space-between;
+      align-items: center;
+      margin-top: 28px; padding-top: 24px;
+      border-top: 1px solid var(--border);
     }
-    #srOverlay.active { display: flex; }
-    #srCountdown { font-family: 'Space Grotesk', sans-serif; font-size: 15rem; font-weight: 700; color: var(--teal); line-height: 1; }
-    #srFrame { display: none; width: 1080px; height: 1080px; border: none; }
-    .sr-exit { position: fixed; top: 1.5rem; right: 1.5rem; font-size: 0.8rem; color: var(--slate); cursor: pointer; background: rgba(255,255,255,0.06); border-radius: 6px; padding: 0.4rem 0.8rem; border: 1px solid rgba(255,255,255,0.1); }
-
-    /* ── SECTION 5: Production Briefs ── */
-    .brief-accordion { display: flex; flex-direction: column; gap: 0.75rem; }
-    .brief-item { background: var(--navy3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); overflow: hidden; }
-    .brief-head { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.2rem; cursor: pointer; transition: background 0.2s; }
-    .brief-head:hover { background: rgba(255,255,255,0.03); }
-    .brief-icon { font-size: 1.1rem; }
-    .brief-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 600; }
-    .brief-toggle { margin-left: auto; font-size: 0.8rem; color: var(--slate); }
-    .brief-body { display: none; padding: 0 1.2rem 1.2rem; }
-    .brief-body.open { display: block; }
-    .brief-content { font-size: 0.85rem; color: var(--slate); line-height: 1.7; white-space: pre-line; }
-    .music-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
-    .mtag { font-size: 0.72rem; background: rgba(0,212,170,0.08); color: var(--teal); border: 1px solid rgba(0,212,170,0.2); border-radius: 20px; padding: 0.2rem 0.6rem; }
-    .srt-dl { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.75rem; padding: 0.5rem 1rem; background: rgba(123,92,240,0.1); border: 1px solid rgba(123,92,240,0.25); border-radius: 6px; color: var(--violet); font-size: 0.8rem; font-weight: 600; cursor: pointer; }
-
-    /* ── SECTION 6: Export ── */
-    .export-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
-    .export-card { background: var(--navy3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); padding: 1.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
-    .export-card:hover { border-color: rgba(0,212,170,0.3); transform: translateY(-2px); }
-    .export-icon { font-size: 2rem; margin-bottom: 0.75rem; }
-    .export-label { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
-    .export-desc { font-size: 0.8rem; color: var(--slate); }
-
-    /* ── Footer ── */
-    footer { border-top: 1px solid rgba(139,155,180,0.12); padding: 2rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: var(--slate); }
-    footer strong { color: var(--teal); }
-
-    @media(max-width:768px) {
-      .grid-2,.grid-3,.grid-5,.swatch-grid { grid-template-columns:1fr; }
-      nav { gap: 1rem; }
+    .btn {
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
     }
+    .btn-primary { background: var(--teal); color: var(--navy); }
+    .btn-primary:hover { background: #00bfa0; }
+    .btn-ghost { background: transparent; color: var(--slate); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--white); border-color: var(--slate); }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ── Phase Grid ── */
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .phase-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+    .phase-card:hover { border-color: rgba(0,212,170,0.3); }
+    .phase-card.complete { border-color: rgba(0,212,170,0.2); }
+    .phase-header {
+      display: flex; justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .phase-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 36px; font-weight: 700;
+      color: var(--teal); line-height: 1;
+    }
+    .phase-status {
+      font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 10px;
+      text-transform: uppercase;
+    }
+    .phase-status.complete { background: rgba(0,212,170,0.12); color: var(--teal); }
+    .phase-status.pending  { background: rgba(139,155,180,0.1); color: var(--slate); }
+    .phase-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px; font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .phase-sub { font-size: 13px; color: var(--slate); margin-bottom: 16px; }
+    .phase-files {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .file-chip {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 3px 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--slate);
+    }
+    .phase-compliance {
+      font-size: 12px; color: var(--slate);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .compliance-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .compliance-dot.pass { background: var(--teal); }
+    .compliance-dot.warn { background: var(--gold); }
+
+    /* ── Tool Matrix Tabs ── */
+    .tool-section { margin-bottom: 40px; }
+    .tab-bar {
+      display: flex; gap: 4px;
+      background: rgba(255,255,255,0.03);
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--slate);
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab-btn.active { background: rgba(0,212,170,0.12); color: var(--teal); }
+    .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.04); color: var(--white); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Tool cards */
+    .tool-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+    .tool-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .tool-card.recommended { border-color: rgba(0,212,170,0.3); }
+    .tool-head {
+      display: flex; justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .tool-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px; font-weight: 700;
+    }
+    .tool-meta { font-size: 13px; color: var(--slate); margin-bottom: 8px; }
+    .quality-stars { color: var(--gold); font-size: 14px; margin-bottom: 8px; }
+    .tool-why {
+      font-size: 13px; color: var(--slate);
+      line-height: 1.6; margin-bottom: 12px;
+    }
+    .tool-cmd {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: var(--teal);
+      background: rgba(0,0,0,0.3);
+      padding: 8px 12px; border-radius: 8px;
+      word-break: break-all;
+    }
+
+    /* ── TTS Comparison Panel ── */
+    .tts-comparison { margin-bottom: 40px; }
+    .tts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .tts-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+    }
+    .tts-card.top-pick { border-color: rgba(0,212,170,0.35); }
+    .top-pick-badge {
+      position: absolute; top: -10px; left: 20px;
+      background: var(--teal); color: var(--navy);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 10px; font-weight: 700;
+      padding: 3px 10px; border-radius: 8px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .tts-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px; font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .tts-specs {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px; margin: 16px 0;
+    }
+    .tts-spec {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .spec-key { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.5px; }
+    .spec-val { font-size: 14px; font-weight: 600; margin-top: 2px; }
+    .tts-output {
+      font-size: 13px; color: var(--slate);
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px; padding: 12px;
+      line-height: 1.6; margin-bottom: 12px;
+      border-left: 3px solid rgba(0,212,170,0.3);
+    }
+
+    /* ── Footer strip ── */
+    .footer-strip {
+      border-top: 1px solid var(--border);
+      margin-top: 60px; padding-top: 24px;
+      display: flex; justify-content: space-between;
+      align-items: center;
+      color: var(--slate); font-size: 13px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(139,155,180,0.2); border-radius: 3px; }
   </style>
 </head>
 <body>
 
-<!-- ── NAV ── -->
-<nav>
-  <a class="nav-brand" href="#brand">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 62" width="36" height="31">
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-brand">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 62" width="44" height="38">
       <polygon points="42,30 32,47 12,47 2,30 12,13 32,13" fill="#00D4AA"/>
       <polygon points="68,30 58,47 38,47 28,30 38,13 58,13" fill="#0A0E1A" stroke="#7B5CF0" stroke-width="2.5"/>
       <polygon points="35,18 42,30 35,42 28,30" fill="#F5A623"/>
     </svg>
-    <span class="nav-brand-text">Chain <span>Clarity</span></span>
-  </a>
-  <a href="#brand">Brand</a>
-  <a href="#roadmap">Roadmap</a>
-  <a href="#scripts">Scripts</a>
-  <a href="#cards">Cards</a>
-  <a href="#briefs">Briefs</a>
-  <a href="#export">Export</a>
-  <a href="#scripts2">Phase 2</a>
-  <a href="#scripts3">Phase 3</a>
-  <span class="nav-status">Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅</span>
-</nav>
+    <div>
+      <div class="brand-name">Bhrikuty <span>Film Director</span></div>
+      <div class="brand-tag">Topic → 7-Platform Package</div>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-chip green">5/5 Phases Complete</div>
+    <div class="stat-chip gold">Chain Clarity Active</div>
+    <div class="stat-chip violet">All PASS_WITH_WARNINGS</div>
+  </div>
+</div>
 
 <div class="page">
 
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 1 — BRAND IDENTITY               -->
-<!-- ══════════════════════════════════════════ -->
-<section id="brand">
-  <p class="section-tag">01 — Brand Identity</p>
-  <h2>Chain Clarity</h2>
-  <p class="section-desc">The single source of truth for all brand decisions.</p>
+  <!-- ── NEW PROJECT WIZARD ── -->
+  <div class="section-title" style="font-size:24px;margin-bottom:12px;">New Project Wizard</div>
+  <p style="color:var(--slate);margin-bottom:24px;font-size:14px;">Follow the steps below to configure your pipeline and get the exact command to run.</p>
 
-  <div class="brand-hero">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 62" width="80" height="69">
-      <polygon points="42,30 32,47 12,47 2,30 12,13 32,13" fill="#00D4AA"/>
-      <polygon points="68,30 58,47 38,47 28,30 38,13 58,13" fill="#0A0E1A" stroke="#7B5CF0" stroke-width="2.5"/>
-      <polygon points="35,18 42,30 35,42 28,30" fill="#F5A623"/>
-    </svg>
-    <div class="brand-wordmark">
-      <h1>Chain <span>Clarity</span></h1>
-      <p class="brand-tagline">Blockchain, without the noise.</p>
-    </div>
-  </div>
+  <div class="wizard">
+    <div class="wizard-title">Create a New Video Project</div>
+    <div class="wizard-sub">5 steps · ~2 minutes · generates a copy-paste pipeline command</div>
 
-  <!-- Color swatches -->
-  <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1rem;margin-bottom:1rem;color:var(--slate);letter-spacing:2px;text-transform:uppercase;font-size:0.7rem;">Color Palette — Click to copy HEX</h3>
-  <div class="swatch-grid" style="margin-bottom:2.5rem;">
-    <div class="swatch" onclick="copyColor('#00D4AA',this)">
-      <div class="swatch-color" style="background:#00D4AA;"></div>
-      <div class="swatch-body"><div class="swatch-name">Electric Teal</div><div class="swatch-hex">#00D4AA</div><div class="copied-msg">✓ Copied!</div></div>
-    </div>
-    <div class="swatch" onclick="copyColor('#F5A623',this)">
-      <div class="swatch-color" style="background:#F5A623;"></div>
-      <div class="swatch-body"><div class="swatch-name">Deep Gold</div><div class="swatch-hex">#F5A623</div><div class="copied-msg">✓ Copied!</div></div>
-    </div>
-    <div class="swatch" onclick="copyColor('#8B9BB4',this)">
-      <div class="swatch-color" style="background:#8B9BB4;"></div>
-      <div class="swatch-body"><div class="swatch-name">Slate</div><div class="swatch-hex">#8B9BB4</div><div class="copied-msg">✓ Copied!</div></div>
-    </div>
-    <div class="swatch" onclick="copyColor('#0A0E1A',this)" style="border-color:rgba(255,255,255,0.12);">
-      <div class="swatch-color" style="background:#0A0E1A;border-bottom:1px solid rgba(255,255,255,0.08);"></div>
-      <div class="swatch-body"><div class="swatch-name">Deep Navy</div><div class="swatch-hex">#0A0E1A</div><div class="copied-msg">✓ Copied!</div></div>
-    </div>
-    <div class="swatch" onclick="copyColor('#7B5CF0',this)">
-      <div class="swatch-color" style="background:#7B5CF0;"></div>
-      <div class="swatch-body"><div class="swatch-name">Electric Violet</div><div class="swatch-hex">#7B5CF0</div><div class="copied-msg">✓ Copied!</div></div>
-    </div>
-  </div>
-
-  <!-- Typography -->
-  <h3 style="font-family:'Space Grotesk',sans-serif;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--slate);margin-bottom:1rem;">Typography</h3>
-  <div class="type-row" style="margin-bottom:2.5rem;">
-    <div class="type-item">
-      <div class="type-label">Heading — Space Grotesk 700</div>
-      <div class="type-sample-h">Blockchain is a <span style="color:var(--teal);">shared ledger</span> nobody owns.</div>
-    </div>
-    <div class="type-item">
-      <div class="type-label">Body — Inter 400</div>
-      <div class="type-sample-b">Every node in the network holds an identical copy of the chain. When someone proposes a new block, every node independently validates it before it is accepted.</div>
-    </div>
-    <div class="type-item">
-      <div class="type-label">Code — JetBrains Mono 400</div>
-      <div class="type-sample-c">SHA-256("Hello") → 185f8db32921bd46d35cc96953e114e6...</div>
-    </div>
-  </div>
-
-  <!-- Tone examples -->
-  <h3 style="font-family:'Space Grotesk',sans-serif;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--slate);margin-bottom:1rem;">Tone of Voice</h3>
-  <div class="grid-2" style="margin-bottom:1.5rem;">
-    <div class="tone-before">
-      <div class="tone-badge">✗ Wrong</div>
-      <div class="tone-text">"Blockchain is simply a distributed ledger — basically a chain of blocks connected through cryptographic hashes. It's easy once you get the basics."</div>
-    </div>
-    <div class="tone-after">
-      <div class="tone-badge">✓ Right</div>
-      <div class="tone-text">"A blockchain is an append-only ledger. Imagine a shared notebook where everyone has a copy — and adding a page notifies every single person in the room."</div>
-    </div>
-  </div>
-  <div class="forbidden-chips">
-    <span style="font-size:0.7rem;color:var(--slate);margin-right:0.25rem;">Forbidden:</span>
-    <span class="fchip">moon</span><span class="fchip">lambo</span><span class="fchip">HODL</span><span class="fchip">simply</span><span class="fchip">just</span><span class="fchip">obviously</span><span class="fchip">easy</span><span class="fchip">basic</span><span class="fchip">pump</span><span class="fchip">dump</span><span class="fchip">guaranteed</span><span class="fchip">rich</span><span class="fchip">explosive</span>
-  </div>
-
-  <!-- Sound identity -->
-  <div class="grid-2" style="margin-top:2.5rem;">
-    <div class="card">
-      <div class="section-tag" style="margin-bottom:0.75rem;">Sound Identity · BPM Range</div>
-      <div class="bpm-big">88–112</div>
-      <p style="font-size:0.82rem;color:var(--slate);margin-top:0.3rem;">Electronic ambient / lo-fi tech</p>
-      <div class="sound-chips" style="margin-top:1rem;">
-        <span class="mchip">Focused</span><span class="mchip">Curious</span><span class="mchip">Empowering</span><span class="mchip">Intelligent</span><span class="mchip">Grounded</span>
+    <!-- Step progress bar -->
+    <div class="steps-bar">
+      <div class="step-tab active" data-step="1" onclick="goStep(1)">
+        <span class="step-num">1</span>Topic
+      </div>
+      <div class="step-tab" data-step="2" onclick="goStep(2)">
+        <span class="step-num">2</span>Voice
+      </div>
+      <div class="step-tab" data-step="3" onclick="goStep(3)">
+        <span class="step-num">3</span>Subtitles
+      </div>
+      <div class="step-tab" data-step="4" onclick="goStep(4)">
+        <span class="step-num">4</span>Platforms
+      </div>
+      <div class="step-tab" data-step="5" onclick="goStep(5)">
+        <span class="step-num">5</span>Command
       </div>
     </div>
-    <div class="card">
-      <div class="section-tag" style="margin-bottom:0.75rem;">Search Terms (click to copy)</div>
-      <div class="sound-chips">
-        <span class="schip" onclick="copyText('lo-fi electronic focused',this)">lo-fi electronic focused</span>
-        <span class="schip" onclick="copyText('ambient tech background',this)">ambient tech background</span>
-        <span class="schip" onclick="copyText('minimal electronic study',this)">minimal electronic study</span>
-        <span class="schip" onclick="copyText('calm tech beat',this)">calm tech beat</span>
-        <span class="schip" onclick="copyText('intelligent electronic chill',this)">intelligent electronic chill</span>
+
+    <!-- Step 1: Topic -->
+    <div class="step-panel active" id="step-1">
+      <div class="input-group">
+        <label class="input-label">Phase Number</label>
+        <input type="number" class="input-field" id="inp-phase" value="6" min="1" max="20" style="width:120px">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Video Title / Topic</label>
+        <input type="text" class="input-field" id="inp-topic" placeholder="e.g. NFTs and Digital Ownership">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Content Outline (key subtopics)</label>
+        <textarea class="input-field" id="inp-outline" placeholder="e.g. ERC-721 standard, concert ticket NFTs, land registry in Georgia, game item ownership, resale royalties"></textarea>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Target Duration (minutes)</label>
+        <input type="number" class="input-field" id="inp-duration" value="12" min="3" max="60" style="width:120px">
       </div>
     </div>
+
+    <!-- Step 2: TTS Voice -->
+    <div class="step-panel" id="step-2">
+      <p style="color:var(--slate);margin-bottom:20px;font-size:14px;">Choose your TTS engine. All produce a WAV file in <code style="color:var(--teal)">phase_N/voiceover/</code>.</p>
+      <div class="radio-grid" id="tts-options">
+        <label class="radio-card selected" onclick="selectRadio(this,'tts')">
+          <input type="radio" name="tts" value="kokoro" checked>
+          <div class="badge badge-free">Free · CPU</div>
+          <div class="radio-name">Kokoro-TTS</div>
+          <div class="radio-meta">#1 TTS Arena · Apache 2.0 · No GPU needed<br>⭐⭐⭐⭐ 8.8 · pip install kokoro</div>
+        </label>
+        <label class="radio-card" onclick="selectRadio(this,'tts')">
+          <input type="radio" name="tts" value="chatterbox">
+          <div class="badge badge-free">Free · GPU</div>
+          <div class="radio-name">Chatterbox TTS</div>
+          <div class="radio-meta">MIT license · Voice cloning (5s ref)<br>⭐⭐⭐⭐⭐ 9.0 · Beats ElevenLabs in tests</div>
+        </label>
+        <label class="radio-card" onclick="selectRadio(this,'tts')">
+          <input type="radio" name="tts" value="elevenlabs">
+          <div class="badge badge-paid">Paid $5+/mo</div>
+          <div class="radio-name">ElevenLabs</div>
+          <div class="radio-meta">Industry standard · 32+ langs · 75ms<br>⭐⭐⭐⭐⭐ 9.5 · Best multilingual</div>
+        </label>
+        <label class="radio-card" onclick="selectRadio(this,'tts')">
+          <input type="radio" name="tts" value="dashscope">
+          <div class="badge badge-free">Freemium</div>
+          <div class="radio-name">Qwen3-TTS</div>
+          <div class="radio-meta">Current default · DashScope API<br>⭐⭐⭐⭐ 8.7 · Best for Chinese/Japanese</div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Step 3: Subtitles -->
+    <div class="step-panel" id="step-3">
+      <p style="color:var(--slate);margin-bottom:20px;font-size:14px;">Choose how to generate SRT subtitles. Word-level timestamps enable karaoke-style captions.</p>
+      <div class="radio-grid">
+        <label class="radio-card selected" onclick="selectRadio(this,'srt')">
+          <input type="radio" name="srt" value="faster-whisper" checked>
+          <div class="badge badge-free">Free · CPU</div>
+          <div class="radio-name">faster-whisper</div>
+          <div class="radio-meta">MIT · No GPU · INT8 quantized<br>⭐⭐⭐⭐ 8.8 · pip install faster-whisper</div>
+        </label>
+        <label class="radio-card" onclick="selectRadio(this,'srt')">
+          <input type="radio" name="srt" value="whisperx">
+          <div class="badge badge-free">Free · GPU</div>
+          <div class="radio-name">WhisperX</div>
+          <div class="radio-meta">BSD-4 · Word timestamps + diarization<br>⭐⭐⭐⭐⭐ 9.0 · Best open-source</div>
+        </label>
+        <label class="radio-card" onclick="selectRadio(this,'srt')">
+          <input type="radio" name="srt" value="assemblyai">
+          <div class="badge badge-paid">Paid ~$0.03/video</div>
+          <div class="radio-name">AssemblyAI</div>
+          <div class="radio-meta">Auto YouTube chapters · Cheapest paid<br>⭐⭐⭐⭐ 8.8 · pip install assemblyai</div>
+        </label>
+        <label class="radio-card" onclick="selectRadio(this,'srt')">
+          <input type="radio" name="srt" value="manual">
+          <div class="badge" style="background:rgba(139,155,180,0.1);color:var(--slate);border:1px solid var(--border)">Skip</div>
+          <div class="radio-name">Manual SRT</div>
+          <div class="radio-meta">Use existing subtitles.srt<br>Already in phase folder</div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Step 4: Platforms -->
+    <div class="step-panel" id="step-4">
+      <p style="color:var(--slate);margin-bottom:20px;font-size:14px;">Select which platforms to generate content for. All selected by default.</p>
+      <div class="checkbox-grid" id="platform-grid">
+        <label class="checkbox-pill checked" onclick="togglePill(this)">
+          <input type="checkbox" name="platforms" value="youtube" checked>
+          <span class="platform-icon">▶</span> YouTube
+        </label>
+        <label class="checkbox-pill checked" onclick="togglePill(this)">
+          <input type="checkbox" name="platforms" value="tiktok" checked>
+          <span class="platform-icon">🎵</span> TikTok
+        </label>
+        <label class="checkbox-pill checked" onclick="togglePill(this)">
+          <input type="checkbox" name="platforms" value="instagram" checked>
+          <span class="platform-icon">📷</span> Instagram
+        </label>
+        <label class="checkbox-pill checked" onclick="togglePill(this)">
+          <input type="checkbox" name="platforms" value="twitter" checked>
+          <span class="platform-icon">𝕏</span> Twitter/X
+        </label>
+        <label class="checkbox-pill checked" onclick="togglePill(this)">
+          <input type="checkbox" name="platforms" value="linkedin" checked>
+          <span class="platform-icon">in</span> LinkedIn
+        </label>
+        <label class="checkbox-pill checked" onclick="togglePill(this)">
+          <input type="checkbox" name="platforms" value="blog" checked>
+          <span class="platform-icon">✍</span> Blog
+        </label>
+        <label class="checkbox-pill checked" onclick="togglePill(this)">
+          <input type="checkbox" name="platforms" value="github" checked>
+          <span class="platform-icon">⌥</span> GitHub
+        </label>
+      </div>
+    </div>
+
+    <!-- Step 5: Generated command -->
+    <div class="step-panel" id="step-5">
+      <p style="color:var(--slate);margin-bottom:20px;font-size:14px;">Your pipeline command is ready. Copy and run it in the <code style="color:var(--teal)">bhrikuty/</code> root directory.</p>
+      <div class="cmd-box">
+        <div class="cmd-text" id="generated-cmd">python pipeline.py --project chain_clarity --phase 6</div>
+        <button class="cmd-copy" onclick="copyCmd()">Copy</button>
+      </div>
+      <div style="margin-top:24px;">
+        <div class="section-title" style="font-size:16px;margin-bottom:12px;">What this will produce</div>
+        <div id="output-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="wizard-nav">
+      <button class="btn btn-ghost" id="btn-back" onclick="changeStep(-1)" disabled>← Back</button>
+      <span style="color:var(--slate);font-size:13px;" id="step-indicator">Step 1 of 5</span>
+      <button class="btn btn-primary" id="btn-next" onclick="changeStep(1)">Next →</button>
+    </div>
   </div>
-</section>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 2 — ROADMAP                      -->
-<!-- ══════════════════════════════════════════ -->
-<section id="roadmap">
-  <p class="section-tag">02 — Project Roadmap</p>
-  <h2>5 Phases · 10 Videos</h2>
-  <p class="section-desc">Click any phase to expand goals and content breakdown.</p>
-
-  <div class="phase-list">
-
-    <div class="phase-row" onclick="togglePhase(this)">
+  <!-- ── PHASE GRID ── -->
+  <div class="section-title">Chain Clarity — Phase Status</div>
+  <div class="phase-grid">
+    <!-- Phase 1 -->
+    <div class="phase-card complete">
       <div class="phase-header">
-        <span class="phase-num">Phase 1</span>
-        <div><div class="phase-title">The Chain Explained</div><div class="phase-subtitle">What blockchain is and why it exists</div></div>
-        <span class="phase-status"><span class="badge badge-done">✅ Complete</span></span>
+        <div class="phase-num">01</div>
+        <div class="phase-status complete">Complete</div>
       </div>
-      <div class="phase-body">
-        <div class="goal-list">
-          <div class="goal-item">Understand why trust-without-middlemen is a hard computer science problem</div>
-          <div class="goal-item">Explain what a blockchain is using non-financial analogies</div>
-          <div class="goal-item">Describe the role of nodes, blocks, hashes, and consensus</div>
-          <div class="goal-item">Understand immutability — why altering a block breaks the chain</div>
-        </div>
-        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
-          <span class="badge badge-done">Long-form script ✅</span>
-          <span class="badge badge-done">Short-form script ✅</span>
-          <span class="badge badge-done">4 Infographic cards ✅</span>
-          <span class="badge badge-done">Voiceover brief ✅</span>
-          <span class="badge badge-done">Music brief ✅</span>
-          <span class="badge badge-done">115 subtitle cues ✅</span>
-        </div>
+      <div class="phase-title">How Blockchain Works</div>
+      <div class="phase-sub">No Bank Required · 12 min</div>
+      <div class="phase-files">
+        <span class="file-chip">script.md</span>
+        <span class="file-chip">subtitles.srt</span>
+        <span class="file-chip">4 cards</span>
+        <span class="file-chip">content_spec.json</span>
+      </div>
+      <div class="phase-compliance">
+        <div class="compliance-dot warn"></div>
+        PASS_WITH_WARNINGS · 115 subtitle cues
       </div>
     </div>
-
-    <div class="phase-row" onclick="togglePhase(this)">
+    <!-- Phase 2 -->
+    <div class="phase-card complete">
       <div class="phase-header">
-        <span class="phase-num">Phase 2</span>
-        <div><div class="phase-title">Bitcoin & Ethereum Deep Dive</div><div class="phase-subtitle">The two protocols that built the industry</div></div>
-        <span class="phase-status"><span class="badge badge-done">✅ Complete</span></span>
+        <div class="phase-num">02</div>
+        <div class="phase-status complete">Complete</div>
       </div>
-      <div class="phase-body">
-        <div class="goal-list">
-          <div class="goal-item">Contrast Proof of Work vs Proof of Stake mechanically</div>
-          <div class="goal-item">Explain Bitcoin's fixed supply model — halvings, 21M cap, miners</div>
-          <div class="goal-item">Understand what Ethereum adds: smart contracts and programmable money</div>
-          <div class="goal-item">Walk through a transaction end-to-end: wallets, keys, gas, confirmation</div>
-        </div>
-        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
-          <span class="badge badge-done">Long-form script ✅</span>
-          <span class="badge badge-done">Short-form script ✅</span>
-          <span class="badge badge-done">3 Infographic cards ✅</span>
-          <span class="badge badge-done">Voiceover brief ✅</span>
-          <span class="badge badge-done">Music brief ✅</span>
-          <span class="badge badge-done">161 subtitle cues ✅</span>
-        </div>
+      <div class="phase-title">Bitcoin & Ethereum</div>
+      <div class="phase-sub">Deep Dive · 14 min</div>
+      <div class="phase-files">
+        <span class="file-chip">script.md</span>
+        <span class="file-chip">subtitles.srt</span>
+        <span class="file-chip">3 cards</span>
+        <span class="file-chip">content_spec.json</span>
+      </div>
+      <div class="phase-compliance">
+        <div class="compliance-dot warn"></div>
+        PASS_WITH_WARNINGS · 161 subtitle cues
       </div>
     </div>
-
-    <div class="phase-row" onclick="togglePhase(this)">
+    <!-- Phase 3 -->
+    <div class="phase-card complete">
       <div class="phase-header">
-        <span class="phase-num">Phase 3</span>
-        <div><div class="phase-title">DeFi & Smart Contracts</div><div class="phase-subtitle">How finance works without banks</div></div>
-        <span class="phase-status"><span class="badge badge-done">✅ Complete</span></span>
+        <div class="phase-num">03</div>
+        <div class="phase-status complete">Complete</div>
       </div>
-      <div class="phase-body">
-        <div class="goal-list">
-          <div class="goal-item">Explain smart contracts using the vending machine analogy</div>
-          <div class="goal-item">Understand how DeFi lending and borrowing protocols work step by step</div>
-          <div class="goal-item">Explain liquidity pools and AMMs plainly — no finance background required</div>
-          <div class="goal-item">Identify real risks: smart contract bugs, rug pulls, impermanent loss</div>
-        </div>
-        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
-          <span class="badge badge-done">Long-form script ✅</span>
-          <span class="badge badge-done">Short-form script ✅</span>
-          <span class="badge badge-done">3 Infographic cards ✅</span>
-          <span class="badge badge-done">Voiceover brief ✅</span>
-          <span class="badge badge-done">Music brief ✅</span>
-          <span class="badge badge-done">174 subtitle cues ✅</span>
-        </div>
+      <div class="phase-title">DeFi & Smart Contracts</div>
+      <div class="phase-sub">Your Bank Has No CEO · 13 min</div>
+      <div class="phase-files">
+        <span class="file-chip">script.md</span>
+        <span class="file-chip">subtitles.srt</span>
+        <span class="file-chip">4 cards</span>
+        <span class="file-chip">content_spec.json</span>
+      </div>
+      <div class="phase-compliance">
+        <div class="compliance-dot warn"></div>
+        PASS_WITH_WARNINGS · 174 subtitle cues
       </div>
     </div>
-
-    <div class="phase-row" onclick="togglePhase(this)">
+    <!-- Phase 4 -->
+    <div class="phase-card complete">
       <div class="phase-header">
-        <span class="phase-num">Phase 4</span>
-        <div><div class="phase-title">Security & Self-Custody</div><div class="phase-subtitle">How to actually keep crypto safe</div></div>
-        <span class="phase-status"><span class="badge badge-pending">Pending</span></span>
+        <div class="phase-num">04</div>
+        <div class="phase-status complete">Complete</div>
       </div>
-      <div class="phase-body">
-        <div class="goal-list">
-          <div class="goal-item">Distinguish hot wallets from cold wallets with real tradeoffs</div>
-          <div class="goal-item">Understand the seed phrase fully — what it is, why it is everything</div>
-          <div class="goal-item">Identify the top 5 attack vectors used against crypto holders</div>
-          <div class="goal-item">Build and apply a personal security checklist</div>
-        </div>
+      <div class="phase-title">Security & Self-Custody</div>
+      <div class="phase-sub">How Crypto Gets Stolen · 11 min</div>
+      <div class="phase-files">
+        <span class="file-chip">script.md</span>
+        <span class="file-chip">subtitles.srt</span>
+        <span class="file-chip">3 cards</span>
+        <span class="file-chip">content_spec.json</span>
+      </div>
+      <div class="phase-compliance">
+        <div class="compliance-dot warn"></div>
+        PASS_WITH_WARNINGS · 118 subtitle cues
       </div>
     </div>
-
-    <div class="phase-row" onclick="togglePhase(this)">
+    <!-- Phase 5 -->
+    <div class="phase-card complete">
       <div class="phase-header">
-        <span class="phase-num">Phase 5</span>
-        <div><div class="phase-title">Blockchain Beyond Crypto</div><div class="phase-subtitle">Real-world applications that aren't about trading</div></div>
-        <span class="phase-status"><span class="badge badge-pending">Pending</span></span>
+        <div class="phase-num">05</div>
+        <div class="phase-status complete">Complete</div>
       </div>
-      <div class="phase-body">
-        <div class="goal-list">
-          <div class="goal-item">Map blockchain use cases across supply chain, identity, and health records</div>
-          <div class="goal-item">Apply a decision framework: when does blockchain actually solve a problem?</div>
-          <div class="goal-item">Explain NFTs accurately — as ownership records, not speculative assets</div>
-          <div class="goal-item">Understand Layer 2 solutions and why they are necessary for mass adoption</div>
+      <div class="phase-title">Blockchain Beyond Crypto</div>
+      <div class="phase-sub">Real Use Cases · 12 min</div>
+      <div class="phase-files">
+        <span class="file-chip">script.md</span>
+        <span class="file-chip">subtitles.srt</span>
+        <span class="file-chip">3 cards</span>
+        <span class="file-chip">content_spec.json</span>
+      </div>
+      <div class="phase-compliance">
+        <div class="compliance-dot warn"></div>
+        PASS_WITH_WARNINGS · 101 subtitle cues
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TTS COMPARISON ── -->
+  <div class="section-title">TTS Voice Engine Comparison</div>
+  <p style="color:var(--slate);margin-bottom:24px;font-size:14px;">Expected output from each engine for a 12-minute blockchain education video. Test each before choosing your final engine.</p>
+  <div class="tts-grid tts-comparison">
+
+    <div class="tts-card top-pick">
+      <div class="top-pick-badge">Best Free · No GPU</div>
+      <div class="tts-name">Kokoro-TTS</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <span class="badge badge-free">Apache 2.0</span>
+        <span class="badge badge-free">CPU OK</span>
+      </div>
+      <div class="tts-specs">
+        <div class="tts-spec"><div class="spec-key">Quality</div><div class="spec-val" style="color:var(--gold)">⭐⭐⭐⭐ 8.8</div></div>
+        <div class="tts-spec"><div class="spec-key">Cost</div><div class="spec-val" style="color:var(--teal)">$0</div></div>
+        <div class="tts-spec"><div class="spec-key">Speed (GPU)</div><div class="spec-val">36x RT</div></div>
+        <div class="tts-spec"><div class="spec-key">Voice Clone</div><div class="spec-val" style="color:var(--slate)">No</div></div>
+      </div>
+      <div class="tts-output">Output for 12-min video: 24kHz WAV, ~20 sec generation on Colab T4. Clean US/UK accent. Consistent educational pacing. No robotic artifacts. Best CPU option available.</div>
+      <div class="tool-cmd">pip install kokoro soundfile<br>python tools/tts/kokoro_voiceover.py --phase 4</div>
+    </div>
+
+    <div class="tts-card top-pick">
+      <div class="top-pick-badge">Best Free · Voice Clone</div>
+      <div class="tts-name">Chatterbox TTS</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <span class="badge badge-free">MIT License</span>
+        <span class="badge badge-best">Beats ElevenLabs</span>
+      </div>
+      <div class="tts-specs">
+        <div class="tts-spec"><div class="spec-key">Quality</div><div class="spec-val" style="color:var(--gold)">⭐⭐⭐⭐⭐ 9.0</div></div>
+        <div class="tts-spec"><div class="spec-key">Cost</div><div class="spec-val" style="color:var(--teal)">$0</div></div>
+        <div class="tts-spec"><div class="spec-key">GPU</div><div class="spec-val">8GB+ VRAM</div></div>
+        <div class="tts-spec"><div class="spec-key">Voice Clone</div><div class="spec-val" style="color:var(--teal)">Yes (5s)</div></div>
+      </div>
+      <div class="tts-output">Output for 12-min video: 23kHz WAV, zero-shot clone from 5-sec reference. Sub-200ms/sentence latency. Emotion exaggeration control (0.5 default). Beats ElevenLabs in 63.75% of blind tests. Perth watermark embedded (inaudible).</div>
+      <div class="tool-cmd">pip install chatterbox-tts torch torchaudio<br>python tools/tts/chatterbox_voiceover.py --phase 4 --reference my_voice.wav</div>
+    </div>
+
+    <div class="tts-card top-pick">
+      <div class="top-pick-badge">Best Paid · Industry Standard</div>
+      <div class="tts-name">ElevenLabs</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <span class="badge badge-paid">$5/mo Starter</span>
+        <span class="badge badge-paid">$22/mo Creator</span>
+      </div>
+      <div class="tts-specs">
+        <div class="tts-spec"><div class="spec-key">Quality</div><div class="spec-val" style="color:var(--gold)">⭐⭐⭐⭐⭐ 9.5</div></div>
+        <div class="tts-spec"><div class="spec-key">Cost/Video</div><div class="spec-val" style="color:var(--gold)">~$0.00</div></div>
+        <div class="tts-spec"><div class="spec-key">Latency</div><div class="spec-val">75ms</div></div>
+        <div class="tts-spec"><div class="spec-key">Languages</div><div class="spec-val">32+</div></div>
+      </div>
+      <div class="tts-output">Output for 12-min video: 44.1kHz stereo MP3. Near-human prosody. Natural stress on 'decentralization', 'smart contracts'. Emotion matches script tone shifts. Zero robotic artifacts. Best for multilingual content.</div>
+      <div class="tool-cmd">pip install elevenlabs<br>python tools/tts/elevenlabs_voiceover.py --phase 4</div>
+    </div>
+
+    <div class="tts-card">
+      <div class="tts-name">Qwen3-TTS / DashScope</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <span class="badge" style="background:rgba(139,155,180,0.1);color:var(--slate);border:1px solid var(--border)">Current Default</span>
+      </div>
+      <div class="tts-specs">
+        <div class="tts-spec"><div class="spec-key">Quality</div><div class="spec-val" style="color:var(--gold)">⭐⭐⭐⭐ 8.7</div></div>
+        <div class="tts-spec"><div class="spec-key">Cost</div><div class="spec-val">Pay/use</div></div>
+        <div class="tts-spec"><div class="spec-key">Streaming</div><div class="spec-val" style="color:var(--teal)">Yes</div></div>
+        <div class="tts-spec"><div class="spec-key">Languages</div><div class="spec-val">10</div></div>
+      </div>
+      <div class="tts-output">Streaming MP3. Strong for Chinese/Japanese content. Competitive with ElevenLabs on Asian languages. Open weights (1.7B) available on HuggingFace for free local use.</div>
+      <div class="tool-cmd">python myvideo/edit/generate_voiceover.py --script phase_4/script.md</div>
+    </div>
+
+    <div class="tts-card">
+      <div class="tts-name">F5-TTS</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <span class="badge badge-free">MIT License</span>
+        <span class="badge badge-free">EN/ZH</span>
+      </div>
+      <div class="tts-specs">
+        <div class="tts-spec"><div class="spec-key">Quality</div><div class="spec-val" style="color:var(--gold)">⭐⭐⭐⭐ 8.2</div></div>
+        <div class="tts-spec"><div class="spec-key">Cost</div><div class="spec-val" style="color:var(--teal)">$0</div></div>
+        <div class="tts-spec"><div class="spec-key">Speed</div><div class="spec-val">7–33x RT</div></div>
+        <div class="tts-spec"><div class="spec-key">Voice Clone</div><div class="spec-val" style="color:var(--teal)">Yes</div></div>
+      </div>
+      <div class="tts-output">16kHz WAV. Flow-matching architecture. EN/ZH bilingual. Fast variant at 33x real-time. Use as backup if Chatterbox has VRAM issues.</div>
+      <div class="tool-cmd">pip install f5-tts<br>f5-tts_infer-cli --ref_audio ref.wav --gen_text "..."</div>
+    </div>
+
+    <div class="tts-card">
+      <div class="tts-name">XTTS-v2</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <span class="badge" style="background:rgba(245,166,35,0.1);color:var(--gold);border:1px solid rgba(245,166,35,0.3)">17 Languages</span>
+      </div>
+      <div class="tts-specs">
+        <div class="tts-spec"><div class="spec-key">Quality</div><div class="spec-val" style="color:var(--gold)">⭐⭐⭐⭐ 8.0</div></div>
+        <div class="tts-spec"><div class="spec-key">Cost</div><div class="spec-val" style="color:var(--teal)">Free*</div></div>
+        <div class="tts-spec"><div class="spec-key">GPU</div><div class="spec-val">8GB VRAM</div></div>
+        <div class="tts-spec"><div class="spec-key">Voice Clone</div><div class="spec-val" style="color:var(--teal)">Yes (6s)</div></div>
+      </div>
+      <div class="tts-output">Best multilingual voice cloning breadth (17 langs). Use for localizing videos. *Verify commercial terms before using on monetized content.</div>
+      <div class="tool-cmd">pip install TTS<br>tts --model_name tts_models/multilingual/multi-dataset/xtts_v2</div>
+    </div>
+
+  </div>
+
+  <!-- ── TOOL MATRIX TABS ── -->
+  <div class="section-title">Full Tool Matrix</div>
+  <div class="tool-section">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('tts2')">TTS / Voice</button>
+      <button class="tab-btn" onclick="switchTab('video')">Video Render</button>
+      <button class="tab-btn" onclick="switchTab('subs')">Transcription</button>
+      <button class="tab-btn" onclick="switchTab('images')">Images</button>
+      <button class="tab-btn" onclick="switchTab('orch')">Orchestration</button>
+    </div>
+
+    <!-- TTS tab (duplicate of above for matrix view) -->
+    <div class="tab-content active" id="tab-tts2">
+      <div class="tool-cards">
+        <div class="tool-card recommended">
+          <div class="tool-head"><div class="tool-name">Kokoro-TTS</div><span class="badge badge-free">Free Apache</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐ 8.8</div>
+          <div class="tool-meta">Cost: $0 · CPU-capable · No voice cloning</div>
+          <div class="tool-why">#1 on TTS Arena leaderboard. Best option when no GPU is available. 36x real-time on GPU, 3x on CPU. Apache 2.0 commercial license.</div>
+          <div class="tool-cmd">pip install kokoro soundfile</div>
+        </div>
+        <div class="tool-card recommended">
+          <div class="tool-head"><div class="tool-name">Chatterbox TTS</div><span class="badge badge-free">Free MIT</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐⭐ 9.0</div>
+          <div class="tool-meta">Cost: $0 · GPU 8GB+ · Voice cloning 5s reference</div>
+          <div class="tool-why">Best open-source voice quality. Beats ElevenLabs in 63.75% of blind tests. Emotion exaggeration control. MIT commercial license.</div>
+          <div class="tool-cmd">pip install chatterbox-tts torch torchaudio</div>
+        </div>
+        <div class="tool-card recommended">
+          <div class="tool-head"><div class="tool-name">ElevenLabs</div><span class="badge badge-paid">Paid</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐⭐ 9.5</div>
+          <div class="tool-meta">$5–22/mo · Cloud · 32+ languages · 75ms latency</div>
+          <div class="tool-why">Industry gold standard. Voice cloning on Creator plan. Best multilingual support. Lowest latency for near-real-time use.</div>
+          <div class="tool-cmd">pip install elevenlabs</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-head"><div class="tool-name">F5-TTS</div><span class="badge badge-free">Free MIT</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐ 8.2</div>
+          <div class="tool-meta">Cost: $0 · GPU · Voice cloning · EN/ZH</div>
+          <div class="tool-why">Flow-matching architecture. Fast variant at 33x real-time. Good EN/ZH bilingual support. Use as Chatterbox backup.</div>
+          <div class="tool-cmd">pip install f5-tts</div>
         </div>
       </div>
     </div>
 
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 3 — SCRIPTS                      -->
-<!-- ══════════════════════════════════════════ -->
-<section id="scripts">
-  <p class="section-tag">03 — Scripts · Phase 1</p>
-  <h2>How Blockchain Works</h2>
-  <p class="section-desc">Long-form (12 min) and short-form (65s) for Phase 1.</p>
-
-  <div class="script-tabs">
-    <button class="stab active" onclick="switchScript('long',this)">Long-Form · YouTube 12min</button>
-    <button class="stab" onclick="switchScript('short',this)">Short-Form · Reels 65s</button>
-  </div>
-
-  <div id="script-long" class="script-panel active">
-    <div class="script-section">
-      <div class="script-section-head">HOOK (0:00–0:12)</div>
-      <div class="script-spoken">"In 2022, a crypto exchange called FTX collapsed in 72 hours. Eight billion dollars in customer funds — gone. No warning. No recourse. No refunds. That same week, the Bitcoin blockchain processed over 200,000 transactions. Zero errors. Zero downtime. Same industry. Completely different result. Today, we are going to understand exactly why."</div>
-      <div class="script-onscreen">ON-SCREEN: "FTX: $8B lost in 72 hours" · "Bitcoin network: 0 errors that week"</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTION 1 — THE TRUST PROBLEM (0:12–2:30)</div>
-      <div class="script-spoken">"Every financial system has the same design flaw. It requires you to trust someone else. [...]  Computer scientists called this the Byzantine Generals Problem. [...] Then in 2008, an anonymous developer named Satoshi Nakamoto published a 9-page paper. The solution: a chain of blocks."</div>
-      <div class="script-onscreen">ON-SCREEN: Byzantine Generals diagram · "Satoshi Nakamoto · 2008"</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTIONS 2–5 + CTA</div>
-      <div class="script-spoken" style="color:var(--slate);">Full script in phase_1/script.md — covers What Is a Block, The Hash, The Chain, The Network, and CTA with exact on-screen cues and infographic timing references.</div>
-    </div>
-  </div>
-
-  <div id="script-short" class="script-panel">
-    <div class="script-section">
-      <div class="script-section-head">HOOK (0:00–0:04)</div>
-      <div class="script-spoken">"Here is why Bitcoin's history can never be secretly changed."</div>
-      <div class="script-onscreen">ON-SCREEN: "Bitcoin: 14 years. Never rewritten."</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">MAIN (0:04–0:52)</div>
-      <div class="script-spoken">"A block is a sealed container. It holds three things. ONE: the transaction data. TWO: the timestamp. THREE: the hash — a digital fingerprint of everything inside. Change one byte of that data — the fingerprint changes completely. [...] If someone alters a block from six months ago — its fingerprint changes. The next block no longer matches. The chain breaks forward. And thousands of computers around the world notice immediately."</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">CTA (0:52–1:05)</div>
-      <div class="script-spoken">"That is immutability. Full 12-minute breakdown at the link. Chain Clarity — blockchain, without the noise. Subscribe for Phase 2."</div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 4 — INFOGRAPHIC CARDS            -->
-<!-- ══════════════════════════════════════════ -->
-<section id="cards">
-  <p class="section-tag">04 — Infographic Assets</p>
-  <h2>Animated Cards</h2>
-  <p class="section-desc">Live previews — each card is screen-record ready. Click "Screen Record Mode" to go fullscreen with a 3-2-1 countdown.</p>
-
-  <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
-    <button class="stab active" onclick="switchPhaseCards(1,this)">Phase 1 · 4 Cards</button>
-    <button class="stab" onclick="switchPhaseCards(2,this)">Phase 2 · 3 Cards</button>
-    <button class="stab" onclick="switchPhaseCards(3,this)">Phase 3 · 3 Cards</button>
-  </div>
-
-  <div id="phase1-cards">
-    <div class="card-selector">
-      <button class="card-btn active" onclick="selectCard(0,this,'p1')">Card 01 · What Is a Block?</button>
-      <button class="card-btn" onclick="selectCard(1,this,'p1')">Card 02 · Hash Fingerprint</button>
-      <button class="card-btn" onclick="selectCard(2,this,'p1')">Card 03 · Chain Link</button>
-      <button class="card-btn" onclick="selectCard(3,this,'p1')">Card 04 · Tamper = Break</button>
-    </div>
-  </div>
-
-  <div id="phase2-cards" style="display:none;">
-    <div class="card-selector">
-      <button class="card-btn active" onclick="selectCard(0,this,'p2')">Card 01 · PoW vs PoS</button>
-      <button class="card-btn" onclick="selectCard(1,this,'p2')">Card 02 · 21M Hard Cap</button>
-      <button class="card-btn" onclick="selectCard(2,this,'p2')">Card 03 · BTC vs ETH</button>
-    </div>
-  </div>
-
-  <div id="phase3-cards" style="display:none;">
-    <div class="card-selector">
-      <button class="card-btn active" onclick="selectCard(0,this,'p3')">Card 01 · Smart Contract IF/THEN</button>
-      <button class="card-btn" onclick="selectCard(1,this,'p3')">Card 02 · DeFi Lending Flow</button>
-      <button class="card-btn" onclick="selectCard(2,this,'p3')">Card 03 · AMM x × y = k</button>
-    </div>
-  </div>
-
-  <div class="card-preview" id="cardPreview">
-    <iframe id="cardFrame" src="phase_1/infographic_assets/card_01.html" style="transform:scale(0.5556);transform-origin:top left;"></iframe>
-  </div>
-
-  <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;">
-    <button class="record-btn" onclick="enterScreenRecord()">⏺ Screen Record Mode (3-2-1 Countdown)</button>
-    <button class="record-btn" style="background:rgba(123,92,240,0.1);border-color:rgba(123,92,240,0.3);color:var(--violet);" onclick="replayCard()">↺ Replay Animation</button>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 3b — SCRIPTS PHASE 2             -->
-<!-- ══════════════════════════════════════════ -->
-<section id="scripts2">
-  <p class="section-tag">03b — Scripts · Phase 2</p>
-  <h2>Bitcoin vs Ethereum — What's Actually Different</h2>
-  <p class="section-desc">Long-form (14 min) and short-form (65s) for Phase 2.</p>
-
-  <div class="script-tabs">
-    <button class="stab active" onclick="switchScript2('long2',this)">Long-Form · YouTube 14min</button>
-    <button class="stab" onclick="switchScript2('short2',this)">Short-Form · Reels 65s</button>
-  </div>
-
-  <div id="script-long2" class="script-panel active">
-    <div class="script-section">
-      <div class="script-section-head">HOOK (0:00–0:15)</div>
-      <div class="script-spoken">"What if your money had a hard limit? Not a soft limit. Not a government policy. Not a promise. A mathematical guarantee, enforced by code. 21 million. No more. Ever."</div>
-      <div class="script-onscreen">ON-SCREEN: "21,000,000 BTC — hard maximum. Forever." [#00D4AA · counter] · "No vote. No exception. No override." [#8B9BB4]</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTION 1 — WHAT MAKES BITCOIN DIFFERENT (0:15–2:30)</div>
-      <div class="script-spoken">"Digital money is not new. PayPal launched in 1998. [...] So what did Bitcoin actually change? Three things. First: no issuer. [...] Third: a fixed supply. No entity can create more Bitcoin. The total supply is 21 million — written into the code in 2009. [...] Bitcoin's rules are set by math. The code IS the policy."</div>
-      <div class="script-onscreen">ON-SCREEN: "NO ISSUER · NO GATEKEEPER · FIXED SUPPLY" [#00D4AA] · "Bitcoin's rules: set by math, not committee" [#8B9BB4]</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTION 2 — PROOF OF WORK (2:30–5:00) · INFOGRAPHIC: card_01</div>
-      <div class="script-spoken">"Every 10 minutes, miners compete to solve a puzzle. The puzzle: find a number — called a nonce — such that when you combine it with the block's data and hash the result, the output starts with a specific number of zeros. There is no shortcut. There is no formula. [...] This mechanism is called Proof of Work."</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTION 3 — BITCOIN'S SUPPLY (5:00–7:30) · INFOGRAPHIC: card_02</div>
-      <div class="script-spoken">"2009: 50 BTC per block. 2012: 25 BTC. 2016: 12.5 BTC. 2020: 6.25 BTC. 2024: 3.125 BTC. [...] Total supply: 21 million. Final. As of 2024, about 19.7 million Bitcoin have already been mined. Only 1.3 million remain."</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTION 4 — ETHEREUM (7:30–9:30) · INFOGRAPHIC: card_03</div>
-      <div class="script-spoken">"In 2013, a 19-year-old named Vitalik Buterin asked a different question. What if we could run code without a server? His insight: a blockchain is not a ledger. It is a shared, unstoppable computer. [...] Bitcoin is a vending machine. Ethereum is a general-purpose computer."</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTIONS 5–6 + CTA (9:30–14:00)</div>
-      <div class="script-spoken" style="color:var(--slate);">Section 5: Proof of Stake / The Merge (Sept 15 2022) — 32 ETH staking, slashing, −99.9% energy. Section 6: Private key → public key → address, mailbox analogy. CTA: Phase 3 DeFi tease. Full script in phase_2/script.md</div>
-    </div>
-  </div>
-
-  <div id="script-short2" class="script-panel">
-    <div class="script-section">
-      <div class="script-section-head">HOOK (0:00–0:04)</div>
-      <div class="script-spoken">"Your crypto is not actually inside your wallet."</div>
-      <div class="script-onscreen">TITLE CARD: "YOUR BITCOIN ISN'T IN YOUR WALLET." · "Common misconception: fixed." [#00D4AA]</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">MAIN (0:04–0:52)</div>
-      <div class="script-spoken">"Your Bitcoin lives on the blockchain. What the wallet holds is the key that proves you own it. There are three layers. ONE: the private key. A 256-bit random number. Whoever holds this owns the coins. Lose it — gone forever. [...] TWO: the public key. Derived from the private key through one-way math. [...] THREE: your address. This is what you share. Like a mailbox number."</div>
-      <div class="script-onscreen">ON-SCREEN: "1 · PRIVATE KEY → proves ownership" [#F5A623] · "2 · PUBLIC KEY → one-way derived" [#8B9BB4] · "3 · ADDRESS → your shareable mailbox" [#00D4AA] · "Lose private key → coins gone. Forever." [#7B5CF0]</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">CTA (0:52–1:05)</div>
-      <div class="script-spoken">"Full 14-minute breakdown: Bitcoin vs Ethereum. Chain Clarity — blockchain, without the noise. Subscribe for Phase 3: DeFi."</div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 3c — SCRIPTS PHASE 3             -->
-<!-- ══════════════════════════════════════════ -->
-<section id="scripts3">
-  <p class="section-tag">03c — Scripts · Phase 3</p>
-  <h2>DeFi & Smart Contracts — How Finance Works Without Banks</h2>
-  <p class="section-desc">Long-form (14 min) and short-form (65s) for Phase 3.</p>
-
-  <div class="script-tabs">
-    <button class="stab active" onclick="switchScript3('long3',this)">Long-Form · YouTube 14min</button>
-    <button class="stab" onclick="switchScript3('short3',this)">Short-Form · Reels 65s</button>
-  </div>
-
-  <div id="script-long3" class="script-panel active">
-    <div class="script-section">
-      <div class="script-section-head">HOOK (0:00–0:15)</div>
-      <div class="script-spoken">"In 2010, getting a bank loan meant paperwork, credit checks, meetings. In 2024, a protocol lent someone $10 million in seconds. No meeting. No signature. No banker. The code processes the loan. Instantly."</div>
-      <div class="script-onscreen">ON-SCREEN: "THE CODE PROCESSES THE LOAN." [#00D4AA · 72px]</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTION 1 — SMART CONTRACTS (0:15–2:30) · INFOGRAPHIC: card_01</div>
-      <div class="script-spoken">"A smart contract is a program that runs on a blockchain. When conditions are met, it executes automatically. No one needs to approve it. No one can stop it. Think of a vending machine. You insert money. The machine checks the amount. If correct, it releases the snack. No human involvement. That's a smart contract. [...] The code is the bank."</div>
-      <div class="script-onscreen">ON-SCREEN: IF/THEN flow — "IF: Deposit 150 USD ETH" → "THEN: Release 100 USD loan" → "IF: Collateral &lt; 120 USD" → "THEN: Auto-liquidate" · "THE CODE IS THE BANK." [#00D4AA · 80px]</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTION 2 — DEFI LENDING (2:30–5:00) · INFOGRAPHIC: card_02</div>
-      <div class="script-spoken">"The two biggest DeFi lending protocols are Aave and Compound. [...] To borrow 100 dollars of USDC, you post 150 dollars of ETH. That's 150% collateralization. [...] Think of it like a pawn shop with no pawnbroker. [...] Automatic. Instant. Unstoppable."</div>
-      <div class="script-onscreen">ON-SCREEN: LENDER [#00D4AA] ⇌ POOL ⇌ BORROWER [#F5A623] · "OVERCOLLATERALIZED: 150%+" [#F5A623]</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTION 3 — AMMs (5:00–7:30) · INFOGRAPHIC: card_03</div>
-      <div class="script-spoken">"There's no order book. Instead: a liquidity pool. Two assets sit in a smart contract. The price is set by a formula: x times y equals k. [...] No one sets the price. The math does. Protocols like Uniswap, Curve, and Balancer use this model."</div>
-      <div class="script-onscreen">ON-SCREEN: "x × y = k" [JetBrains Mono · #F5A623 · 72px] · "NO ONE SETS THE PRICE. THE MATH DOES." [#00D4AA]</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTION 4 — YIELD + RISKS (7:30–9:30)</div>
-      <div class="script-spoken">"Two yield sources: trading fees and protocol incentives. [...] But there's a catch: impermanent loss. [...] In 2020, Harvest Finance lost $34 million in a single transaction. [...] If you don't understand where the yield comes from — walk away."</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTION 5 — STABLECOINS (9:30–11:30)</div>
-      <div class="script-spoken">"Three types: fiat-backed (USDC/USDT), crypto-backed (DAI), algorithmic. In May 2022, Terra's UST lost its peg. Forty billion dollars in value — destroyed in four days. The mechanism failed. The peg broke."</div>
-      <div class="script-onscreen">ON-SCREEN: "$40 BILLION" [#F5A623 · 96px] · "Destroyed in 4 days." [#FFFFFF · 48px]</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">SECTION 6 — RISKS + CTA (11:30–14:00)</div>
-      <div class="script-spoken" style="color:var(--slate);">Smart contract risk · Protocol risk · Liquidation risk · Rug pulls ("This is fraud.") · Oracle risk · Regulatory risk. CTA: Phase 4 tease — Security &amp; Self-Custody. Full script in phase_3/script.md</div>
-    </div>
-  </div>
-
-  <div id="script-short3" class="script-panel">
-    <div class="script-section">
-      <div class="script-section-head">HOOK (0:00–0:04)</div>
-      <div class="script-spoken">"A smart contract does something no bank can. It cannot lie."</div>
-      <div class="script-onscreen">TITLE: "SMART CONTRACT" · "Cannot lie. Cannot delay. Cannot deny." [#00D4AA]</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">MAIN (0:04–0:52)</div>
-      <div class="script-spoken">"A smart contract is a program that runs on a blockchain. No human controls it. No company owns it. Once deployed, it executes exactly as coded. Three rules: ONE — conditions are in the code. TWO — when met, execution is automatic. THREE — nobody can stop it."</div>
-      <div class="script-onscreen">ON-SCREEN: "1 · CONDITIONS IN CODE" [#F5A623] · "2 · EXECUTION IS AUTOMATIC" [#00D4AA] · "3 · NOBODY CAN STOP IT" [#7B5CF0]</div>
-    </div>
-    <div class="script-section">
-      <div class="script-section-head">CTA (0:52–1:05)</div>
-      <div class="script-spoken">"Full 14-minute breakdown: DeFi, lending, AMMs, stablecoins. Chain Clarity — blockchain, without the noise."</div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 5 — PRODUCTION BRIEFS            -->
-<!-- ══════════════════════════════════════════ -->
-<section id="briefs">
-  <p class="section-tag">05 — Production Briefs</p>
-  <h2>Creator Toolkit</h2>
-  <p class="section-desc">Everything the editor, VO artist, and music supervisor need for both phases.</p>
-
-  <div style="margin-bottom:1.5rem;">
-    <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:0.75rem;">Phase 1 Briefs</div>
-  </div>
-
-  <div class="brief-accordion">
-
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">🎙️</span>
-        <span class="brief-title">Voiceover Brief — Tone, Pace & Emphasis Markers</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">Key delivery rules for this video:
-
-• Hook: Matter-of-fact. No sensationalism. One beat between sentences.
-• "Eight billion dollars in customer funds — gone." → [PAUSE 0.8s after "gone."]
-• "No warning. No recourse. No refunds." → Staccato. Each word hits.
-• Byzantine Generals analogy → Storytelling voice. Slightly slower. Vivid.
-• "But one general is a traitor." → [DRAMATIC PAUSE 0.5s before.] Slow.
-• "The solution: a chain of blocks." → [PAUSE 0.5s before.] Quiet revelation.
-• Hash section: Technical but accessible. Demo-mode pace.
-• Cascade section: SPEED UP through "block 501... 502... all the way to present"
-• "The past is locked." → SLOW DOWN. Let it land.
-
-Full line-by-line brief in: phase_1/voiceover_brief.md</div>
-      </div>
-    </div>
-
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">🎵</span>
-        <span class="brief-title">Music Brief — BPM, Energy & Search Terms by Section</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">Section-by-section music map:</div>
-        <div class="music-tags">
-          <span class="mtag">Hook: 105–110 BPM · dramatic tension · sparse piano/sub-bass</span>
-          <span class="mtag">Section 1: 90–95 BPM · curious, building · lo-fi background</span>
-          <span class="mtag">Section 2: 92–98 BPM · methodical · steady lo-fi beat</span>
-          <span class="mtag">Section 3: 98–105 BPM · technical curiosity · arpeggios</span>
-          <span class="mtag">Section 4: 100–108 BPM · escalating tension · cascade moment</span>
-          <span class="mtag">Section 5: 98–105 BPM · empowering, resolved · warm pads</span>
-          <span class="mtag">CTA: 105–110 BPM · optimistic, forward-looking · melodic hook</span>
+    <!-- Video Render tab -->
+    <div class="tab-content" id="tab-video">
+      <div class="tool-cards">
+        <div class="tool-card recommended">
+          <div class="tool-head"><div class="tool-name">Remotion</div><span class="badge badge-free">Freemium</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐⭐ 9.0</div>
+          <div class="tool-meta">Free for individuals · React-based · Lambda rendering</div>
+          <div class="tool-why">Code-as-video. Once template built, new videos = changing props only. Spring physics, SVG animations, synchronized audio. Best upgrade for visual quality.</div>
+          <div class="tool-cmd">npx create-video@latest && cd remotion && npm install</div>
         </div>
-        <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--slate);">Full brief in: phase_1/music_brief.md</div>
-      </div>
-    </div>
-
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">🎬</span>
-        <span class="brief-title">Clip Assembly Brief — Shot-by-Shot Timeline</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">36 shots across 12 minutes. Key moments:
-
-00:00–00:12 · HOOK: FTX headlines b-roll → Bitcoin network visual contrast
-02:30–05:00 · SECTION 2: card_01.html screen-record + ledger b-roll
-05:00–07:15 · SECTION 3: card_02.html screen-record (hash demo live)
-07:15–09:00 · SECTION 4: card_03 + card_04 cascade animation
-09:00–11:00 · SECTION 5: Node network motion graphic + stat counter
-11:00–12:00 · CTA: End screen with Chain Clarity logo + subscribe chip
-
-Transitions: hard cuts (energy beats) · cross-dissolve (b-roll↔infographics) · swipe-left (section changes)
-Color grade: desaturate b-roll 20%, no warm LUT.
-
-Full 36-shot list in: phase_1/clip_brief.md</div>
-      </div>
-    </div>
-
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">💬</span>
-        <span class="brief-title">Subtitles — 115 Cues · Download .SRT</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">115 subtitle cues · max 7 words per line · max 2 lines per cue · 1.5–4.5s duration each. Ready for import into Premiere Pro, DaVinci Resolve, CapCut, or YouTube Studio.</div>
-        <div class="srt-dl" onclick="downloadSRT(1)">⬇ Download subtitles.srt (Phase 1)</div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Phase 2 Briefs -->
-  <div style="margin-top:2.5rem;margin-bottom:0.75rem;">
-    <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--violet);margin-bottom:0.75rem;">Phase 2 Briefs — Bitcoin &amp; Ethereum Deep Dive</div>
-  </div>
-
-  <div class="brief-accordion">
-
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">🎙️</span>
-        <span class="brief-title">Voiceover Brief — Phase 2 · Tone, Pace &amp; Emphasis Markers</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">Key delivery rules for Phase 2:
-
-• Hook: Weight and wonder. "21 million. No more. Ever." → [PAUSE 0.8s before.] Let each word land separately.
-• "The code IS the policy." → [EMPHASIZE IS.] Slight pause before. This is the section's peak line.
-• Proof of Work section: Methodical pace. You are explaining a mechanical process.
-• Halving countdown (50 → 25 → 12.5...) → [SPEED UP slightly.] Momentum building.
-• "Total supply: 21 million. Final." → [SLOW DOWN dramatically.] Pause 1s after.
-• "What if we could run code without a server?" → [PAUSE 0.5s before.] Revelation tone.
-• Wallet/keys section: Slowest pace in the video. High practical stakes.
-• "Lose it — the coins are inaccessible. Forever." → [PAUSE 0.5s after "inaccessible."] Very deliberate.
-
-Full line-by-line brief in: phase_2/voiceover_brief.md</div>
-      </div>
-    </div>
-
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">🎵</span>
-        <span class="brief-title">Music Brief — Phase 2 · BPM, Energy &amp; Search Terms by Section</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">Phase 2 is slightly more confident and revelatory than Phase 1. Music should feel like momentum, not just explanation.</div>
-        <div class="music-tags">
-          <span class="mtag">Hook: 105–110 BPM · weight + wonder · deep bass pulse, sparse piano</span>
-          <span class="mtag">Section 1: 92–96 BPM · intellectual curiosity · minimal lo-fi</span>
-          <span class="mtag">Section 2: 96–102 BPM · mechanical precision · rhythmic pulse, arpeggio</span>
-          <span class="mtag">Section 3: 98–105 BPM · building reverence · warm pad, rhythmic pulse</span>
-          <span class="mtag">Section 4: 100–108 BPM · revelation + possibility · brighter synth, more harmonic richness</span>
-          <span class="mtag">Section 5: 98–105 BPM · analytical, resolved · cleaner harmonics vs PoW</span>
-          <span class="mtag">Section 6: 92–98 BPM · precise + practical · back to minimal, soft pad</span>
-          <span class="mtag">CTA: 105–110 BPM · satisfying, forward · fade up 20% → 35%</span>
+        <div class="tool-card recommended">
+          <div class="tool-head"><div class="tool-name">FFmpeg + MoviePy</div><span class="badge badge-free">Free MIT/GPL</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐ 7.8</div>
+          <div class="tool-meta">$0 · Python-native · Wraps FFmpeg</div>
+          <div class="tool-why">Best immediate Python upgrade from PIL. Familiar API. Good for data-driven compositions. Keep FFmpeg as base, MoviePy on top.</div>
+          <div class="tool-cmd">pip install moviepy  # FFmpeg must be on PATH</div>
         </div>
-        <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--slate);">Full brief in: phase_2/music_brief.md</div>
-      </div>
-    </div>
-
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">🎬</span>
-        <span class="brief-title">Clip Assembly Brief — Phase 2 · 52-Shot Timeline</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">52 shots across 14 minutes. Key infographic insert moments:
-
-03:05–03:25 · SECTION 2: card_01.html (PoW vs PoS) — full-screen, dissolve 0.4s
-05:20–05:40 · SECTION 3: card_02.html (21M halving timeline) — hold 8s for counter animation
-07:55–08:10 · SECTION 4: card_03.html (BTC vs ETH) — cut on "run code without a server?"
-09:50–10:10 · SECTION 5: card_01.html right column (PoS side highlight)
-
-Color grade: Base #0A0E1A · teal in shadows · gold pull on mining shots · violet/teal on Ethereum sections
-Key moment: "Total supply: 21 million. Final." — hold stat card + music pause 1s
-
-Full 52-shot list in: phase_2/clip_brief.md</div>
-      </div>
-    </div>
-
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">💬</span>
-        <span class="brief-title">Subtitles — Phase 2 · 161 Cues · Download .SRT</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">161 subtitle cues covering the full 14-minute script · max 7 words per line · max 2 lines per cue · 1.5–4.5s duration each. Ready for import into Premiere Pro, DaVinci Resolve, CapCut, or YouTube Studio.</div>
-        <div class="srt-dl" onclick="downloadSRT(2)">⬇ Download subtitles.srt (Phase 2)</div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-  <!-- Phase 3 Briefs -->
-  <div style="margin-top:2.5rem;margin-bottom:0.75rem;">
-    <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:0.75rem;">Phase 3 Briefs — DeFi &amp; Smart Contracts</div>
-  </div>
-
-  <div class="brief-accordion">
-
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">🎙️</span>
-        <span class="brief-title">Voiceover Brief — Phase 3 · Tone, Pace &amp; Emphasis Markers</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">Key delivery rules for Phase 3:
-
-• Hook: "The code processes the loan. Instantly." → Crisp. Each word stands alone.
-• "The mechanism is the rule." → [SLOW DOWN.] 4-word sentence. Pause 0.5s after.
-• "The code is the bank." → [PAUSE 0.8s before.] Section 1 peak line. Quiet authority.
-• Risk section: Deliberate, not alarmist. Safety briefing tone.
-• "walk away" → [PAUSE before.] Direct advice tone. Not dramatic.
-• "$40B destroyed in 4 days" → [Let number land.] No inflation in delivery.
-• "This is fraud." → Flat. Matter-of-fact. No theatre.
-
-Full line-by-line brief in: phase_3/voiceover_brief.md</div>
-      </div>
-    </div>
-
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">🎵</span>
-        <span class="brief-title">Music Brief — Phase 3 · BPM, Energy &amp; Search Terms by Section</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">Phase 3 is the most emotionally varied: opens with precision, closes with gravity.</div>
-        <div class="music-tags">
-          <span class="mtag">Hook: 108–112 BPM · institutional piano chord → clean electronic pulse</span>
-          <span class="mtag">Section 1: 96–102 BPM · mechanical clockwork · brief filter close on "The code is the bank."</span>
-          <span class="mtag">Section 2: 98–104 BPM · slightly fuller · accent hits on "Automatic. Instant. Unstoppable."</span>
-          <span class="mtag">Section 3: 96–102 BPM · meditative · two-voice arrangement (balance concept)</span>
-          <span class="mtag">Section 4: 92–98 BPM · cautious/honest · near-silence on "walk away"</span>
-          <span class="mtag">Section 5: 94–100 BPM · near-silence on "$40B destroyed"</span>
-          <span class="mtag">Section 6: 90–96 BPM · minimal · music nearly inaudible</span>
-          <span class="mtag">CTA: 106–112 BPM · warm/resolved · full color return</span>
+        <div class="tool-card">
+          <div class="tool-head"><div class="tool-name">Motion Canvas</div><span class="badge badge-free">Free MIT</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐⭐ 9.0</div>
+          <div class="tool-meta">$0 · TypeScript · 3Blue1Brown style</div>
+          <div class="tool-why">Best for signature explainer animations (blockchain-building, hash-function visuals). Not for full video assembly — use for 2–3 hero animations.</div>
+          <div class="tool-cmd">npm create motion-canvas@latest</div>
         </div>
-        <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--slate);">Full brief in: phase_3/music_brief.md</div>
+        <div class="tool-card">
+          <div class="tool-head"><div class="tool-name">Runway Gen-4</div><span class="badge badge-paid">Paid</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐⭐ 9.5</div>
+          <div class="tool-meta">~$0.05/sec · Cloud API · AI generative</div>
+          <div class="tool-why">Cinematic AI B-roll. 20×5sec clips per video ≈ $5. Scene consistency across shots. Eliminates stock footage licenses.</div>
+          <div class="tool-cmd">pip install requests  # REST API</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-head"><div class="tool-name">Kling AI</div><span class="badge badge-paid">Paid</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐ 8.8</div>
+          <div class="tool-meta">$7.99/mo · Best cost/quality B-roll ratio</div>
+          <div class="tool-why">Lower commitment than Runway ($7.99 vs $76/mo). Good for 1–5 videos/month. 20×5sec clips ≈ $7.</div>
+          <div class="tool-cmd">pip install requests  # REST API</div>
+        </div>
       </div>
     </div>
 
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">🎬</span>
-        <span class="brief-title">Clip Assembly Brief — Phase 3 · 83-Shot Timeline</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">83 shots across 14 minutes. Key infographic insert moments:
-
-0:55–1:25 · SECTION 1: card_01.html (Smart Contract IF/THEN) — full-screen, hold 3.5s animation + 4s
-3:30–4:05 · SECTION 2: card_02.html (DeFi Lending Flow) — full-screen, hold 8s for 3-column absorption
-5:28–6:05 · SECTION 3: card_03.html (AMM x×y=k) — full-screen, let formula type in naturally
-
-Color grade: Deep teal-shifted shadows by default · Risk section desaturated 15% · Near-monochrome at peak risk moments
-Key moments: Music nearly silent on "$40B destroyed" · Hard hit on "THIS IS FRAUD." · Music resolves warm for CTA
-
-Full 83-shot list in: phase_3/clip_brief.md</div>
+    <!-- Subtitles tab -->
+    <div class="tab-content" id="tab-subs">
+      <div class="tool-cards">
+        <div class="tool-card recommended">
+          <div class="tool-head"><div class="tool-name">WhisperX</div><span class="badge badge-free">Free BSD-4</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐⭐ 9.0</div>
+          <div class="tool-meta">$0 · GPU recommended · Word timestamps + diarization</div>
+          <div class="tool-why">Best open-source option. Word-level timestamps enable karaoke captions. Speaker diarization for interviews. Eliminates manual SRT entirely.</div>
+          <div class="tool-cmd">pip install whisperx && whisperx video.mp4 --word_timestamps True</div>
+        </div>
+        <div class="tool-card recommended">
+          <div class="tool-head"><div class="tool-name">faster-whisper</div><span class="badge badge-free">Free MIT</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐ 8.8</div>
+          <div class="tool-meta">$0 · CPU-capable · INT8 quantized</div>
+          <div class="tool-why">Easiest drop-in. No GPU required. Same accuracy as Whisper large-v3-turbo. Best for CPU-only environments.</div>
+          <div class="tool-cmd">pip install faster-whisper</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-head"><div class="tool-name">AssemblyAI</div><span class="badge badge-paid">$0.03/video</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐ 8.8</div>
+          <div class="tool-meta">~$0.03 per 12-min video · Auto YouTube chapters</div>
+          <div class="tool-why">Unique: auto-generates YouTube chapter markers from transcript. Cheapest paid option. $3/mo for 100 videos.</div>
+          <div class="tool-cmd">pip install assemblyai</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-head"><div class="tool-name">Gladia Solaria-1</div><span class="badge badge-paid">$0.04/video</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐⭐ 9.0</div>
+          <div class="tool-meta">~$0.04 per 12-min video · 100+ language translation</div>
+          <div class="tool-why">Best value paid: includes translation to 100 languages in one API call. Good for multilingual Bhrikuty content.</div>
+          <div class="tool-cmd">pip install requests  # REST API</div>
+        </div>
       </div>
     </div>
 
-    <div class="brief-item">
-      <div class="brief-head" onclick="toggleBrief(this)">
-        <span class="brief-icon">💬</span>
-        <span class="brief-title">Subtitles — Phase 3 · 174 Cues · Download .SRT</span>
-        <span class="brief-toggle">▼</span>
-      </div>
-      <div class="brief-body">
-        <div class="brief-content">174 subtitle cues covering the full 14-minute Phase 3 script · max 7 words per line · max 2 lines per cue · 1.5–4.5s duration each. 3 pre-delivery corrections applied. Ready for import into Premiere Pro, DaVinci Resolve, CapCut, or YouTube Studio.</div>
-        <div class="srt-dl" onclick="downloadSRT(3)">⬇ Download subtitles.srt (Phase 3)</div>
+    <!-- Images tab -->
+    <div class="tab-content" id="tab-images">
+      <div class="tool-cards">
+        <div class="tool-card recommended">
+          <div class="tool-head"><div class="tool-name">FLUX.1 schnell</div><span class="badge badge-free">Free Apache</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐⭐ 9.2</div>
+          <div class="tool-meta">$0 after setup · 24GB VRAM · Unlimited generations</div>
+          <div class="tool-why">Best open-source thumbnail generator. Superior text rendering vs SD. Apache 2.0 commercial. Once set up, zero per-image cost.</div>
+          <div class="tool-cmd">git clone https://github.com/comfyanonymous/ComfyUI</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-head"><div class="tool-name">FLUX.1 pro (BFL API)</div><span class="badge badge-paid">$0.055/img</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐⭐ 9.2</div>
+          <div class="tool-meta">~$0.55 for 10 variants · No local GPU</div>
+          <div class="tool-why">Cloud FLUX without local setup. 10 thumbnail variants for $0.55. Use when no high-VRAM GPU available.</div>
+          <div class="tool-cmd">pip install requests  # BFL API</div>
+        </div>
+        <div class="tool-card recommended">
+          <div class="tool-head"><div class="tool-name">Ideogram v2</div><span class="badge badge-paid">$0.08/img</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐⭐ 9.3</div>
+          <div class="tool-meta">Best text-in-image · Professional typography</div>
+          <div class="tool-why">Best-in-class text rendering. Perfect for thumbnails where text IS the design (e.g. "HOW CRYPTO GETS STOLEN" in giant bold). Use for text-heavy layouts.</div>
+          <div class="tool-cmd">pip install requests  # Ideogram API</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-head"><div class="tool-name">HTML Cards (current)</div><span class="badge badge-free">Free</span></div>
+          <div class="quality-stars">⭐⭐⭐ 7.0</div>
+          <div class="tool-meta">$0 · Brand consistent · Already in repo</div>
+          <div class="tool-why">Zero setup. Perfect brand color control. Good for infographic data cards. Upgrade to FLUX/Ideogram for photorealistic thumbnails.</div>
+          <div class="tool-cmd"># Already in phase_N/infographic_assets/</div>
+        </div>
       </div>
     </div>
 
+    <!-- Orchestration tab -->
+    <div class="tab-content" id="tab-orch">
+      <div class="tool-cards">
+        <div class="tool-card recommended">
+          <div class="tool-head"><div class="tool-name">pipeline.py (current)</div><span class="badge badge-free">Free · In Repo</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐⭐</div>
+          <div class="tool-meta">$0 · Python · Full control · No dependencies</div>
+          <div class="tool-why">Already integrated. Context-aware routing (HyperEdit pattern). 3-tier fallback per stage. Zero external dependencies. Extend rather than replace.</div>
+          <div class="tool-cmd">python pipeline.py --phase 6 --topic "NFTs" --outline "..."</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-head"><div class="tool-name">n8n</div><span class="badge badge-free">Free Self-Host</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐ 8.5</div>
+          <div class="tool-meta">Free to self-host · Visual builder · 400+ integrations</div>
+          <div class="tool-why">Best visual automation. Trigger pipeline.py on schedule, webhook, or manual. Connect to social media publishing APIs. Good for hands-off publishing.</div>
+          <div class="tool-cmd">docker run -it --rm -p 5678:5678 n8nio/n8n</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-head"><div class="tool-name">CrewAI</div><span class="badge badge-free">Free MIT</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐ 8.0</div>
+          <div class="tool-meta">$0 · Python · Multi-agent roles</div>
+          <div class="tool-why">Director/Picasso/DiCaprio pattern maps naturally to CrewAI roles. Each agent has tools and specialized instructions. Good for advanced multi-agent orchestration.</div>
+          <div class="tool-cmd">pip install crewai</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-head"><div class="tool-name">Dify</div><span class="badge badge-free">Free Self-Host</span></div>
+          <div class="quality-stars">⭐⭐⭐⭐ 8.0</div>
+          <div class="tool-meta">Free self-host · Visual LLM workflow builder</div>
+          <div class="tool-why">LLMOps platform with visual workflow editor. Good for non-developer team members to trigger and monitor pipeline runs.</div>
+          <div class="tool-cmd">docker compose up dify</div>
+        </div>
+      </div>
+    </div>
   </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 6 — EXPORT                       -->
-<!-- ══════════════════════════════════════════ -->
-<section id="export">
-  <p class="section-tag">06 — Export Tools</p>
-  <h2>Production Bundle</h2>
-  <p class="section-desc">Copy, download, or export your production assets.</p>
-
-  <div class="export-grid">
-    <div class="export-card" onclick="copyBrandGuidelines()">
-      <div class="export-icon">📋</div>
-      <div class="export-label">Copy Brand Guidelines</div>
-      <div class="export-desc">Copy brand_guidelines.md to clipboard for use in prompts</div>
+  <!-- Footer -->
+  <div class="footer-strip">
+    <div>
+      Bhrikuty Film Director · Chain Clarity · Blockchain without the noise.
     </div>
-    <div class="export-card" onclick="alert('Open dashboard.html in browser → File → Print → Save as PDF')">
-      <div class="export-icon">📄</div>
-      <div class="export-label">Export as PDF</div>
-      <div class="export-desc">File → Print → Save as PDF for client delivery</div>
-    </div>
-    <div class="export-card" onclick="alert('Phase 1–3 cards available in the Cards section above.\nOpen any card_0N.html at 1080×1080 viewport and screen-record.')">
-      <div class="export-icon">⏺</div>
-      <div class="export-label">Screen-Record Cards</div>
-      <div class="export-desc">Open each card_0N.html at 1080×1080 viewport (P1 · 4 cards · P2 · 3 cards · P3 · 3 cards)</div>
-    </div>
-    <div class="export-card" onclick="alert('Phase 3 complete. Say \"continue\" to begin Phase 4: Security & Self-Custody.')">
-      <div class="export-icon">➡️</div>
-      <div class="export-label">Continue to Phase 4</div>
-      <div class="export-desc">Security &amp; Self-Custody — say "continue" to start</div>
+    <div style="display:flex;gap:20px;align-items:center;">
+      <span>Inspired by <a href="https://github.com/kevinbadi/hyperedit" style="color:var(--teal);text-decoration:none;">HyperEdit</a></span>
+      <span style="color:rgba(139,155,180,0.4)">|</span>
+      <span>5 phases · 7 platforms · 17 compliance checks</span>
     </div>
   </div>
-</section>
 
 </div>
-
-<!-- ── SCREEN RECORD OVERLAY ── -->
-<div id="srOverlay">
-  <button class="sr-exit" onclick="exitScreenRecord()">✕ Exit</button>
-  <div id="srCountdown">3</div>
-  <iframe id="srFrame" src=""></iframe>
-</div>
-
-<!-- ── FOOTER ── -->
-<footer>
-  <span>Chain Clarity Dashboard · <strong>Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅</strong> · Generated 2026-05-27</span>
-  <span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;">BRANDFORGE · chain_clarity · v3.0</span>
-</footer>
 
 <script>
-  const cardSrcs = {
-    p1: [
-      'phase_1/infographic_assets/card_01.html',
-      'phase_1/infographic_assets/card_02.html',
-      'phase_1/infographic_assets/card_03.html',
-      'phase_1/infographic_assets/card_04.html'
-    ],
-    p2: [
-      'phase_2/infographic_assets/card_01.html',
-      'phase_2/infographic_assets/card_02.html',
-      'phase_2/infographic_assets/card_03.html'
-    ],
-    p3: [
-      'phase_3/infographic_assets/card_01.html',
-      'phase_3/infographic_assets/card_02.html',
-      'phase_3/infographic_assets/card_03.html'
-    ]
+  // ── Wizard state ──
+  let currentStep = 1;
+  const totalSteps = 5;
+  const state = {
+    phase: 6, topic: '', outline: '', duration: 12,
+    tts: 'kokoro', srt: 'faster-whisper',
+    platforms: ['youtube','tiktok','instagram','twitter','linkedin','blog','github']
   };
-  let currentCard = 0;
-  let currentPhase = 'p1';
 
-  function selectCard(idx, btn, phase) {
-    currentCard = idx;
-    currentPhase = phase || currentPhase;
-    const selector = phase === 'p2' ? '#phase2-cards .card-btn' : '#phase1-cards .card-btn';
-    document.querySelectorAll(selector).forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const frame = document.getElementById('cardFrame');
-    frame.src = cardSrcs[currentPhase][idx];
-    resizeCardPreview();
+  function goStep(n) {
+    currentStep = n;
+    updateWizard();
   }
 
-  function switchPhaseCards(phase, btn) {
-    currentPhase = 'p' + phase;
-    currentCard = 0;
-    document.querySelectorAll('#cards .stab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('phase1-cards').style.display = phase === 1 ? 'block' : 'none';
-    document.getElementById('phase2-cards').style.display = phase === 2 ? 'block' : 'none';
-    document.getElementById('phase3-cards').style.display = phase === 3 ? 'block' : 'none';
-    const frame = document.getElementById('cardFrame');
-    frame.src = cardSrcs[currentPhase][0];
-    const containerId = '#phase' + phase + '-cards';
-    const firstBtn = document.querySelector(containerId + ' .card-btn');
-    if (firstBtn) {
-      document.querySelectorAll(containerId + ' .card-btn').forEach(b => b.classList.remove('active'));
-      firstBtn.classList.add('active');
-    }
-    resizeCardPreview();
+  function changeStep(dir) {
+    const next = currentStep + dir;
+    if (next < 1 || next > totalSteps) return;
+    if (currentStep === totalSteps - 1 && dir === 1) buildCommand();
+    currentStep = next;
+    updateWizard();
   }
 
-  function replayCard() {
-    const frame = document.getElementById('cardFrame');
-    frame.src = frame.src;
-  }
-
-  function enterScreenRecord() {
-    const overlay = document.getElementById('srOverlay');
-    const countdown = document.getElementById('srCountdown');
-    const srFrame = document.getElementById('srFrame');
-    overlay.classList.add('active');
-    countdown.style.display = 'block';
-    srFrame.style.display = 'none';
-    let count = 3;
-    countdown.textContent = count;
-    const interval = setInterval(() => {
-      count--;
-      if (count === 0) {
-        clearInterval(interval);
-        countdown.style.display = 'none';
-        srFrame.src = cardSrcs[currentPhase][currentCard];
-        srFrame.style.display = 'block';
-      } else {
-        countdown.textContent = count;
-      }
-    }, 1000);
-  }
-
-  function exitScreenRecord() {
-    const overlay = document.getElementById('srOverlay');
-    overlay.classList.remove('active');
-    document.getElementById('srFrame').src = '';
-    document.getElementById('srFrame').style.display = 'none';
-    document.getElementById('srCountdown').style.display = 'block';
-  }
-
-  function togglePhase(row) {
-    const body = row.querySelector('.phase-body');
-    body.classList.toggle('open');
-  }
-
-  function toggleBrief(head) {
-    const body = head.nextElementSibling;
-    body.classList.toggle('open');
-    head.querySelector('.brief-toggle').textContent = body.classList.contains('open') ? '▲' : '▼';
-  }
-
-  function switchScript(type, btn) {
-    const section = btn.closest('section');
-    section.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    section.querySelectorAll('.script-panel').forEach(p => p.classList.remove('active'));
-    section.querySelector('#script-' + type).classList.add('active');
-  }
-
-  function switchScript2(type, btn) {
-    const section = btn.closest('section');
-    section.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    section.querySelectorAll('.script-panel').forEach(p => p.classList.remove('active'));
-    section.querySelector('#script-' + type).classList.add('active');
-  }
-
-  function switchScript3(type, btn) {
-    const section = btn.closest('section');
-    section.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    section.querySelectorAll('.script-panel').forEach(p => p.classList.remove('active'));
-    section.querySelector('#script-' + type).classList.add('active');
-  }
-
-  function copyColor(hex, el) {
-    navigator.clipboard.writeText(hex).then(() => {
-      const msg = el.querySelector('.copied-msg');
-      msg.style.display = 'block';
-      setTimeout(() => msg.style.display = 'none', 1800);
+  function updateWizard() {
+    document.querySelectorAll('.step-panel').forEach((p, i) => {
+      p.classList.toggle('active', i + 1 === currentStep);
     });
+    document.querySelectorAll('.step-tab').forEach((t, i) => {
+      const n = i + 1;
+      t.classList.toggle('active', n === currentStep);
+      t.classList.toggle('done', n < currentStep);
+    });
+    document.getElementById('btn-back').disabled = currentStep === 1;
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.textContent = currentStep === totalSteps ? 'Done ✓' : 'Next →';
+    nextBtn.disabled = currentStep === totalSteps;
+    document.getElementById('step-indicator').textContent = `Step ${currentStep} of ${totalSteps}`;
+
+    if (currentStep === totalSteps) buildCommand();
   }
 
-  function copyText(text, el) {
+  function selectRadio(el, group) {
+    document.querySelectorAll(`input[name="${group}"]`).forEach(r => {
+      r.closest('.radio-card').classList.remove('selected');
+    });
+    el.classList.add('selected');
+    const val = el.querySelector('input').value;
+    state[group] = val;
+  }
+
+  function togglePill(el) {
+    el.classList.toggle('checked');
+    const val = el.querySelector('input').value;
+    const idx = state.platforms.indexOf(val);
+    if (idx > -1) state.platforms.splice(idx, 1);
+    else state.platforms.push(val);
+  }
+
+  function buildCommand() {
+    state.phase = parseInt(document.getElementById('inp-phase').value) || 6;
+    state.topic = document.getElementById('inp-topic').value || 'Your Topic Here';
+    state.outline = document.getElementById('inp-outline').value || 'key subtopics here';
+    state.duration = parseInt(document.getElementById('inp-duration').value) || 12;
+
+    const ttsFlag = state.tts !== 'dashscope' ? ` \\\n  --tts ${state.tts}` : '';
+    const srtFlag = state.srt !== 'manual' ? ` \\\n  --transcribe ${state.srt}` : ' \\\n  --skip-transcribe';
+    const topic = state.topic.replace(/"/g, '\\"');
+    const outline = state.outline.replace(/"/g, '\\"');
+
+    const cmd = `python pipeline.py \\
+  --project chain_clarity \\
+  --phase ${state.phase} \\
+  --topic "${topic}" \\
+  --outline "${outline}"${ttsFlag}${srtFlag}`;
+
+    document.getElementById('generated-cmd').textContent = cmd;
+
+    const platformIcons = {
+      youtube: '▶ YouTube', tiktok: '🎵 TikTok', instagram: '📷 Instagram',
+      twitter: '𝕏 Twitter', linkedin: 'in LinkedIn', blog: '✍ Blog', github: '⌥ GitHub'
+    };
+    const preview = document.getElementById('output-preview');
+    preview.innerHTML = state.platforms.map(p =>
+      `<div style="padding:8px 14px;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.2);border-radius:20px;font-size:13px;color:var(--teal);font-weight:600">${platformIcons[p] || p}</div>`
+    ).join('');
+  }
+
+  function copyCmd() {
+    const text = document.getElementById('generated-cmd').textContent;
     navigator.clipboard.writeText(text).then(() => {
-      const orig = el.textContent;
-      el.textContent = '✓ Copied!';
-      setTimeout(() => el.textContent = orig, 1500);
+      const btn = document.querySelector('.cmd-copy');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
     });
   }
 
-  function copyBrandGuidelines() {
-    const text = `Chain Clarity — Brand Guidelines\nBrand: Chain Clarity\nTagline: Blockchain, without the noise.\nColors: #00D4AA (teal), #F5A623 (gold), #8B9BB4 (slate), #0A0E1A (navy), #7B5CF0 (violet)\nFonts: Space Grotesk (heading), Inter (body), JetBrains Mono (code)\nTone: Senior engineer, analogy-first, no forbidden words (moon, lambo, HODL, simply, just, obviously, easy, basic, pump, dump, guaranteed, rich, explosive)`;
-    navigator.clipboard.writeText(text).then(() => alert('Brand guidelines copied to clipboard!'));
+  // ── Tab switching ──
+  function switchTab(id) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.target.classList.add('active');
   }
-
-  function downloadSRT(phase) {
-    window.open('phase_' + phase + '/subtitles.srt');
-  }
-
-  // Auto-resize card preview iframe
-  function resizeCardPreview() {
-    const preview = document.querySelector('.card-preview');
-    if (!preview) return;
-    const w = preview.offsetWidth;
-    const scale = w / 1080;
-    const frame = document.getElementById('cardFrame');
-    frame.style.transform = `scale(${scale})`;
-    frame.style.transformOrigin = 'top left';
-    preview.style.height = Math.round(1080 * scale) + 'px';
-  }
-  window.addEventListener('resize', resizeCardPreview);
-  window.addEventListener('load', resizeCardPreview);
 </script>
-
 </body>
 </html>

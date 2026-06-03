@@ -1,0 +1,42 @@
+{
+  "project": "chain_clarity",
+  "phase": 2,
+  "title": "Bitcoin vs Ethereum — What's Actually Different",
+  "slug": "bitcoin-vs-ethereum-whats-actually-different",
+  "duration_min": 14,
+  "pillar": "Cryptocurrency Fundamentals",
+  "status": "complete",
+  "tags": ["bitcoin", "ethereum", "proof of work", "proof of stake", "smart contracts", "bitcoin halving", "crypto fundamentals", "blockchain"],
+  "hashtags": ["#bitcoin", "#ethereum", "#blockchain", "#crypto", "#web3", "#chainclarity", "#proofofwork", "#proofofstake"],
+  "youtube": {
+    "title": "Bitcoin vs Ethereum — What's Actually Different | Chain Clarity Phase 2",
+    "description_hook": "Bitcoin and Ethereum are both blockchains. But they solve completely different problems. Today: a mechanical breakdown of what actually separates them — and why both matter.",
+    "chapters": [
+      {"timestamp": "0:00", "title": "Why This Question Matters"},
+      {"timestamp": "0:12", "title": "Bitcoin: Digital Gold"},
+      {"timestamp": "3:00", "title": "Proof of Work Explained"},
+      {"timestamp": "5:30", "title": "The 21 Million Cap & Halvings"},
+      {"timestamp": "7:30", "title": "Ethereum: Programmable Money"},
+      {"timestamp": "9:30", "title": "Proof of Stake vs Proof of Work"},
+      {"timestamp": "11:30", "title": "Wallets, Keys & Gas Fees"}
+    ]
+  },
+  "platform_cuts": {
+    "tiktok_hook":    {"start": "0:00", "end": "0:15", "aspect": "9:16", "caption": "Bitcoin and Ethereum are NOT the same. Here's the real difference. #bitcoin #ethereum"},
+    "tiktok_main":    {"start": "5:30", "end": "6:30", "aspect": "9:16", "caption": "Why Bitcoin will only ever have 21 million coins. #bitcoin #halving #chainclarity"},
+    "instagram_reel": {"start": "0:00", "end": "1:00", "aspect": "9:16", "caption": "Bitcoin vs Ethereum in 60 seconds. 🔗 Full breakdown in bio. #bitcoin #ethereum #crypto #blockchain"},
+    "twitter_clip":   {"start": "3:00", "end": "3:45", "aspect": "16:9", "caption": "Proof of Work explained in under a minute 👇"},
+    "linkedin_clip":  {"start": "7:30", "end": "8:15", "aspect": "16:9", "caption": "What Ethereum adds to blockchain: programmable money."}
+  },
+  "text_overlays": [
+    {"time": "0:00", "text": "Chain Clarity | Phase 2 of 5", "position": "top-left", "color": "#8B9BB4"},
+    {"time": "0:05", "text": "#bitcoin #ethereum", "position": "bottom-left", "color": "#8B9BB4"},
+    {"time": "3:00", "text": "PROOF OF WORK", "position": "title-card", "color": "#00D4AA"},
+    {"time": "5:30", "text": "21 MILLION CAP", "position": "title-card", "color": "#F5A623"},
+    {"time": "13:30", "text": "Subscribe for Phase 3 →", "position": "end-card", "color": "#00D4AA"}
+  ],
+  "tags_file": "tags_and_metadata.json",
+  "infographic_cards": 3,
+  "subtitle_cues": 161,
+  "compliance_status": "PASS"
+}

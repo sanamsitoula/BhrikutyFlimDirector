@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brand Setup — Bhrikuty Film Director</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0A0E1A; --bg2:#0F1525; --card:#141B2D; --card2:#1A2238;
+  --border:#1E2A42;
+  --teal:#00D4AA; --teal-d:rgba(0,212,170,.12);
+  --gold:#F5A623; --gold-d:rgba(245,166,35,.12);
+  --red:#FF4D6A;  --red-d:rgba(255,77,106,.12);
+  --blue:#4D94FF; --blue-d:rgba(77,148,255,.12);
+  --purple:#A855F7;
+  --green:#22C55E;
+  --text:#E8EDF5; --text2:#8A97B0; --muted:#4A5568;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;display:flex;flex-direction:column;}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--teal);}
+
+/* ── NAV ── */
+.topnav{display:flex;align-items:center;gap:16px;padding:0 24px;height:56px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;flex-shrink:0;}
+.brand-logo{width:32px;height:32px;}
+.brand-name{font-size:15px;font-weight:700;color:var(--text);font-family:'Space Grotesk',sans-serif;text-decoration:none;}
+.nav-divider{width:1px;height:20px;background:var(--border);}
+.nav-link{padding:6px 12px;border-radius:7px;font-size:13px;font-weight:500;color:var(--text2);text-decoration:none;transition:all .2s;}
+.nav-link:hover{color:var(--text);background:var(--card);}
+.nav-link.active{color:var(--teal);background:var(--teal-d);}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all .2s;}
+.btn-teal{background:var(--teal);color:var(--bg);}
+.btn-teal:hover{background:#00EDBC;transform:translateY(-1px);}
+.btn-ghost{background:var(--card);border:1px solid var(--border);color:var(--text2);}
+.btn-ghost:hover{border-color:var(--teal);color:var(--teal);}
+.btn-red{background:var(--red-d);border:1px solid rgba(255,77,106,.3);color:var(--red);}
+.btn-red:hover{background:var(--red);color:white;}
+.nav-right{display:flex;gap:8px;margin-left:auto;}
+.badge{padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.badge-teal{background:var(--teal-d);color:var(--teal);border:1px solid rgba(0,212,170,.3);}
+.badge-blue{background:var(--blue-d);color:var(--blue);border:1px solid rgba(77,148,255,.3);}
+
+/* ── LAYOUT: sidebar + main ── */
+.app-body{display:flex;flex:1;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:240px;flex-shrink:0;
+  background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.sidebar-hdr{
+  padding:16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sidebar-hdr h3{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;}
+.new-brand-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 10px;border-radius:6px;
+  background:var(--teal-d);border:1px solid rgba(0,212,170,.3);
+  color:var(--teal);font-size:11px;font-weight:700;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:all .2s;white-space:nowrap;
+}
+.new-brand-btn:hover{background:var(--teal);color:var(--bg);}
+
+.brand-list{flex:1;padding:8px;}
+.brand-list-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:9px;cursor:pointer;
+  transition:all .15s;border:1px solid transparent;margin-bottom:4px;
+}
+.brand-list-item:hover{background:var(--card);border-color:var(--border);}
+.brand-list-item.active{background:var(--teal-d);border-color:rgba(0,212,170,.3);}
+.brand-logo-mini{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;background:var(--bg);
+}
+.brand-list-info{min-width:0;flex:1;}
+.brand-list-name{font-size:12px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.brand-list-sub{font-size:10px;color:var(--muted);}
+.color-dots{display:flex;gap:3px;margin-top:3px;}
+.cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* ── MAIN AREA ── */
+.main-area{flex:1;overflow-y:auto;padding:28px 32px 60px;}
+
+/* ── BRAND VIEW ── */
+.brand-view-header{
+  display:flex;align-items:flex-start;gap:20px;
+  padding:24px;background:linear-gradient(135deg,var(--bg2),var(--card));
+  border:1px solid var(--border);border-radius:16px;margin-bottom:24px;
+}
+.brand-logo-lg{
+  width:72px;height:72px;border-radius:16px;flex-shrink:0;
+  background:var(--bg);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.brand-view-info{flex:1;}
+.brand-view-info h1{font-size:24px;color:var(--text);margin-bottom:4px;}
+.brand-view-tagline{font-size:14px;color:var(--text2);font-style:italic;margin-bottom:8px;}
+.brand-view-meta{display:flex;gap:10px;flex-wrap:wrap;}
+.bv-meta-chip{font-size:11px;color:var(--text2);padding:3px 9px;border-radius:6px;background:var(--bg);border:1px solid var(--border);}
+
+.view-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.view-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.view-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px;}
+.view-card.full{grid-column:1/-1;}
+
+/* Color swatches */
+.color-swatches{display:flex;gap:10px;flex-wrap:wrap;}
+.swatch{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.swatch-block{width:48px;height:48px;border-radius:10px;border:2px solid rgba(255,255,255,.08);}
+.swatch-name{font-size:9px;color:var(--muted);text-align:center;max-width:52px;}
+.swatch-hex{font-size:9px;color:var(--text2);font-family:'Courier New',monospace;}
+
+/* Pillar list */
+.pillar-list{display:flex;flex-direction:column;gap:6px;}
+.pillar-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--text2);}
+.pillar-bullet{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;}
+
+/* Social links */
+.social-links{display:flex;flex-direction:column;gap:6px;}
+.social-row{display:flex;align-items:center;gap:10px;font-size:12px;}
+.social-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.social-url{color:var(--teal);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.social-url:hover{text-decoration:underline;}
+
+/* Tone of voice */
+.tov-row{margin-bottom:8px;}
+.tov-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px;}
+.tov-value{font-size:12px;color:var(--text2);line-height:1.5;}
+.forbidden-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.forbidden-chip{padding:2px 8px;border-radius:6px;font-size:10px;background:var(--red-d);color:var(--red);border:1px solid rgba(255,77,106,.2);}
+
+/* ── FORM ── */
+.form-header{
+  display:flex;align-items:center;gap:12px;margin-bottom:24px;
+  padding-bottom:16px;border-bottom:1px solid var(--border);
+}
+.form-header h2{font-size:20px;color:var(--text);}
+.form-section{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:20px;margin-bottom:16px;
+}
+.form-section-title{
+  font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--teal);margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;}
+.form-input,.form-textarea,.form-select{
+  background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:9px 13px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;
+  outline:none;transition:border-color .2s;width:100%;
+}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,212,170,.1);}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--muted);}
+.form-textarea{min-height:80px;resize:vertical;}
+.form-select{cursor:pointer;}
+.form-select option{background:var(--card);}
+
+/* Color picker row */
+.color-row{display:flex;align-items:center;gap:10px;}
+.color-preview{width:36px;height:36px;border-radius:8px;border:2px solid rgba(255,255,255,.1);flex-shrink:0;cursor:pointer;}
+.color-input{width:0;height:0;opacity:0;position:absolute;}
+.color-hex-input{flex:1;}
+
+/* Dynamic list (pillars / forbidden words / social links) */
+.dynamic-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+.dynamic-item{display:flex;align-items:center;gap:8px;}
+.dynamic-item input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 11px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;outline:none;}
+.dynamic-item input:focus{border-color:var(--teal);}
+.remove-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 4px;flex-shrink:0;}
+.remove-btn:hover{color:var(--red);}
+.add-item-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;background:var(--bg);border:1px solid var(--border);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;}
+.add-item-btn:hover{border-color:var(--teal);color:var(--teal);}
+
+/* Platform checkboxes */
+.platform-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.plat-option{position:relative;}
+.plat-option input{position:absolute;opacity:0;width:0;height:0;}
+.plat-label{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all .2s;}
+.plat-option input:checked + .plat-label{border-color:var(--teal);background:var(--teal-d);color:var(--teal);}
+
+/* Form actions */
+.form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+
+/* Loading/empty states */
+.empty-state{text-align:center;padding:60px;color:var(--muted);font-size:13px;}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--teal);border-radius:8px;padding:10px 16px;font-size:12px;font-weight:500;color:var(--teal);z-index:9999;transform:translateY(60px);opacity:0;transition:all .3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+@media(max-width:768px){
+  .app-body{flex-direction:column;}
+  .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:220px;}
+  .view-grid{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav">
+  <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <svg class="brand-logo" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#0A0E1A"/>
+      <rect x="3" y="11" width="10" height="10" rx="3" stroke="#00D4AA" stroke-width="1.5" fill="none"/>
+      <rect x="19" y="11" width="10" height="10" rx="3" stroke="#F5A623" stroke-width="1.5" fill="none"/>
+      <line x1="13" y1="16" x2="19" y2="16" stroke="#00D4AA" stroke-width="1.5"/>
+      <path d="M13 19 L13 13 L18 16 Z" fill="#00D4AA"/>
+    </svg>
+    <span class="brand-name">Bhrikuty</span>
+  </a>
+  <div class="nav-divider"></div>
+  <a class="nav-link" href="/">Dashboard</a>
+  <a class="nav-link" href="/projects">Projects</a>
+  <a class="nav-link active" href="/brand">Brand</a>
+  <div class="nav-right">
+    <button class="btn btn-teal" onclick="showCreateForm()">+ New Brand</button>
+  </div>
+</nav>
+
+<!-- BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-hdr">
+      <h3>Brands</h3>
+      <button class="new-brand-btn" onclick="showCreateForm()">+ New</button>
+    </div>
+    <div class="brand-list" id="brand-list">
+      <div class="empty-state" style="padding:30px 10px;font-size:12px;"><div class="spinner"></div>Loading…</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-area" id="main-area">
+    <div class="empty-state" id="main-empty">
+      <div style="font-size:48px;margin-bottom:12px;">🎨</div>
+      <strong style="color:var(--text2);font-size:15px;">Select a brand or create a new one</strong><br>
+      <p style="margin-top:6px;font-size:12px;">Brands define your visual identity, tone of voice, and content pillars.<br>Projects are created under a brand.</p>
+      <button class="btn btn-teal" style="margin-top:16px;" onclick="showCreateForm()">+ Create Your First Brand</button>
+    </div>
+  </main>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────
+const PLATFORMS = ['YouTube','TikTok','Instagram','Twitter/X','LinkedIn','Facebook','Pinterest','GitHub'];
+const SOCIAL_ICONS = {YouTube:'▶️',TikTok:'🎵',Instagram:'📸','Twitter/X':'🐦',LinkedIn:'💼',Facebook:'📘',Website:'🌐',GitHub:'⚙️'};
+
+let brands = [];
+let activeBrand = null;
+
+// ─────────────────────────────────────────────────
+async function init() {
+  try {
+    const r = await fetch('/api/brands');
+    brands = r.ok ? await r.json() : [];
+  } catch { brands = []; }
+  renderSidebar();
+  if (brands.length === 1) selectBrand(brands[0]._slug || brands[0].brand_slug);
+}
+
+// ─────────────────────────────────────────────────
+// SIDEBAR
+// ─────────────────────────────────────────────────
+function renderSidebar() {
+  const list = document.getElementById('brand-list');
+  if (!brands.length) {
+    list.innerHTML = `<div class="empty-state" style="padding:20px 10px;font-size:12px;">No brands yet.<br>Click + New to create one.</div>`;
+    return;
+  }
+  list.innerHTML = brands.map(b => {
+    const colors = b.colors || {};
+    const dots = Object.values(colors).slice(0,4).map(c =>
+      `<div class="cdot" style="background:${c.hex||'#444'}"></div>`
+    ).join('');
+    const slug = b._slug || b.brand_slug || b.brand_name;
+    const logo = b.logo?.svg_code || '';
+    const logoHtml = logo
+      ? `<div class="brand-logo-mini">${logo.replace(/width="\d+"/, 'width="32"').replace(/height="\d+"/, 'height="32"')}</div>`
+      : `<div class="brand-logo-mini" style="background:var(--teal-d);color:var(--teal);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:800;">${(b.brand_name||slug)[0]}</div>`;
+    return `<div class="brand-list-item${activeBrand === slug ? ' active' : ''}" onclick="selectBrand('${slug}')" id="sitem-${slug}">
+      ${logoHtml}
+      <div class="brand-list-info">
+        <div class="brand-list-name">${b.brand_name || slug}</div>
+        <div class="brand-list-sub">${b._phases || 0} projects</div>
+        <div class="color-dots">${dots}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────
+// SELECT BRAND → show view
+// ─────────────────────────────────────────────────
+async function selectBrand(slug) {
+  activeBrand = slug;
+  document.querySelectorAll('.brand-list-item').forEach(el => el.classList.remove('active'));
+  const item = document.getElementById(`sitem-${slug}`);
+  if (item) item.classList.add('active');
+
+  const main = document.getElementById('main-area');
+  main.innerHTML = '<div class="empty-state"><div class="spinner"></div>Loading brand…</div>';
+
+  try {
+    const r = await fetch(`/api/brands/${slug}`);
+    if (!r.ok) throw new Error('Not found');
+    const b = await r.json();
+    renderBrandView(b);
+  } catch(e) {
+    main.innerHTML = `<div class="empty-state" style="color:var(--red);">Error: ${e.message}</div>`;
+  }
+}
+
+// ─────────────────────────────────────────────────
+// BRAND VIEW
+// ─────────────────────────────────────────────────
+function renderBrandView(b) {
+  const slug = b._slug || b.brand_slug;
+  const colors = b.colors || {};
+  const swatches = Object.entries(colors).map(([key, c]) =>
+    `<div class="swatch">
+      <div class="swatch-block" style="background:${c.hex||'#333'}"></div>
+      <div class="swatch-name">${c.name||key}</div>
+      <div class="swatch-hex">${c.hex||''}</div>
+    </div>`
+  ).join('');
+
+  const pillars = (b.content_pillars||[]).map(p =>
+    `<div class="pillar-item"><div class="pillar-bullet"></div>${p}</div>`
+  ).join('') || '<span style="color:var(--muted);font-size:12px;">None defined</span>';
+
+  const tov = b.tone_of_voice || {};
+  const forbWords = (tov.forbidden_words||[]).map(w =>
+    `<span class="forbidden-chip">${w}</span>`
+  ).join('');
+
+  const social = b.social_links || {};
+  const socialRows = Object.entries(social).filter(([,v])=>v).map(([k,v]) =>
+    `<div class="social-row">
+      <span class="social-icon">${SOCIAL_ICONS[k]||'🔗'}</span>
+      <span style="font-size:12px;color:var(--text2);width:80px;flex-shrink:0;">${k}</span>
+      <a class="social-url" href="${v}" target="_blank">${v}</a>
+    </div>`
+  ).join('') || '<span style="color:var(--muted);font-size:12px;">No social links added</span>';
+
+  const logo = b.logo?.svg_code || '';
+  const logoHtml = logo
+    ? logo.replace(/width="\d+"/, 'width="64"').replace(/height="\d+"/, 'height="64"')
+    : `<div style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:800;color:var(--teal);">${(b.brand_name||slug)[0]}</div>`;
+
+  const phaseCount = b._phases || 0;
+
+  document.getElementById('main-area').innerHTML = `
+    <!-- header -->
+    <div class="brand-view-header">
+      <div class="brand-logo-lg">${logoHtml}</div>
+      <div class="brand-view-info">
+        <h1>${b.brand_name || slug}</h1>
+        <div class="brand-view-tagline">${b.tagline || ''}</div>
+        <div class="brand-view-meta">
+          ${b.niche ? `<span class="bv-meta-chip">📌 ${b.niche}</span>` : ''}
+          <span class="bv-meta-chip badge-blue">🎬 ${phaseCount} project${phaseCount!==1?'s':''}</span>
+          ${(b.platforms||[]).map(p=>`<span class="bv-meta-chip">${SOCIAL_ICONS[p]||''} ${p}</span>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
+        <button class="btn btn-teal" onclick="showEditForm('${slug}')">✏️ Edit Brand</button>
+        <a class="btn btn-ghost" href="/projects" style="text-decoration:none;text-align:center;">📁 Projects →</a>
+      </div>
+    </div>
+
+    <div class="view-grid">
+      <!-- Colors -->
+      <div class="view-card">
+        <h4>🎨 Color Palette</h4>
+        <div class="color-swatches">${swatches || '<span style="color:var(--muted);font-size:12px;">No colors defined</span>'}</div>
+      </div>
+
+      <!-- Typography -->
+      <div class="view-card">
+        <h4>🔤 Typography</h4>
+        ${b.typography ? `
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">HEADING</div>
+              <div style="font-size:15px;font-weight:700;color:var(--text);font-family:'${b.typography.heading_font||'Space Grotesk'}',sans-serif;">${b.typography.heading_font||'—'}</div></div>
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">BODY</div>
+              <div style="font-size:13px;color:var(--text2);">${b.typography.body_font||'—'}</div></div>
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">CODE</div>
+              <div style="font-size:12px;color:var(--teal);font-family:'Courier New',monospace;">${b.typography.code_font||'—'}</div></div>
+          </div>` : '<span style="color:var(--muted);font-size:12px;">Not defined</span>'}
+      </div>
+
+      <!-- Content Pillars -->
+      <div class="view-card">
+        <h4>📋 Content Pillars</h4>
+        <div class="pillar-list">${pillars}</div>
+      </div>
+
+      <!-- Social Links -->
+      <div class="view-card">
+        <h4>🔗 Social Links</h4>
+        <div class="social-links">${socialRows}</div>
+      </div>
+
+      <!-- Tone of Voice -->
+      <div class="view-card full">
+        <h4>🎙️ Tone of Voice</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div class="tov-row">
+              <div class="tov-label">Primary Tone</div>
+              <div class="tov-value">${tov.primary||'Not defined'}</div>
+            </div>
+            <div class="tov-row" style="margin-top:10px;">
+              <div class="tov-label">Sentence Style</div>
+              <div class="tov-value">${tov.sentence_style||'—'}</div>
+            </div>
+          </div>
+          <div>
+            <div class="tov-label">Forbidden Words</div>
+            <div class="forbidden-list">${forbWords||'<span style="color:var(--muted);font-size:12px;">None</span>'}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Target Audience -->
+      ${b.target_audience ? `<div class="view-card full">
+        <h4>🎯 Target Audience</h4>
+        <p style="font-size:13px;color:var(--text2);line-height:1.7;">${b.target_audience}</p>
+      </div>` : ''}
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────────
+// CREATE FORM
+// ─────────────────────────────────────────────────
+function showCreateForm() {
+  activeBrand = null;
+  document.querySelectorAll('.brand-list-item').forEach(el => el.classList.remove('active'));
+  renderForm(null);
+}
+
+async function showEditForm(slug) {
+  const r = await fetch(`/api/brands/${slug}`);
+  if (!r.ok) return;
+  renderForm(await r.json());
+}
+
+function renderForm(b) {
+  const isEdit = !!b;
+  const slug = isEdit ? (b._slug || b.brand_slug) : '';
+  const colors = (b && b.colors) || {
+    primary:    {name:'Primary',    hex:'#00D4AA', usage:'headers, CTAs'},
+    secondary:  {name:'Secondary',  hex:'#F5A623', usage:'accents, icons'},
+    neutral:    {name:'Neutral',    hex:'#8B9BB4', usage:'body text'},
+    background: {name:'Background', hex:'#0A0E1A', usage:'page background'},
+    highlight:  {name:'Highlight',  hex:'#7B5CF0', usage:'emphasis'},
+  };
+  const tov = (b && b.tone_of_voice) || {};
+  const typ = (b && b.typography) || {};
+  const social = (b && b.social_links) || {};
+  const pillars = (b && b.content_pillars) || [''];
+  const forbWords = (tov.forbidden_words || []).join(', ');
+  const platforms = (b && b.platforms) || [];
+
+  const colorRows = Object.entries(colors).map(([key, c]) => `
+    <div class="form-group">
+      <label class="form-label">${c.name||key}</label>
+      <div class="color-row">
+        <div class="color-preview" id="cprev-${key}" style="background:${c.hex||'#333'}"
+          onclick="document.getElementById('cinput-${key}').click()"></div>
+        <input type="color" class="color-input" id="cinput-${key}" value="${c.hex||'#333333'}"
+          oninput="document.getElementById('cprev-${key}').style.background=this.value;document.getElementById('chex-${key}').value=this.value">
+        <input class="form-input color-hex-input" id="chex-${key}" type="text" value="${c.hex||''}"
+          placeholder="#000000"
+          oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)){document.getElementById('cprev-${key}').style.background=this.value;document.getElementById('cinput-${key}').value=this.value;}">
+      </div>
+      <input class="form-input" type="text" id="cusage-${key}" value="${c.usage||''}" placeholder="Usage description" style="margin-top:4px;">
+    </div>`).join('');
+
+  const pillarItems = pillars.map((p,i) => pillarRow(p, i)).join('');
+  const socialRows = Object.entries({YouTube:'',TikTok:'',Instagram:'','Twitter/X':'',LinkedIn:'',GitHub:'',Website:'',...social})
+    .map(([k,v]) => `<div class="dynamic-item">
+      <span style="font-size:13px;width:20px;text-align:center;">${SOCIAL_ICONS[k]||'🔗'}</span>
+      <span style="font-size:11px;color:var(--text2);width:80px;flex-shrink:0;">${k}</span>
+      <input type="url" placeholder="https://…" value="${v||''}" data-social="${k}" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 11px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;outline:none;">
+    </div>`).join('');
+
+  const platChecks = PLATFORMS.map(p => `
+    <div class="plat-option">
+      <input type="checkbox" id="plat-${p}" value="${p}" ${platforms.includes(p)?'checked':''}>
+      <label class="plat-label" for="plat-${p}">${SOCIAL_ICONS[p]||''} ${p}</label>
+    </div>`).join('');
+
+  document.getElementById('main-area').innerHTML = `
+    <div class="form-header">
+      <div>
+        <h2>${isEdit ? '✏️ Edit Brand' : '✨ Create New Brand'}</h2>
+        <p style="font-size:12px;color:var(--muted);margin-top:3px;">${isEdit ? `Editing: ${b.brand_name}` : 'Set up your brand identity. Projects will be created under this brand.'}</p>
+      </div>
+      ${isEdit ? `<button class="btn btn-ghost" onclick="selectBrand('${slug}')">← Back</button>` : ''}
+    </div>
+
+    <!-- 1. Basic Info -->
+    <div class="form-section">
+      <div class="form-section-title">📋 Basic Information</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Brand / Company Name *</label>
+          <input class="form-input" id="f-brand-name" type="text" value="${b?.brand_name||''}" placeholder="e.g. Chain Clarity" oninput="autoSlug(this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Brand Slug (project folder name) *</label>
+          <input class="form-input" id="f-brand-slug" type="text" value="${b?.brand_slug||slug||''}" placeholder="e.g. chain_clarity" ${isEdit?'readonly style="opacity:.6;"':''}>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Tagline</label>
+          <input class="form-input" id="f-tagline" type="text" value="${b?.tagline||''}" placeholder="e.g. Blockchain, without the noise.">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Niche / Industry</label>
+          <input class="form-input" id="f-niche" type="text" value="${b?.niche||''}" placeholder="e.g. Blockchain & Crypto Education">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Platforms</label>
+          <div class="platform-grid" id="platforms-grid">${platChecks}</div>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Target Audience</label>
+          <textarea class="form-textarea" id="f-audience" placeholder="Describe your ideal viewer — age, interests, goals, level of knowledge…">${b?.target_audience||''}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Color Palette -->
+    <div class="form-section">
+      <div class="form-section-title">🎨 Color Palette</div>
+      <div class="form-grid">${colorRows}</div>
+    </div>
+
+    <!-- 3. Typography -->
+    <div class="form-section">
+      <div class="form-section-title">🔤 Typography</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Heading Font</label>
+          <input class="form-input" id="f-font-heading" type="text" value="${typ.heading_font||'Space Grotesk'}" placeholder="Space Grotesk">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Body Font</label>
+          <input class="form-input" id="f-font-body" type="text" value="${typ.body_font||'Inter'}" placeholder="Inter">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Code Font</label>
+          <input class="form-input" id="f-font-code" type="text" value="${typ.code_font||'JetBrains Mono'}" placeholder="JetBrains Mono">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Max Words Per Line (subtitles)</label>
+          <input class="form-input" id="f-max-words" type="number" value="${typ.max_words_per_line||7}" min="4" max="12">
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Content Pillars -->
+    <div class="form-section">
+      <div class="form-section-title">📋 Content Pillars</div>
+      <div class="dynamic-list" id="pillars-list">${pillarItems}</div>
+      <button class="add-item-btn" onclick="addPillar()">+ Add Pillar</button>
+    </div>
+
+    <!-- 5. Tone of Voice -->
+    <div class="form-section">
+      <div class="form-section-title">🎙️ Tone of Voice</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Primary Tone</label>
+          <textarea class="form-textarea" id="f-tov-primary" style="min-height:60px;">${tov.primary||''}</textarea>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Sentence Style Guidelines</label>
+          <textarea class="form-textarea" id="f-tov-style" style="min-height:60px;">${tov.sentence_style||''}</textarea>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Forbidden Words (comma-separated)</label>
+          <input class="form-input" id="f-tov-forbidden" type="text" value="${forbWords}" placeholder="moon, lambo, HODL, simply, just, obviously…">
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Social Links -->
+    <div class="form-section">
+      <div class="form-section-title">🔗 Social Media Links</div>
+      <div class="dynamic-list">${socialRows}</div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      ${isEdit ? `<button class="btn btn-red" onclick="if(confirm('Delete brand ${b.brand_name}? This only removes brand_profile.json.'))deleteBrand('${slug}')">🗑 Delete Brand</button>` : ''}
+      <button class="btn btn-ghost" onclick="${isEdit ? `selectBrand('${slug}')` : 'renderSidebar();document.getElementById(\"main-empty\").style.display=\"\"'}">Cancel</button>
+      <button class="btn btn-teal" onclick="saveBrand(${isEdit ? `'${slug}'` : 'null'})">💾 ${isEdit ? 'Save Changes' : 'Create Brand'}</button>
+    </div>
+  `;
+}
+
+function pillarRow(value, i) {
+  return `<div class="dynamic-item" id="pillar-${i}">
+    <input type="text" value="${esc(value)}" placeholder="e.g. How Blockchain Works" data-pillar="true">
+    <button class="remove-btn" onclick="this.closest('.dynamic-item').remove()">✕</button>
+  </div>`;
+}
+
+let _pillarIdx = 10;
+function addPillar() {
+  const list = document.getElementById('pillars-list');
+  const div = document.createElement('div');
+  div.innerHTML = pillarRow('', _pillarIdx++);
+  list.appendChild(div.firstElementChild);
+}
+
+function autoSlug(name) {
+  const slugEl = document.getElementById('f-brand-slug');
+  if (slugEl && !slugEl.readOnly) {
+    slugEl.value = name.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+  }
+}
+
+// ─────────────────────────────────────────────────
+// SAVE
+// ─────────────────────────────────────────────────
+async function saveBrand(editSlug) {
+  const name = document.getElementById('f-brand-name')?.value.trim();
+  const slug = document.getElementById('f-brand-slug')?.value.trim();
+  if (!name || !slug) { showToast('Brand name and slug are required'); return; }
+
+  // Collect colors
+  const colorKeys = ['primary','secondary','neutral','background','highlight'];
+  const colors = {};
+  colorKeys.forEach(k => {
+    const hexEl   = document.getElementById(`chex-${k}`);
+    const usageEl = document.getElementById(`cusage-${k}`);
+    if (hexEl) colors[k] = { hex: hexEl.value || document.getElementById(`cinput-${k}`)?.value, usage: usageEl?.value || '' };
+  });
+  // Infer names from existing or defaults
+  const colorNames = {primary:'Primary',secondary:'Secondary',neutral:'Neutral',background:'Background',highlight:'Highlight'};
+  Object.entries(colors).forEach(([k,c]) => { if(!c.name) c.name = colorNames[k]||k; });
+
+  // Collect platforms
+  const platforms = [...document.querySelectorAll('#platforms-grid input:checked')].map(el => el.value);
+
+  // Collect pillars
+  const pillars = [...document.querySelectorAll('[data-pillar]')].map(el => el.value.trim()).filter(Boolean);
+
+  // Collect social links
+  const social_links = {};
+  document.querySelectorAll('[data-social]').forEach(el => {
+    if (el.value.trim()) social_links[el.dataset.social] = el.value.trim();
+  });
+
+  const data = {
+    brand_slug: slug,
+    brand_name: name,
+    tagline: document.getElementById('f-tagline')?.value.trim() || '',
+    niche:   document.getElementById('f-niche')?.value.trim()   || '',
+    target_audience: document.getElementById('f-audience')?.value.trim() || '',
+    platforms,
+    colors,
+    typography: {
+      heading_font:      document.getElementById('f-font-heading')?.value.trim() || 'Space Grotesk',
+      body_font:         document.getElementById('f-font-body')?.value.trim()    || 'Inter',
+      code_font:         document.getElementById('f-font-code')?.value.trim()    || 'JetBrains Mono',
+      max_words_per_line:parseInt(document.getElementById('f-max-words')?.value) || 7,
+    },
+    content_pillars: pillars,
+    tone_of_voice: {
+      primary:        document.getElementById('f-tov-primary')?.value.trim() || '',
+      sentence_style: document.getElementById('f-tov-style')?.value.trim()   || '',
+      forbidden_words: document.getElementById('f-tov-forbidden')?.value.split(',').map(s=>s.trim()).filter(Boolean),
+    },
+    social_links,
+  };
+
+  try {
+    const url    = editSlug ? `/api/brands/${editSlug}` : '/api/brands';
+    const res    = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Save failed');
+    showToast(editSlug ? '✅ Brand updated!' : '✅ Brand created!');
+    await init();
+    setTimeout(() => selectBrand(result.slug || slug), 300);
+  } catch(e) {
+    showToast('Error: ' + e.message);
+  }
+}
+
+async function deleteBrand(slug) {
+  try {
+    // We just clear the brand_profile — don't delete the project folder
+    const res = await fetch(`/api/brands/${slug}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({_deleted:true})});
+    showToast('Brand profile removed');
+    await init();
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+// ─────────────────────────────────────────────────
+function esc(s){ return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

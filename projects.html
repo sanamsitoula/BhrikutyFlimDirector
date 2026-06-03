@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects — Bhrikuty Film Director</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0A0E1A;  --bg2:    #0F1525;  --card:  #141B2D;  --card2: #1A2238;
+  --border:   #1E2A42;
+  --teal:     #00D4AA;  --teal-d: rgba(0,212,170,.12);
+  --gold:     #F5A623;  --gold-d: rgba(245,166,35,.12);
+  --red:      #FF4D6A;  --red-d:  rgba(255,77,106,.12);
+  --blue:     #4D94FF;  --blue-d: rgba(77,148,255,.12);
+  --purple:   #A855F7;  --purp-d: rgba(168,85,247,.12);
+  --green:    #22C55E;  --grn-d:  rgba(34,197,94,.12);
+  --text:     #E8EDF5;  --text2:  #8A97B0;  --muted: #4A5568;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+h1,h2,h3,h4,h5{font-family:'Space Grotesk',sans-serif;font-weight:600;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--teal);}
+
+/* ─── NAV ─── */
+.topnav{
+  display:flex;align-items:center;gap:16px;
+  padding:0 24px;height:56px;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;
+}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.brand-logo{width:32px;height:32px;}
+.brand-name{font-size:15px;font-weight:700;color:var(--text);font-family:'Space Grotesk',sans-serif;}
+.nav-divider{width:1px;height:20px;background:var(--border);}
+.nav-link{
+  padding:6px 12px;border-radius:7px;font-size:13px;font-weight:500;
+  color:var(--text2);text-decoration:none;transition:all .2s;
+}
+.nav-link:hover{color:var(--text);background:var(--card);}
+.nav-link.active{color:var(--teal);background:var(--teal-d);}
+.search-wrap{
+  display:flex;align-items:center;gap:8px;flex:1;max-width:340px;
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:7px 12px;
+}
+.search-wrap:focus-within{border-color:var(--teal);}
+.search-icon{color:var(--muted);font-size:14px;flex-shrink:0;}
+.search-input{
+  background:none;border:none;outline:none;width:100%;
+  font-size:13px;color:var(--text);font-family:'Inter',sans-serif;
+}
+.search-input::placeholder{color:var(--muted);}
+.nav-right{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all .2s;
+}
+.btn-teal{background:var(--teal);color:var(--bg);}
+.btn-teal:hover{background:#00EDBC;transform:translateY(-1px);}
+.btn-ghost{background:var(--card);border:1px solid var(--border);color:var(--text2);}
+.btn-ghost:hover{border-color:var(--teal);color:var(--teal);}
+
+/* ─── LAYOUT ─── */
+.page{max-width:1200px;margin:0 auto;padding:28px 24px 80px;}
+.section-hdr{
+  display:flex;align-items:center;gap:12px;margin-bottom:18px;
+}
+.section-hdr h2{font-size:18px;color:var(--text);}
+.badge{padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.badge-teal{background:var(--teal-d);color:var(--teal);border:1px solid rgba(0,212,170,.3);}
+.badge-gold{background:var(--gold-d);color:var(--gold);border:1px solid rgba(245,166,35,.3);}
+.badge-red{background:var(--red-d);color:var(--red);border:1px solid rgba(255,77,106,.3);}
+.badge-blue{background:var(--blue-d);color:var(--blue);border:1px solid rgba(77,148,255,.3);}
+.badge-grey{background:var(--border);color:var(--text2);}
+
+/* ─── STATS ROW ─── */
+.stats-row{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:12px;margin-bottom:32px;
+}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;
+}
+.stat-card .icon{font-size:22px;margin-bottom:6px;}
+.stat-card .val{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:var(--teal);line-height:1;}
+.stat-card .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;}
+
+/* ─── FAVOURITES SECTION ─── */
+#section-favs{margin-bottom:36px;}
+.favs-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:16px;
+}
+.fav-card{
+  background:linear-gradient(135deg,var(--bg2),var(--card));
+  border:1px solid var(--teal);border-radius:14px;
+  padding:20px;position:relative;overflow:hidden;
+  transition:all .2s;cursor:default;
+}
+.fav-card::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:180px;height:180px;
+  background:radial-gradient(circle,rgba(0,212,170,.07),transparent 70%);
+  pointer-events:none;
+}
+.fav-card:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.3);}
+.fav-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.fav-project-name{
+  font-size:16px;font-weight:700;color:var(--text);
+  font-family:'Space Grotesk',sans-serif;
+}
+.fav-star{
+  background:none;border:none;font-size:20px;cursor:pointer;
+  transition:transform .2s;flex-shrink:0;
+  filter:drop-shadow(0 0 6px rgba(245,166,35,.4));
+}
+.fav-star:hover{transform:scale(1.25);}
+.fav-meta{font-size:11px;color:var(--text2);margin-bottom:12px;}
+.fav-progress-label{font-size:11px;color:var(--text2);margin-bottom:4px;display:flex;justify-content:space-between;}
+.prog-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:14px;}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(to right,var(--teal),#00EDBC);transition:width 1s ease;}
+.fav-phases{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;}
+.fav-phase-chip{
+  padding:3px 9px;border-radius:6px;font-size:10px;font-weight:500;
+  background:var(--bg);border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;transition:all .15s;text-decoration:none;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.fav-phase-chip:hover{border-color:var(--teal);color:var(--teal);}
+.fav-actions{display:flex;gap:8px;}
+.fav-open-btn{
+  flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;
+  background:var(--teal-d);border:1px solid rgba(0,212,170,.3);
+  color:var(--teal);cursor:pointer;font-family:'Inter',sans-serif;
+  transition:all .2s;text-align:center;text-decoration:none;display:flex;
+  align-items:center;justify-content:center;gap:6px;
+}
+.fav-open-btn:hover{background:var(--teal);color:var(--bg);}
+
+/* ─── ALL PROJECTS ACCORDION ─── */
+.project-list{display:flex;flex-direction:column;gap:12px;}
+.proj-accordion{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;transition:border-color .2s;
+}
+.proj-accordion.is-fav{border-color:rgba(0,212,170,.4);}
+.proj-accordion:hover{border-color:var(--border);box-shadow:0 4px 20px rgba(0,0,0,.2);}
+.proj-row{
+  display:flex;align-items:center;gap:14px;
+  padding:16px 20px;cursor:pointer;user-select:none;
+}
+.proj-star-btn{
+  font-size:22px;background:none;border:none;cursor:pointer;
+  flex-shrink:0;transition:transform .2s;opacity:.5;
+}
+.proj-star-btn.starred{opacity:1;filter:drop-shadow(0 0 5px rgba(245,166,35,.5));}
+.proj-star-btn:hover{transform:scale(1.2);opacity:1;}
+.proj-name{
+  font-size:15px;font-weight:700;color:var(--text);
+  font-family:'Space Grotesk',sans-serif;flex:1;min-width:0;
+}
+.proj-name span{font-size:11px;font-weight:400;color:var(--text2);margin-left:8px;font-family:'Inter',sans-serif;}
+.proj-pills{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.proj-progress-wrap{min-width:100px;}
+.proj-pct{font-size:10px;color:var(--text2);margin-bottom:3px;text-align:right;}
+.proj-mini-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.proj-mini-fill{height:100%;border-radius:2px;background:linear-gradient(to right,var(--teal),#00EDBC);}
+.proj-expand-icon{
+  color:var(--muted);font-size:12px;flex-shrink:0;
+  transition:transform .25s;
+}
+.proj-accordion.open .proj-expand-icon{transform:rotate(180deg);}
+
+.phases-table-wrap{display:none;border-top:1px solid var(--border);}
+.proj-accordion.open .phases-table-wrap{display:block;}
+.phases-table{width:100%;border-collapse:collapse;}
+.phases-table th{
+  padding:9px 20px;font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--muted);background:var(--bg);
+  text-align:left;border-bottom:1px solid var(--border);
+}
+.phases-table td{
+  padding:11px 20px;border-bottom:1px solid rgba(30,42,66,.5);
+  vertical-align:middle;
+}
+.phases-table tr:last-child td{border-bottom:none;}
+.phases-table tr:hover td{background:rgba(255,255,255,.02);}
+.ph-num{
+  width:28px;height:28px;border-radius:7px;
+  background:var(--teal-d);border:1px solid rgba(0,212,170,.25);
+  color:var(--teal);font-family:'Space Grotesk',sans-serif;
+  font-size:13px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+}
+.ph-title{font-size:13px;font-weight:600;color:var(--text);}
+.comp-badge{
+  padding:2px 8px;border-radius:8px;font-size:9px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;
+}
+.comp-pass{background:var(--teal-d);color:var(--teal);border:1px solid rgba(0,212,170,.3);}
+.comp-warn{background:var(--gold-d);color:var(--gold);border:1px solid rgba(245,166,35,.3);}
+.comp-fail{background:var(--red-d);color:var(--red);border:1px solid rgba(255,77,106,.3);}
+.comp-unk{background:var(--border);color:var(--muted);}
+.ph-progress{min-width:80px;}
+.ph-pct{font-size:10px;color:var(--text2);margin-bottom:2px;}
+.ph-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.ph-fill{height:100%;border-radius:2px;background:linear-gradient(to right,var(--teal),#00EDBC);}
+.open-phase-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;
+  background:var(--teal-d);border:1px solid rgba(0,212,170,.3);
+  color:var(--teal);cursor:pointer;text-decoration:none;
+  transition:all .2s;white-space:nowrap;
+}
+.open-phase-btn:hover{background:var(--teal);color:var(--bg);}
+
+/* ─── EMPTY / LOADING ─── */
+.empty-state{
+  text-align:center;padding:60px 20px;
+  color:var(--muted);font-size:13px;
+}
+.empty-icon{font-size:48px;margin-bottom:12px;}
+.spinner{
+  width:32px;height:32px;border:3px solid var(--border);
+  border-top-color:var(--teal);border-radius:50%;
+  animation:spin .7s linear infinite;margin:0 auto 12px;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ─── TOAST ─── */
+.toast{
+  position:fixed;bottom:20px;right:20px;
+  background:var(--card);border:1px solid var(--teal);border-radius:8px;
+  padding:10px 16px;font-size:12px;font-weight:500;color:var(--teal);
+  z-index:9999;transform:translateY(60px);opacity:0;transition:all .3s;pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ─── SORT BAR ─── */
+.sort-bar{display:flex;gap:6px;align-items:center;margin-left:auto;}
+.sort-btn{
+  padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;
+}
+.sort-btn.active{background:var(--teal-d);border-color:rgba(0,212,170,.3);color:var(--teal);}
+.sort-btn:hover:not(.active){border-color:var(--teal);color:var(--teal);}
+
+/* ─── NO SERVER ─── */
+.offline-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;background:var(--gold-d);border:1px solid rgba(245,166,35,.3);
+  border-radius:10px;margin-bottom:20px;font-size:12px;color:var(--gold);
+}
+
+@media(max-width:768px){
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .favs-grid{grid-template-columns:1fr;}
+  .proj-pills{display:none;}
+  .proj-progress-wrap{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav">
+  <a class="brand" href="/">
+    <svg class="brand-logo" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#0A0E1A"/>
+      <rect x="3" y="11" width="10" height="10" rx="3" stroke="#00D4AA" stroke-width="1.5" fill="none"/>
+      <rect x="19" y="11" width="10" height="10" rx="3" stroke="#F5A623" stroke-width="1.5" fill="none"/>
+      <line x1="13" y1="16" x2="19" y2="16" stroke="#00D4AA" stroke-width="1.5"/>
+      <path d="M13 19 L13 13 L18 16 Z" fill="#00D4AA"/>
+    </svg>
+    <span class="brand-name">Bhrikuty</span>
+  </a>
+  <div class="nav-divider"></div>
+  <a class="nav-link" href="/">Dashboard</a>
+  <a class="nav-link active" href="/projects">Projects</a>
+  <a class="nav-link" href="/brand">Brand</a>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="search-input" type="text" placeholder="Search projects…" oninput="filterProjects(this.value)">
+  </div>
+  <div class="nav-right">
+    <button class="btn btn-ghost" onclick="refreshAll()">↺ Refresh</button>
+    <a class="btn btn-teal" href="/#new-project" onclick="return goNew()">+ New Project</a>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- offline notice -->
+  <div class="offline-bar" id="offline-bar" style="display:none;">
+    ⚠️ Server offline — some data may be unavailable. Start with:
+    <code style="background:rgba(0,0,0,.3);padding:1px 6px;border-radius:3px;">python server.py</code>
+  </div>
+
+  <!-- stats row -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="icon">📁</div><div class="val" id="stat-projects">—</div><div class="lbl">Projects</div></div>
+    <div class="stat-card"><div class="icon">🎬</div><div class="val" id="stat-phases">—</div><div class="lbl">Total Phases</div></div>
+    <div class="stat-card"><div class="icon">✅</div><div class="val" id="stat-steps">—</div><div class="lbl">Steps Done</div></div>
+    <div class="stat-card"><div class="icon">⭐</div><div class="val" id="stat-favs">—</div><div class="lbl">Favourites</div></div>
+    <div class="stat-card"><div class="icon">📊</div><div class="val" id="stat-pct">—</div><div class="lbl">Avg Completion</div></div>
+  </div>
+
+  <!-- FAVOURITES -->
+  <section id="section-favs" style="display:none;">
+    <div class="section-hdr">
+      <h2>⭐ Favourites</h2>
+      <span class="badge badge-gold" id="fav-count">0</span>
+      <span style="font-size:11px;color:var(--muted);margin-left:4px;">Click ★ on any project to pin it here</span>
+    </div>
+    <div class="favs-grid" id="favs-grid"></div>
+  </section>
+
+  <!-- ALL PROJECTS -->
+  <section id="section-all">
+    <div class="section-hdr">
+      <h2>All Projects</h2>
+      <span class="badge badge-blue" id="all-count">—</span>
+      <div class="sort-bar">
+        <span style="font-size:11px;color:var(--muted);">Sort:</span>
+        <button class="sort-btn active" onclick="setSort('name',this)">Name</button>
+        <button class="sort-btn" onclick="setSort('completion',this)">Completion</button>
+        <button class="sort-btn" onclick="setSort('phases',this)">Phases</button>
+      </div>
+    </div>
+    <div class="project-list" id="project-list">
+      <div class="empty-state"><div class="spinner"></div>Loading projects…</div>
+    </div>
+  </section>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────
+const FAV_KEY = 'bhrikuty_favourites';
+let allProjects  = [];   // [{name, phase_count, completion_pct, phases:[...], ...}]
+let favourites   = new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]'));
+let currentSort  = 'name';
+let searchQuery  = '';
+let serverOnline = false;
+
+// ─────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────
+async function init() {
+  await checkServer();
+  if (!serverOnline) {
+    document.getElementById('offline-bar').style.display = 'flex';
+    document.getElementById('project-list').innerHTML =
+      `<div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        Server is offline.<br>
+        <code style="color:var(--teal);font-size:12px;">python server.py</code>
+        <br><button class="btn btn-ghost" style="margin-top:12px;" onclick="init()">Try again</button>
+      </div>`;
+    return;
+  }
+  await loadAllProjects();
+}
+
+async function checkServer() {
+  try {
+    const r = await fetch('/api/projects', {signal: AbortSignal.timeout(1500)});
+    serverOnline = r.ok;
+  } catch { serverOnline = false; }
+}
+
+async function loadAllProjects() {
+  // 1. Get project list
+  const r = await fetch('/api/projects');
+  const projects = await r.json();
+
+  // 2. Load summary for each project in parallel
+  const summaries = await Promise.all(
+    projects.map(async p => {
+      try {
+        const sr = await fetch(`/api/projects/${p.name}/summary`);
+        return sr.ok ? await sr.json() : {name: p.name, phase_count: p.phases.length, completion_pct: 0, phases: [], total_steps_done:0, total_steps:0};
+      } catch { return {name: p.name, phase_count: p.phases.length, completion_pct: 0, phases: [], total_steps_done:0, total_steps:0}; }
+    })
+  );
+
+  allProjects = summaries;
+  renderStats();
+  renderFavourites();
+  renderAllProjects();
+}
+
+async function refreshAll() {
+  document.getElementById('project-list').innerHTML = '<div class="empty-state"><div class="spinner"></div>Refreshing…</div>';
+  await loadAllProjects();
+  showToast('Refreshed!');
+}
+
+// ─────────────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────────────
+function renderStats() {
+  const totalPhases  = allProjects.reduce((s,p) => s + p.phase_count, 0);
+  const totalDone    = allProjects.reduce((s,p) => s + (p.total_steps_done||0), 0);
+  const totalAll     = allProjects.reduce((s,p) => s + (p.total_steps||0), 0);
+  const avgPct       = totalAll ? Math.round(totalDone/totalAll*100) : 0;
+
+  document.getElementById('stat-projects').textContent = allProjects.length;
+  document.getElementById('stat-phases').textContent   = totalPhases;
+  document.getElementById('stat-steps').textContent    = `${totalDone}/${totalAll}`;
+  document.getElementById('stat-favs').textContent     = favourites.size;
+  document.getElementById('stat-pct').textContent      = avgPct + '%';
+  document.getElementById('all-count').textContent     = allProjects.length + ' projects';
+}
+
+// ─────────────────────────────────────────────────
+// FAVOURITES
+// ─────────────────────────────────────────────────
+function saveFavourites() {
+  localStorage.setItem(FAV_KEY, JSON.stringify([...favourites]));
+  document.getElementById('stat-favs').textContent = favourites.size;
+}
+
+function toggleFav(name) {
+  if (favourites.has(name)) {
+    favourites.delete(name);
+    showToast(`Removed "${name}" from favourites`);
+  } else {
+    favourites.add(name);
+    showToast(`Added "${name}" to favourites ⭐`);
+  }
+  saveFavourites();
+  renderFavourites();
+  renderAllProjects();
+}
+
+function renderFavourites() {
+  const section = document.getElementById('section-favs');
+  const favProjects = allProjects.filter(p => favourites.has(p.name));
+
+  document.getElementById('fav-count').textContent = favourites.size;
+
+  if (!favProjects.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+
+  document.getElementById('favs-grid').innerHTML = favProjects.map(p => {
+    const pct = p.completion_pct || 0;
+    const chips = (p.phases || []).map(ph =>
+      `<a class="fav-phase-chip" href="/phase/${p.name}/${ph.phase}" target="_blank">
+        <span style="color:var(--teal);">P${ph.phase}</span> ${shortTitle(ph.title)}
+      </a>`
+    ).join('');
+
+    return `<div class="fav-card">
+      <div class="fav-card-top">
+        <div>
+          <div class="fav-project-name">${p.name}</div>
+          <div class="fav-meta" style="margin-top:3px;">${p.phase_count} phases · ${p.total_steps_done||0}/${p.total_steps||0} steps</div>
+        </div>
+        <button class="fav-star" onclick="toggleFav('${p.name}')" title="Remove from favourites">⭐</button>
+      </div>
+      <div class="fav-progress-label">
+        <span>Completion</span><strong style="color:var(--teal);">${pct}%</strong>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div class="fav-phases">${chips}</div>
+      <div class="fav-actions">
+        <button class="fav-open-btn" onclick="openProject('${p.name}')">↗ View All Phases</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────
+// ALL PROJECTS LIST
+// ─────────────────────────────────────────────────
+function setSort(key, btn) {
+  currentSort = key;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAllProjects();
+}
+
+function filterProjects(q) {
+  searchQuery = q.toLowerCase().trim();
+  renderAllProjects();
+}
+
+function sorted(list) {
+  const l = [...list];
+  if (currentSort === 'name')       return l.sort((a,b) => a.name.localeCompare(b.name));
+  if (currentSort === 'completion') return l.sort((a,b) => (b.completion_pct||0) - (a.completion_pct||0));
+  if (currentSort === 'phases')     return l.sort((a,b) => b.phase_count - a.phase_count);
+  return l;
+}
+
+function renderAllProjects() {
+  const list = document.getElementById('project-list');
+  let projects = searchQuery
+    ? allProjects.filter(p => p.name.toLowerCase().includes(searchQuery))
+    : allProjects;
+  projects = sorted(projects);
+
+  if (!projects.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div>No projects match "${searchQuery}"</div>`;
+    return;
+  }
+
+  list.innerHTML = projects.map(p => renderProjectAccordion(p)).join('');
+}
+
+function renderProjectAccordion(p) {
+  const isFav  = favourites.has(p.name);
+  const pct    = p.completion_pct || 0;
+  const phases = p.phases || [];
+
+  const compCounts = {PASS:0, PASS_WITH_WARNINGS:0, FAIL:0, unknown:0};
+  phases.forEach(ph => { compCounts[ph.compliance_status] = (compCounts[ph.compliance_status]||0)+1; });
+
+  const pillsHtml = [
+    phases.length ? `<span class="badge badge-blue">${phases.length} phases</span>` : '',
+    compCounts.PASS > 0 ? `<span class="badge badge-teal">✅ ${compCounts.PASS} PASS</span>` : '',
+    compCounts.PASS_WITH_WARNINGS > 0 ? `<span class="badge badge-gold">⚠️ ${compCounts.PASS_WITH_WARNINGS} WARN</span>` : '',
+    compCounts.FAIL > 0 ? `<span class="badge badge-red">❌ ${compCounts.FAIL} FAIL</span>` : '',
+  ].filter(Boolean).join('');
+
+  const phaseRows = phases.map(ph => {
+    const phPct  = ph.steps_total ? Math.round(ph.steps_done/ph.steps_total*100) : 0;
+    const comp   = ph.compliance_status;
+    const cClass = comp === 'PASS' ? 'comp-pass' : comp === 'PASS_WITH_WARNINGS' ? 'comp-warn' : comp === 'FAIL' ? 'comp-fail' : 'comp-unk';
+    const cLabel = comp === 'PASS' ? '✅ PASS' : comp === 'PASS_WITH_WARNINGS' ? '⚠️ PASS' : comp === 'FAIL' ? '❌ FAIL' : '—';
+
+    return `<tr>
+      <td style="width:40px;"><div class="ph-num">${ph.phase}</div></td>
+      <td>
+        <div class="ph-title">${ph.title}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">${ph.file_count} files · ${ph.card_count} cards</div>
+      </td>
+      <td style="width:100px;"><span class="comp-badge ${cClass}">${cLabel}</span></td>
+      <td style="width:90px;" class="ph-progress">
+        <div class="ph-pct">${phPct}%</div>
+        <div class="ph-bar"><div class="ph-fill" style="width:${phPct}%"></div></div>
+      </td>
+      <td style="width:120px;text-align:right;">
+        <a class="open-phase-btn" href="/phase/${p.name}/${ph.phase}" target="_blank">↗ Open</a>
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="proj-accordion${isFav ? ' is-fav' : ''}" id="acc-${p.name}">
+    <div class="proj-row" onclick="toggleAccordion('${p.name}')">
+      <button class="proj-star-btn${isFav ? ' starred' : ''}"
+        onclick="event.stopPropagation();toggleFav('${p.name}')"
+        title="${isFav ? 'Remove from favourites' : 'Add to favourites'}">
+        ${isFav ? '⭐' : '☆'}
+      </button>
+      <div class="proj-name">${p.name}<span>${p.phase_count} phases</span></div>
+      <div class="proj-pills">${pillsHtml}</div>
+      <div class="proj-progress-wrap">
+        <div class="proj-pct">${pct}%</div>
+        <div class="proj-mini-bar"><div class="proj-mini-fill" style="width:${pct}%"></div></div>
+      </div>
+      <span class="proj-expand-icon">▾</span>
+    </div>
+    <div class="phases-table-wrap">
+      <table class="phases-table">
+        <thead><tr>
+          <th style="width:40px;">#</th>
+          <th>Phase Title</th>
+          <th>Compliance</th>
+          <th>Progress</th>
+          <th style="text-align:right;">Dashboard</th>
+        </tr></thead>
+        <tbody>${phaseRows || '<tr><td colspan="5" style="padding:20px;color:var(--muted);text-align:center;">No phases found</td></tr>'}</tbody>
+      </table>
+      <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;">
+        <span style="font-size:11px;color:var(--muted);">Run full pipeline:</span>
+        <code style="font-size:11px;color:var(--teal);background:var(--bg);padding:2px 8px;border-radius:4px;">python pipeline.py --project ${p.name} --phase N --skip-generate</code>
+        <button class="sort-btn" style="margin-left:auto;" onclick="copyCmd('python pipeline.py --project ${p.name} --phase 1')">📋 Copy</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleAccordion(name) {
+  const acc = document.getElementById(`acc-${name}`);
+  if (acc) acc.classList.toggle('open');
+}
+
+function openProject(name) {
+  const acc = document.getElementById(`acc-${name}`);
+  if (acc) {
+    acc.classList.add('open');
+    acc.scrollIntoView({behavior:'smooth', block:'start'});
+  } else {
+    document.getElementById('section-all').scrollIntoView({behavior:'smooth'});
+  }
+}
+
+// ─────────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────────
+function shortTitle(title) {
+  if (!title) return '';
+  return title.length > 22 ? title.slice(0, 20) + '…' : title;
+}
+
+function goNew() {
+  window.location.href = '/#new-project';
+  return false;
+}
+
+function copyCmd(cmd) {
+  navigator.clipboard.writeText(cmd).then(() => showToast('Copied!'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─────────────────────────────────────────────────
+// START
+// ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
