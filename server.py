@@ -694,9 +694,25 @@ class Handler(BaseHTTPRequestHandler):
                 compliance_status = "FAIL"
 
         cards = []
+        card_urls = {}
+        cards_manifest = {}
         ia_dir = phase_dir / "infographic_assets"
         if ia_dir.exists():
             cards = [f.name for f in sorted(ia_dir.iterdir()) if f.suffix == ".html"]
+            card_urls = {
+                c: {
+                    "url":      f"/media/{project}/{phase}/infographic_assets/{c}",
+                    "filename": c,
+                    "size":     (ia_dir / c).stat().st_size if (ia_dir / c).exists() else 0,
+                }
+                for c in cards
+            }
+            cm = ia_dir / "cards_manifest.json"
+            if cm.exists():
+                try:
+                    cards_manifest = json.loads(cm.read_text(encoding="utf-8"))
+                except Exception:
+                    pass
 
         output_dir = PROJECT_ROOT / project / "_output" / f"phase_{phase:02d}"
         output_files = []
@@ -745,6 +761,8 @@ class Handler(BaseHTTPRequestHandler):
             "platform_cuts": spec.get("platform_cuts", {}),
             "files": files,
             "cards": cards,
+            "card_urls": card_urls,
+            "cards_manifest": cards_manifest,
             "compliance_status": compliance_status,
             "output_files": output_files,
             "pipeline_steps": steps,

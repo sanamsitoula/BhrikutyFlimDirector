@@ -13,15 +13,47 @@ import argparse
 import sys
 from pathlib import Path
 
+import io
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
+# Load .env
+_env = Path(__file__).parent.parent / ".env"
+if _env.exists():
+    for _l in _env.read_text(encoding="utf-8").splitlines():
+        _l = _l.strip()
+        if _l and not _l.startswith("#") and "=" in _l:
+            _k, _, _v = _l.partition("=")
+            os.environ.setdefault(_k.strip(), _v.strip())
+
 try:
-    import anthropic
+    import anthropic as _anthropic_lib
+    _ANTHROPIC_OK = bool(os.environ.get("ANTHROPIC_API_KEY"))
 except ImportError:
-    print("[ERROR] anthropic package not installed. Run: pip install anthropic")
+    _anthropic_lib = None
+    _ANTHROPIC_OK = False
+
+try:
+    from google import genai as _genai
+    from google.genai import types as _genai_types
+    _GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
+    _GEMINI_CLIENT = _genai.Client(api_key=_GEMINI_KEY) if _GEMINI_KEY else None
+    _GEMINI_OK = bool(_GEMINI_KEY)
+except ImportError:
+    _genai = None
+    _GEMINI_CLIENT = None
+    _GEMINI_OK = False
+
+if not _ANTHROPIC_OK and not _GEMINI_OK:
+    print("[ERROR] No AI API key. Set ANTHROPIC_API_KEY or GEMINI_API_KEY in .env")
     sys.exit(1)
 
 PROJECT_ROOT = Path(__file__).parent.parent / "youtube_scripts" / "setup" / "projects"
 
-MODEL = "claude-sonnet-4-6"
+MODEL        = "claude-sonnet-4-6"
+GEMINI_MODEL = "gemini-2.5-flash"
+_BILLING_ERRORS = ("credit balance", "quota", "billing", "rate limit", "overloaded",
+                   "invalid_request_error", "insufficient_quota", "payment")
 
 
 def load_brand(project: str) -> dict:
@@ -55,13 +87,49 @@ Platforms: {", ".join(brand["platforms"])}"""
 
 
 def call_claude(client, system_prompt: str, user_prompt: str) -> str:
-    message = client.messages.create(
-        model=MODEL,
-        max_tokens=2000,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_prompt}]
-    )
-    return message.content[0].text
+    """Call Anthropic; auto-fall back to Gemini on billing/quota errors."""
+    if client is not None:
+        try:
+            msg = client.messages.create(
+                model=MODEL, max_tokens=2000, system=system_prompt,
+                messages=[{"role": "user", "content": user_prompt}]
+            )
+            return msg.content[0].text
+        except Exception as e:
+            err = str(e).lower()
+            recoverable = any(k in err for k in _BILLING_ERRORS)
+            if recoverable and _GEMINI_OK:
+                print(f"  [WARN] Anthropic failed ({str(e)[:80]}). Switching to Gemini...")
+            elif not _GEMINI_OK:
+                raise
+            else:
+                raise
+    # Gemini fallback
+    if not _GEMINI_OK:
+        raise RuntimeError("No AI provider available. Set ANTHROPIC_API_KEY or GEMINI_API_KEY.")
+    import time, re as _re
+    last_err = None
+    for attempt in range(4):
+        try:
+            r = _GEMINI_CLIENT.models.generate_content(
+                model=GEMINI_MODEL,
+                config=_genai_types.GenerateContentConfig(system_instruction=system_prompt),
+                contents=user_prompt,
+            )
+            return r.text
+        except Exception as e:
+            last_err = e
+            s = str(e)
+            if "429" in s or "RESOURCE_EXHAUSTED" in s:
+                m = _re.search(r'retryDelay[^0-9]*(\d+)', s)
+                wait = int(m.group(1)) + 5 if m else 65
+                print(f"  [GEMINI] Rate limit. Waiting {wait}s (attempt {attempt+1}/4)...")
+                time.sleep(wait)
+            elif "503" in s or "UNAVAILABLE" in s:
+                time.sleep(2 ** (attempt + 1))
+            else:
+                raise
+    raise last_err
 
 
 def generate_youtube_description(client, brand_ctx: str, spec: dict, script: str) -> str:
@@ -296,16 +364,18 @@ def process_phase(client, project: str, phase_num: int):
 
 def main():
     api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        print("[ERROR] ANTHROPIC_API_KEY not set. Export it before running.")
-        sys.exit(1)
 
     parser = argparse.ArgumentParser(description="Generate text platform content via Claude API")
     parser.add_argument("--project", default="chain_clarity")
     parser.add_argument("--phase", required=True, help="Phase number or 'all'")
     args = parser.parse_args()
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = _anthropic_lib.Anthropic(api_key=api_key) if (api_key and _anthropic_lib) else None
+    if not client and not _GEMINI_OK:
+        print("[ERROR] No AI provider. Set ANTHROPIC_API_KEY or GEMINI_API_KEY in .env")
+        sys.exit(1)
+    if not client:
+        print("  [INFO] Anthropic not available. Using Gemini.")
     phases = list(range(1, 6)) if args.phase == "all" else [int(args.phase)]
 
     for phase_num in phases:

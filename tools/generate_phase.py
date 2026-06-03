@@ -388,6 +388,39 @@ def run_compliance_check(project: str, phase: int):
             print(f"  [WARN] Compliance check issues: {result.stderr[-200:]}")
 
 
+def _write_cards_manifest(project: str, phase: int, topic: str,
+                          assets_dir: Path, filenames: list):
+    """Create/update cards_manifest.json recording each card's URL and metadata."""
+    import datetime as _dt
+    assets_dir.mkdir(parents=True, exist_ok=True)
+    existing = {}
+    mp = assets_dir / "cards_manifest.json"
+    if mp.exists():
+        try:
+            existing = json.loads(mp.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    cards = {c["filename"]: c for c in existing.get("cards", [])}
+    for fn in filenames:
+        fp = assets_dir / fn
+        cards[fn] = {
+            "filename":   fn,
+            "url_path":   f"/media/{project}/{phase}/infographic_assets/{fn}",
+            "card_number": int(fn[5]) if len(fn) > 5 and fn[5].isdigit() else 0,
+            "size_bytes": fp.stat().st_size if fp.exists() else 0,
+            "generated_at": _dt.datetime.now().isoformat(),
+        }
+    manifest = {
+        "project":      project,
+        "phase":        phase,
+        "topic":        topic,
+        "generated_at": _dt.datetime.now().isoformat(),
+        "cards":        list(cards.values()),
+    }
+    mp.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+    print("  [ok] cards_manifest.json")
+
+
 def _generate_single(client, system_prompt: str, args, phase_dir: Path, assets_dir: Path, tags: list):
     """Generate exactly one output file. All derivations from script.md read it from disk."""
     only  = args.only
@@ -442,6 +475,7 @@ def _generate_single(client, system_prompt: str, args, phase_dir: Path, assets_d
         num   = int(only[5])
         brief = f"Card {num} from brief:\n{infobr[num*200:(num+1)*400]}" if infobr else f"Card {num}"
         _write(only, generate_html_card(client, system_prompt, args.phase, num, topic, brief), in_assets=True)
+        _write_cards_manifest(args.project, args.phase, topic, assets_dir, [only])
 
     elif only == "content_spec.json":
         spec = generate_content_spec(args.phase, topic, script, tags)
@@ -554,6 +588,10 @@ def main():
     files["content_spec.json"] = generate_content_spec(args.phase, args.topic, script, tags)
 
     write_phase_files(phase_dir, assets_dir, files)
+
+    # Write cards manifest for tracking
+    _write_cards_manifest(args.project, args.phase, args.topic, assets_dir,
+                          ["card_01.html", "card_02.html", "card_03.html"])
 
     print("\nRunning compliance check...")
     run_compliance_check(args.project, args.phase)

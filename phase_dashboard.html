@@ -445,7 +445,7 @@ function render() {
         <div id="tab-overview"     class="tab-panel active">${renderOverview(d)}</div>
         <div id="tab-script"       class="tab-panel">${renderFileTab('script.md')}</div>
         <div id="tab-short"        class="tab-panel">${renderFileTab('script_short.md')}</div>
-        <div id="tab-infographics" class="tab-panel">${renderInfographics(d.cards)}</div>
+        <div id="tab-infographics" class="tab-panel">${renderInfographics(d.cards, d.card_urls||{}, d.cards_manifest||{})}</div>
         <div id="tab-srt"          class="tab-panel">${renderFileTab('subtitles.srt')}</div>
         <div id="tab-audio"        class="tab-panel">${renderAudio()}</div>
         <div id="tab-video"        class="tab-panel">${renderVideo(d)}</div>
@@ -624,6 +624,14 @@ function renderPipelineTable(steps) {
               → <code style="color:var(--teal);font-size:10px;">${esc(ss.file||'')}</code>
               <span style="margin-left:8px;opacity:.5;">needs: ${esc(ss.needs||'')}</span>
             </div>
+            ${ss.id === '1_8' && ssDone && (phaseData?.cards||[]).length > 0 ? `
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
+              ${(phaseData.cards).map(c => {
+                const info = (phaseData.card_urls||{})[c]||{};
+                const url = `${window.location.origin}${info.url||`/media/${PROJECT}/${PHASE}/infographic_assets/${c}`}`;
+                return `<a href="${url}" target="_blank" style="font-size:10px;padding:1px 7px;background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--teal);text-decoration:none;font-family:'Courier New',monospace;">${c}</a>`;
+              }).join('')}
+            </div>` : ''}
           </td>
           <td style="width:120px;">
             ${ssDone ? '<span class="status-dot done" style="font-size:11px;">✅ Done</span>' : '<span class="status-dot pending" style="font-size:11px;">⬜ Pending</span>'}
@@ -631,7 +639,9 @@ function renderPipelineTable(steps) {
           <td style="width:160px;text-align:right;">
             <div style="display:flex;gap:4px;justify-content:flex-end;">
               <button class="step-action-btn view" style="font-size:10px;padding:3px 8px;" onclick="toggleCmd('${cmdId}')">$ CMD</button>
-              ${ssViewable ? `<button class="step-action-btn view" style="font-size:10px;padding:3px 8px;" onclick="handleStepAction('view:${ss.file}','${ss.name}')">👁</button>` : ''}
+              ${ss.id === '1_8' && ssDone
+                ? `<button class="step-action-btn preview" style="font-size:10px;padding:3px 8px;" onclick="switchTab('infographics',document.querySelectorAll('.tab-btn')[3])">🃏 View</button>`
+                : ssViewable ? `<button class="step-action-btn view" style="font-size:10px;padding:3px 8px;" onclick="handleStepAction('view:${ss.file}','${ss.name}')">👁</button>` : ''}
             </div>
           </td>
         </tr>
@@ -1037,20 +1047,77 @@ function copyFileContent(id) {
 // ─────────────────────────────────────────────────
 // INFOGRAPHICS TAB
 // ─────────────────────────────────────────────────
-function renderInfographics(cards) {
+function renderInfographics(cards, cardUrls, manifest) {
   if (!cards.length) {
     return `<div class="media-section"><div class="media-placeholder">
       <div class="icon">🃏</div>
-      No infographic cards found for this phase.
-      <br><button class="btn btn-gold" style="margin-top:12px;" onclick="runPhase()">▶ Generate Cards</button>
+      No infographic cards found yet.
+      <br><small style="color:var(--muted);display:block;margin-top:6px;">Run Step 1.8 to generate cards, or paste HTML into the Script tab editor.</small>
+      <button class="btn btn-gold" style="margin-top:12px;" onclick="runSubstepCmd({project:'${PROJECT}',phase:${PHASE},only:'card_01.html'})">▶ Generate Card 1</button>
     </div></div>`;
   }
+
+  const origin = window.location.origin;
+  const genAt  = manifest.generated_at ? new Date(manifest.generated_at).toLocaleString() : null;
+  const topic  = manifest.topic || '';
+
+  // ── Manifest header ─────────────────────────────
+  const manifestBar = `
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+                padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;">
+      <div>
+        <span style="font-size:13px;font-weight:700;color:var(--text);">🃏 ${cards.length} Infographic Card${cards.length>1?'s':''}</span>
+        ${topic ? `<span style="font-size:12px;color:var(--text2);margin-left:10px;">${esc(topic)}</span>` : ''}
+        ${genAt  ? `<span style="font-size:11px;color:var(--muted);margin-left:10px;">Generated ${genAt}</span>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="step-action-btn run" style="font-size:11px;" onclick="copyAllCardUrls()">📋 Copy All URLs</button>
+        <button class="step-action-btn view" style="font-size:11px;" onclick="cards.forEach(c=>window.open('${origin}/media/${PROJECT}/${PHASE}/infographic_assets/'+c,'_blank'))">Open All →</button>
+      </div>
+    </div>`;
+
+  // ── URL list ─────────────────────────────────────
+  const urlRows = cards.map(c => {
+    const info = cardUrls[c] || {};
+    const fullUrl = `${origin}${info.url || `/media/${PROJECT}/${PHASE}/infographic_assets/${c}`}`;
+    const kb = info.size ? (info.size / 1024).toFixed(1) + ' KB' : '';
+    return `
+      <tr>
+        <td style="padding:8px 12px;width:100px;">
+          <span style="font-family:'Courier New',monospace;font-size:12px;color:var(--teal);font-weight:600;">${esc(c)}</span>
+          ${kb ? `<div style="font-size:10px;color:var(--muted);">${kb}</div>` : ''}
+        </td>
+        <td style="padding:8px 12px;">
+          <code id="card-url-${c}" style="font-size:11px;color:var(--text2);word-break:break-all;">${esc(fullUrl)}</code>
+        </td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap;">
+          <button class="step-action-btn view" style="font-size:10px;padding:3px 9px;margin-right:4px;"
+                  onclick="copyCardUrl('${c}')">📋 Copy</button>
+          <a href="${fullUrl}" target="_blank" class="step-action-btn preview"
+             style="font-size:10px;padding:3px 9px;text-decoration:none;">Open →</a>
+        </td>
+      </tr>`;
+  }).join('');
+
+  const urlTable = `
+    <div style="margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;
+                  text-transform:uppercase;letter-spacing:.07em;color:var(--muted);">
+        Clickable URLs — open in browser or share
+      </div>
+      <table style="width:100%;border-collapse:collapse;">
+        <tbody>${urlRows}</tbody>
+      </table>
+    </div>`;
+
+  // ── Card preview grid ─────────────────────────────
   const items = cards.map((c, i) => `
     <div class="card-frame-wrap">
       <div class="card-frame-header">
         <span class="card-frame-name">${c}</span>
         <div class="card-frame-actions">
-          <button class="card-frame-btn open" onclick="window.open('/media/${PROJECT}/${PHASE}/infographic_assets/${c}','_blank')">Open →</button>
+          <button class="card-frame-btn open" onclick="copyCardUrl('${c}')">📋 URL</button>
+          <button class="card-frame-btn open" onclick="window.open('${origin}/media/${PROJECT}/${PHASE}/infographic_assets/${c}','_blank')">Open →</button>
         </div>
       </div>
       <div class="card-frame-container" id="cfc-${i}">
@@ -1058,8 +1125,23 @@ function renderInfographics(cards) {
           title="${c}" loading="lazy"></iframe>
       </div>
     </div>`).join('');
-  return `<div class="cards-grid">${items}</div>
-    <p style="font-size:11px;color:var(--muted);margin-top:12px;">Cards are shown scaled. Click "Open →" to view full size in a new tab.</p>`;
+
+  return manifestBar + urlTable + `<div class="cards-grid">${items}</div>
+    <p style="font-size:11px;color:var(--muted);margin-top:12px;">
+      Cards are shown scaled to fit. Click "Open →" to view full 1080×1080px in a new tab.
+    </p>`;
+}
+
+function copyCardUrl(filename) {
+  const el = document.getElementById(`card-url-${filename}`);
+  if (el) navigator.clipboard.writeText(el.textContent).then(() => showToast(`URL copied: ${filename}`));
+}
+function copyAllCardUrls() {
+  const urls = (phaseData?.cards || []).map(c => {
+    const info = (phaseData?.card_urls||{})[c] || {};
+    return `${window.location.origin}${info.url||`/media/${PROJECT}/${PHASE}/infographic_assets/${c}`}`;
+  }).join('\n');
+  navigator.clipboard.writeText(urls).then(() => showToast(`${(phaseData?.cards||[]).length} URLs copied!`));
 }
 
 function scaleIframes() {
