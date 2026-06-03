@@ -1,415 +1,303 @@
-# Bhrikuty — Film Director Content Factory
+# Bhrikuty Film Director
 
-> **Brand → Project → Content — One Pipeline**
+<div align="center">
 
-Bhrikuty is an AI-powered content production system. Define your brand once, create projects under it, then run a single command to produce a 7-platform content package: YouTube video, TikTok clips, Instagram reels, Twitter thread, LinkedIn article, blog post, and GitHub README.
+**AI-powered content factory — Brand → Project → 7-Platform Content Package**
+
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue?style=flat-square&logo=python)](https://python.org)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square&logo=node.js)](https://nodejs.org)
+[![Claude API](https://img.shields.io/badge/Claude-Sonnet_4.6-orange?style=flat-square)](https://anthropic.com)
+[![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)](LICENSE)
+
+[Quick Start](#quick-start) · [Dashboard](#dashboard-pages) · [Getting Started Guide](GETTING_STARTED.md) · [Live Demo](#chain-clarity--live-example)
+
+</div>
 
 ---
 
-## Complete Flow
+## What is Bhrikuty?
+
+Bhrikuty is an end-to-end content production system. You give it a **topic** and it produces a fully **brand-compliant 7-platform content package** — YouTube video script, TikTok clips, Instagram reels, Twitter thread, LinkedIn article, blog post, and GitHub README — all driven by a single pipeline command.
+
+The system is built around three layers:
 
 ```
-STEP 0  Set up prerequisites (Python, ffmpeg, Node.js)
-   ↓
-STEP 1  Copy .env.example → .env  (add your API keys)
-   ↓
-STEP 2  Start the web dashboard
-   ↓
-STEP 3  Create a Brand  (/brand)
-        — name, colors, fonts, tone of voice, social links
-   ↓
-STEP 4  Create a Project  (/projects)
-        — tied to your brand, named by topic series
-   ↓
-STEP 5  Generate Content  (/  →  New Video Project)
-        — topic, outline, phase number → run pipeline
-   ↓
-STEP 6  Voiceover  (TTS engine of your choice)
-   ↓
-STEP 7  Build Infographic Cards  (Remotion or HTML screenshots)
-   ↓
-STEP 8  Assemble Video  (FFmpeg + MoviePy)
-   ↓
-STEP 9  Auto-Transcribe  (faster-whisper or WhisperX)
-   ↓
-STEP 10 Compliance Check  (17 brand rules validated)
-   ↓
-STEP 11 Export Platform Clips  (YouTube · TikTok · Instagram · Twitter · LinkedIn)
-   ↓
-STEP 12 Generate Text Content  (blog · thread · article · GitHub README)
-   ↓
-STEP 13 Review & Publish
+Brand  →  Project  →  Content
+  ↓           ↓           ↓
+Colors      Topic      Script
+Fonts       Phase      Voiceover
+Tone        Outline    Infographic Cards
+Pillars     Roadmap    Platform Clips
+Social                 Text Content
 ```
+
+---
+
+## How It Works
+
+```
+                        TOPIC + OUTLINE
+                               │
+                               ▼
+              ┌────────────────────────────────┐
+              │     DIRECTOR (pipeline.py)      │
+              │  Script · Briefs · Compliance   │
+              └──────────────┬─────────────────┘
+                             │
+          ┌──────────────────┼──────────────────┐
+          ▼                  ▼                  ▼
+  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐
+  │   PICASSO    │  │   DiCAPRIO   │  │  TEXT ENGINE     │
+  │  Infographics│  │  Video Cuts  │  │  Blog · Thread   │
+  │  Remotion    │  │  platform_   │  │  LinkedIn · YT   │
+  │  HTML Cards  │  │  cutter.py   │  │  Instagram · GH  │
+  └──────────────┘  └──────────────┘  └──────────────────┘
+          │                  │                  │
+          └──────────────────┴──────────────────┘
+                             │
+                             ▼
+              ┌────────────────────────────────┐
+              │      COMPLIANCE CHECKER        │
+              │     17 brand rules validated   │
+              └──────────────┬─────────────────┘
+                             │
+                             ▼
+              ┌────────────────────────────────┐
+              │       _output/phase_XX/        │
+              │  youtube/  tiktok/  instagram/ │
+              │  twitter/  linkedin/ blog/     │
+              │  github/   publish_checklist   │
+              └────────────────────────────────┘
+```
+
+---
+
+## Quick Start
+
+**You need:** Python 3.11+, Node.js 18+, FFmpeg, and an Anthropic API key.
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/sanamsitoula/BhrikutyFlimDirector.git
+cd BhrikutyFlimDirector
+
+# 2. Install Python packages
+pip install anthropic moviepy faster-whisper
+
+# 3. Install Remotion
+cd remotion && npm install && cd ..
+
+# 4. Set up your API key
+copy .env.example .env
+# Open .env → add: ANTHROPIC_API_KEY=sk-ant-...
+
+# 5. Start the dashboard
+python server.py
+```
+
+Open **http://localhost:8080** in your browser.
+
+> Full step-by-step instructions with screenshots and troubleshooting: **[GETTING_STARTED.md](GETTING_STARTED.md)**
+
+---
+
+## Dashboard Pages
+
+| URL | Page | What you do there |
+|-----|------|-------------------|
+| `http://localhost:8080/` | **Main Dashboard** | Run the pipeline, watch live output, view project status |
+| `http://localhost:8080/brand` | **Brand Setup** | Create your brand — colors, fonts, tone, social links |
+| `http://localhost:8080/projects` | **Projects Browser** | Favourite projects, search, view all phases at a glance |
+| `http://localhost:8080/phase/{project}/{num}` | **Phase Dashboard** | View scripts, infographics, compliance — per phase |
+
+---
+
+## Chain Clarity — Live Example
+
+The **Chain Clarity** brand comes pre-loaded as a working example — 5 completed phases of blockchain education content.
+
+| Phase | Title | Duration | Script | Cards | SRT | Comply |
+|-------|-------|----------|--------|-------|-----|--------|
+| 1 | How Blockchain Works — No Bank Required | 12 min | ✅ | ✅ 4 | ✅ | ⚠️ PASS |
+| 2 | Bitcoin vs Ethereum — What's Actually Different | 14 min | ✅ | ✅ 3 | ✅ | ⚠️ PASS |
+| 3 | DeFi Explained — Your Bank Has No CEO | 13 min | ✅ | ✅ 3 | ✅ | ⚠️ PASS |
+| 4 | How Crypto Gets Stolen — And How to Stop It | 11 min | ✅ | ✅ 3 | ✅ | ⚠️ PASS |
+| 5 | Blockchain Is Not Just Crypto — Real Use Cases | 12 min | ✅ | ✅ 3 | ✅ | ⚠️ PASS |
+
+Browse any phase at `http://localhost:8080/phase/chain_clarity/1`
+
+---
+
+## Platform Output
+
+One pipeline run produces a complete package for every platform:
+
+| Platform | Files produced | Specs |
+|----------|---------------|-------|
+| **YouTube** | `final_1080p.mp4` · `description.txt` · `subtitles.srt` | 1920×1080, H.264, SEO description, timestamps |
+| **TikTok** | `clip_01_hook.mp4` · `clip_02_main.mp4` | 1080×1920, 9:16, :15 hook + :60 main |
+| **Instagram** | `reel_60s.mp4` · `carousel_1–3.png` · `caption.txt` | 9:16 reel + 1:1 carousel |
+| **Twitter/X** | `thread.txt` · `card_clip.mp4` | 7-tweet thread + :30 clip |
+| **LinkedIn** | `article.md` · `clip.mp4` | 800-word article + :45 clip |
+| **Blog** | `post.md` | 1,500-word SEO post with YouTube embed |
+| **GitHub** | `README.md` | Structured project README |
 
 ---
 
 ## Project Structure
 
 ```
-bhrikuty/
-├── server.py                          ← Web dashboard server (run this first)
-├── pipeline.py                        ← Film Director entry point (CLI)
-├── dashboard.html                     ← Main dashboard UI
-├── projects.html                      ← Projects browser with favourites
-├── brand.html                         ← Brand setup and management
-├── phase_dashboard.html               ← Per-phase content dashboard
-├── .env.example                       ← Copy to .env, fill in keys
-├── README.md
+BhrikutyFlimDirector/
+│
+├── server.py                    ← Web dashboard server — run this first
+├── pipeline.py                  ← CLI entry point — Film Director
+├── dashboard.html               ← Main pipeline control UI
+├── brand.html                   ← Brand creation & management
+├── projects.html                ← Projects browser with favourites
+├── phase_dashboard.html         ← Per-phase content dashboard
+├── .env.example                 ← Copy to .env, fill in API keys
+├── GETTING_STARTED.md           ← Full 17-step setup guide
 │
 ├── tools/
-│   ├── generate_phase.py              ← AI script + brief generation
-│   ├── compliance_checker.py          ← 17 brand rule checks
-│   ├── platform_cutter.py             ← Export per-platform clips
-│   ├── text_content_generator.py      ← Blog · thread · article · README
+│   ├── generate_phase.py        ← AI script + brief generation
+│   ├── compliance_checker.py    ← 17 brand rule checks
+│   ├── platform_cutter.py       ← Platform-specific video exports
+│   ├── text_content_generator.py← Blog · thread · article · README
+│   ├── TOOL_GUIDE.md            ← Tool installation and code samples
 │   └── tts/
-│       ├── kokoro_voiceover.py        ← Free (CPU, no GPU needed)
-│       ├── chatterbox_voiceover.py    ← Free (GPU, voice cloning)
-│       └── elevenlabs_voiceover.py    ← Paid (best quality)
+│       ├── kokoro_voiceover.py  ← Free CPU voiceover
+│       ├── chatterbox_voiceover.py ← Free GPU voiceover (voice clone)
+│       └── elevenlabs_voiceover.py ← Paid voiceover (best quality)
 │
-├── remotion/                          ← Animated infographic cards (React)
+├── remotion/                    ← Animated infographic cards (React)
 │   ├── package.json
 │   └── scripts/render_all_cards.js
 │
 ├── myvideo/edit/
-│   ├── burn_text.py                   ← Text overlay on video
-│   ├── generate_voiceover.py          ← Qwen3-TTS (current default)
-│   └── clean_voice.py                 ← Audio cleanup
+│   ├── burn_text.py             ← Text overlay on video
+│   ├── generate_voiceover.py    ← Qwen3-TTS (current default)
+│   └── clean_voice.py           ← Audio cleanup
 │
 └── youtube_scripts/setup/projects/
-    └── {brand_slug}/                  ← One folder per brand/project
-        ├── brand_profile.json         ← Brand identity (colors, fonts, tone)
-        ├── roadmap.json               ← Phase plan
-        ├── tags_and_metadata.json     ← Platform tags
-        ├── compliance_log.json
+    └── {brand_slug}/            ← One folder per brand
+        ├── brand_profile.json   ← Colors, fonts, tone, social links
+        ├── roadmap.json         ← Phase plan
+        ├── tags_and_metadata.json
         ├── phase_1/
-        │   ├── script.md              ← Full narration script
-        │   ├── script_short.md        ← 60-second cut
-        │   ├── subtitles.srt          ← Captions
-        │   ├── voiceover_brief.md     ← TTS pacing guide
-        │   ├── clip_brief.md          ← Shot-by-shot assembly guide
-        │   ├── music_brief.md         ← BPM, mood, instrumentation
-        │   ├── infographics.md        ← Card layout specs
-        │   ├── content_spec.json      ← Platform cuts, tags, YouTube chapters
-        │   ├── compliance_report.md   ← Manual compliance
-        │   ├── compliance_report_auto.md ← Auto-generated compliance
+        │   ├── script.md
+        │   ├── script_short.md
+        │   ├── subtitles.srt
+        │   ├── voiceover_brief.md
+        │   ├── clip_brief.md
+        │   ├── music_brief.md
+        │   ├── infographics.md
+        │   ├── content_spec.json
+        │   ├── compliance_report_auto.md
         │   └── infographic_assets/
         │       ├── card_01.html
-        │       ├── card_02.html
-        │       └── card_03.html
+        │       └── card_02.html
         ├── phase_2/ … phase_N/
         └── _output/
             └── phase_01/
-                ├── youtube/  final_1080p.mp4 · description.txt · subtitles.srt
-                ├── tiktok/   clip_01_hook.mp4 · clip_02_main.mp4
-                ├── instagram/ reel_60s.mp4 · carousel_1.png … carousel_3.png
-                ├── twitter/  card_clip.mp4 · thread.txt
-                ├── linkedin/ clip.mp4 · article.md
-                ├── blog/     post.md
-                ├── github/   README.md
-                └── PIPELINE_SUMMARY.md
+                ├── youtube/
+                ├── tiktok/
+                ├── instagram/
+                ├── twitter/
+                ├── linkedin/
+                ├── blog/
+                └── github/
 ```
 
 ---
 
-## STEP 0 — Prerequisites
+## Brand Setup
 
-### Python 3.11+
+Create your brand identity at `http://localhost:8080/brand`. Everything you set here flows into every piece of generated content.
 
-```bash
-# Verify
-python --version
-```
+| Setting | Example (Chain Clarity) |
+|---------|------------------------|
+| **Brand Name** | Chain Clarity |
+| **Tagline** | Blockchain, without the noise. |
+| **Niche** | Blockchain & Crypto Education |
+| **Primary Color** | `#00D4AA` — Electric Teal |
+| **Secondary Color** | `#F5A623` — Deep Gold |
+| **Background** | `#0A0E1A` — Deep Navy |
+| **Highlight** | `#7B5CF0` — Electric Violet |
+| **Heading Font** | Space Grotesk |
+| **Body Font** | Inter |
+| **Platforms** | YouTube · TikTok · Instagram |
+| **Forbidden Words** | moon, lambo, HODL, simply, obviously, easy, guaranteed |
 
-### Core Python packages
-
-```bash
-pip install anthropic moviepy faster-whisper
-```
-
-### FFmpeg (required for video cuts)
-
-```bash
-# Windows
-winget install ffmpeg
-
-# Mac
-brew install ffmpeg
-
-# Linux
-sudo apt install ffmpeg
-
-# Verify
-ffmpeg -version
-```
-
-### Node.js 18+ (required for Remotion card rendering)
-
-```bash
-# Download from https://nodejs.org
-# Verify
-node --version
-```
-
-### Install Remotion dependencies (once)
-
-```bash
-cd remotion
-npm install
-cd ..
-```
+Brand profile saved to `{project}/brand_profile.json` — versioned with the project.
 
 ---
 
-## STEP 1 — Environment Setup
+## Content Generation
 
-```bash
-# Copy the example file
-cp .env.example .env
-```
-
-Open `.env` and fill in your keys:
-
-```env
-# REQUIRED — for script generation and text content
-ANTHROPIC_API_KEY=sk-ant-api03-...
-
-# TTS — pick ONE (others are optional)
-ELEVENLABS_API_KEY=          # Paid, best quality
-DASHSCOPE_API_KEY=           # Freemium, Qwen3-TTS (current default)
-# Chatterbox + Kokoro run locally — no key needed
-
-# Transcription — optional (faster-whisper is free and runs locally)
-ASSEMBLYAI_API_KEY=
-
-# Image generation — optional
-BFL_API_KEY=
-
-# Video B-roll — optional
-RUNWAY_API_KEY=
-KLING_API_KEY=
-```
-
----
-
-## STEP 2 — Start the Dashboard Server
-
-```bash
-python server.py
-```
-
-Open your browser:
-
-```
-http://localhost:8080
-```
-
-The server runs on port 8080 by default. To change the port:
-
-```bash
-PORT=3000 python server.py
-```
-
-**All four pages are now available:**
-
-| URL | Page |
-|-----|------|
-| `http://localhost:8080/` | Main Dashboard (pipeline control) |
-| `http://localhost:8080/brand` | Brand Setup & Management |
-| `http://localhost:8080/projects` | Projects Browser with Favourites |
-| `http://localhost:8080/phase/{project}/{num}` | Per-Phase Content Dashboard |
-
----
-
-## STEP 3 — Create a Brand
-
-Go to: **`http://localhost:8080/brand`**
-
-Click **+ New Brand** and fill in:
-
-| Field | Example |
-|-------|---------|
-| Brand / Company Name | `Chain Clarity` |
-| Brand Slug | `chain_clarity` (auto-generated from name) |
-| Tagline | `Blockchain, without the noise.` |
-| Niche / Industry | `Blockchain & Crypto Education` |
-| Target Audience | `Curious learners ages 22–40…` |
-| Platforms | YouTube, TikTok, Instagram |
-| Primary Color | `#00D4AA` (Electric Teal) |
-| Secondary Color | `#F5A623` (Deep Gold) |
-| Background Color | `#0A0E1A` (Deep Navy) |
-| Heading Font | `Space Grotesk` |
-| Body Font | `Inter` |
-| Content Pillars | How Blockchain Works, DeFi, Security… |
-| Tone of Voice | Trusted senior engineer explaining… |
-| Forbidden Words | moon, lambo, HODL, simply, obviously… |
-| Social Links | YouTube channel URL, Instagram URL, etc. |
-
-Click **💾 Create Brand** — this creates:
-
-```
-youtube_scripts/setup/projects/chain_clarity/
-└── brand_profile.json
-```
-
----
-
-## STEP 4 — Plan Your Project (Roadmap)
-
-Edit `youtube_scripts/setup/projects/{brand_slug}/roadmap.json`:
-
-```json
-[
-  {
-    "phase": 1,
-    "title": "How Blockchain Works",
-    "learning_goals": [
-      "Understand what a block and chain are",
-      "Explain consensus without jargon"
-    ],
-    "content_breakdown": [
-      { "type": "long-form", "duration_min": 12 },
-      { "type": "short-form", "duration_min": 1 },
-      { "type": "infographic", "card_count": 3 }
-    ]
-  }
-]
-```
-
-Or skip this step and pass `--topic` + `--outline` directly to `pipeline.py`.
-
----
-
-## STEP 5 — Generate Content (Script + Briefs)
-
-### Option A — From the Dashboard (recommended)
+### From the Dashboard (no terminal needed)
 
 1. Open `http://localhost:8080`
-2. Fill in **Step 1** — Project Name, Phase Number, Topic, Outline
-3. Click through Steps 2–4 (TTS engine, render engine, platforms)
-4. Go to **Step 5** → click **▶ Run on Server**
-5. Watch live output in the terminal drawer at the bottom
+2. Fill in **New Video Project** — topic, phase, outline
+3. Click **▶ Run on Server**
+4. Watch live output in the terminal drawer
 
-### Option B — CLI
+### From the Terminal
 
 ```bash
-# Generate a new phase from scratch
 python pipeline.py \
   --project chain_clarity \
-  --phase 1 \
-  --topic "How Blockchain Works — No Bank Required" \
-  --outline "blocks and chains, consensus, immutability, why it matters"
-
-# Skip content generation (re-run compliance + cuts on existing phase)
-python pipeline.py \
-  --project chain_clarity \
-  --phase 1 \
-  --skip-generate
-
-# Skip voiceover too (only run compliance and platform cuts)
-python pipeline.py \
-  --project chain_clarity \
-  --phase 1 \
-  --skip-generate \
-  --skip-voiceover
+  --phase 6 \
+  --topic "How NFTs Actually Work" \
+  --outline "ERC-721 standard, real use cases, concert tickets, land registry, resale royalties" \
+  --duration 12 \
+  --tags "nft,blockchain,crypto,web3,chainclarity"
 ```
 
-**Output — `phase_1/` folder created:**
+### All pipeline flags
 
-| File | Description |
-|------|-------------|
-| `script.md` | Full narration script (12 min, brand voice enforced) |
-| `script_short.md` | 60-second short-form cut |
-| `voiceover_brief.md` | Pacing + emphasis guide for TTS |
-| `music_brief.md` | BPM 88–112, mood, instrumentation |
-| `clip_brief.md` | Shot-by-shot assembly guide |
-| `infographics.md` | Layout specs for animated cards |
-| `content_spec.json` | Platform cuts, tags, YouTube chapters |
-| `subtitles.srt` | Auto-timed captions |
-| `compliance_report_auto.md` | Brand audit (17 checks) |
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--project` | `chain_clarity` | Brand/project folder name |
+| `--phase` | *(required)* | Phase number |
+| `--topic` | — | Video title |
+| `--outline` | — | Key points |
+| `--duration` | `12` | Target minutes |
+| `--tags` | `blockchain,crypto,web3` | Comma-separated tags |
+| `--video` | — | Path to master video (enables cuts) |
+| `--skip-generate` | off | Skip script generation |
+| `--skip-voiceover` | off | Skip voiceover |
+| `--skip-remotion` | off | Skip card rendering |
+| `--skip-text` | off | Skip text content |
 
 ---
 
-## STEP 6 — Generate Voiceover (TTS)
+## Voiceover / TTS
 
-Pick the engine that fits your setup:
+Choose the engine that fits your budget and hardware:
+
+| Engine | Cost | GPU? | Voice Clone | Quality | Command |
+|--------|------|------|-------------|---------|---------|
+| **Kokoro-TTS** | Free | No | No | ⭐⭐⭐⭐ | `pip install kokoro soundfile` |
+| **Chatterbox TTS** | Free | Yes (8GB) | Yes (5s ref) | ⭐⭐⭐⭐⭐ | `pip install chatterbox-tts torch` |
+| **ElevenLabs** | $5–22/mo | Cloud | Yes | ⭐⭐⭐⭐⭐ | `pip install elevenlabs` |
+| **Qwen3-TTS** | Pay/use | Partial | Yes | ⭐⭐⭐⭐ | `pip install dashscope` |
 
 ```bash
-# FREE — No GPU required (recommended for most users)
-pip install kokoro soundfile
+# Kokoro — free, no GPU
 python tools/tts/kokoro_voiceover.py --phase 1 --voice af_heart
 
-# FREE — Best quality (requires CUDA GPU 8GB+)
-pip install chatterbox-tts torch torchaudio
-python tools/tts/chatterbox_voiceover.py --phase 1 --reference voice_sample.wav
+# Chatterbox — free, GPU required
+python tools/tts/chatterbox_voiceover.py --phase 1 --reference voice.wav
 
-# PAID — Industry standard, fastest
-pip install elevenlabs
+# ElevenLabs — paid, best quality
 python tools/tts/elevenlabs_voiceover.py --phase 1 --voice_id YOUR_VOICE_ID
-
-# CURRENT DEFAULT — Qwen3-TTS / DashScope (requires DASHSCOPE_API_KEY)
-python myvideo/edit/generate_voiceover.py --script youtube_scripts/setup/projects/chain_clarity/phase_1/script.md
 ```
-
-**Output:** `phase_1/voiceover/phase_01.wav`
 
 ---
 
-## STEP 7 — Build Infographic Cards
+## Compliance Checker
 
-```bash
-# Option A: Remotion — animated React components (best quality)
-cd remotion
-node scripts/render_all_cards.js --phase 1
-cd ..
-
-# Option B: HTML cards — open in browser, screenshot manually
-# open: youtube_scripts/setup/projects/chain_clarity/phase_1/infographic_assets/card_01.html
-```
-
-**Preview cards in the browser:**
-
-Open `http://localhost:8080/phase/chain_clarity/1` → click the **🃏 Infographics** tab.
-
-Each card opens full-size in a new tab via **Open →**.
-
----
-
-## STEP 8 — Assemble the Video
-
-```bash
-# FFmpeg + PIL (current pipeline)
-python myvideo/edit/burn_text.py --phase 1
-
-# MoviePy (upgraded pipeline)
-python tools/render/moviepy_render.py --phase 1
-```
-
-**Output:** `_output/phase_01/youtube/final_1080p.mp4` (1920×1080, H.264)
-
----
-
-## STEP 9 — Auto-Transcribe and Generate SRT
-
-```bash
-# FREE — CPU-friendly (no GPU needed)
-python tools/transcribe.py --phase 1 --engine faster-whisper
-
-# FREE — Best (requires GPU, word-level timestamps)
-pip install whisperx
-whisperx _output/phase_01/youtube/final_1080p.mp4 \
-  --model large-v3-turbo --language en --word_timestamps True \
-  --output_dir youtube_scripts/setup/projects/chain_clarity/phase_1/ \
-  --output_format srt
-
-# PAID — Auto YouTube chapters ($0.03/video)
-python tools/transcribe.py --phase 1 --engine assemblyai
-```
-
-**Output:** `phase_1/subtitles_auto.srt`
-
----
-
-## STEP 10 — Run Compliance Check
+All generated content is automatically checked against 17 brand rules:
 
 ```bash
 # Check one phase
@@ -419,436 +307,186 @@ python tools/compliance_checker.py --project chain_clarity --phase 1
 python tools/compliance_checker.py --project chain_clarity --phase all
 ```
 
-All 17 brand checks must reach **PASS** or **PASS_WITH_WARNINGS** before publishing.
+Checks include: tone of voice, color codes, typography, subtitle length, forbidden words, brand hashtags, animation sequences, and more.
 
-View compliance report in the browser:
-
-```
-http://localhost:8080/phase/chain_clarity/1
-```
-
-Click **✅ Compliance** tab.
+Results: **PASS** · **PASS_WITH_WARNINGS** · **FAIL**
 
 ---
 
-## STEP 11 — Export Platform Clips
+## Phase Dashboard
 
-```bash
-python tools/platform_cutter.py \
-  --project chain_clarity \
-  --phase 1 \
-  --video _output/phase_01/youtube/final_1080p.mp4
-```
-
-**Output structure:**
+Every phase has its own browser dashboard at:
 
 ```
-_output/phase_01/
-├── youtube/    final_1080p.mp4 · description.txt · subtitles.srt
-├── tiktok/     clip_01_hook.mp4 (:15, 9:16) · clip_02_main.mp4 (:60, 9:16)
-├── instagram/  reel_60s.mp4 · carousel_1.png · carousel_2.png · carousel_3.png
-├── twitter/    card_clip.mp4 (:30) · thread.txt
-├── linkedin/   clip.mp4 (:45) · article.md
-├── blog/       post.md
-└── github/     README.md
+http://localhost:8080/phase/{project}/{phase_number}
 ```
-
-All clips include brand watermark (`#00D4AA` teal, top-right), content name overlay, and brand hashtags.
-
----
-
-## STEP 12 — Generate Text Content
-
-```bash
-python tools/text_content_generator.py --project chain_clarity --phase 1
-```
-
-Requires `ANTHROPIC_API_KEY`. Generates:
-
-| Platform | File | Description |
-|----------|------|-------------|
-| YouTube | `youtube/description.txt` | SEO description, chapter timestamps, tags |
-| Twitter/X | `twitter/thread.txt` | 7-tweet thread (hook→insight→data→CTA) |
-| LinkedIn | `linkedin/article.md` | 800-word professional article |
-| Blog | `blog/post.md` | 1500-word SEO post + YouTube embed |
-| Instagram | `instagram/caption_reel.txt` | Punchy caption + 15 hashtags |
-| GitHub | `github/README.md` | Structured project README |
-
----
-
-## STEP 13 — Review and Publish
-
-```bash
-# View the publish checklist
-cat _output/phase_01/PIPELINE_SUMMARY.md
-```
-
-Or open the phase dashboard:
-
-```
-http://localhost:8080/phase/chain_clarity/1
-```
-
-The pipeline steps table shows exactly which steps are ✅ Done and ⬜ Pending. Click **▶ Run Pipeline** to re-run any step from the browser.
-
----
-
-## Browser Dashboard Reference
-
-### Main Dashboard — `http://localhost:8080`
-
-- **Existing Projects** — table showing all phases with completion status
-- **New Video Project** — 5-step wizard to configure and run the pipeline
-- **▶ Run on Server** — executes pipeline and streams live output to browser terminal
-- **Tool Matrix** — 38 tools across 7 stages with install commands
-
-### Brand Setup — `http://localhost:8080/brand`
-
-- Create and edit brand profiles (colors, fonts, tone, social links)
-- Brand profile stored as `brand_profile.json` per project
-- All generated content inherits brand colors, fonts, and tone rules
-- Live logo preview, color swatches, forbidden words list
-
-### Projects Browser — `http://localhost:8080/projects`
-
-- **Favourites** — star any project to pin it at the top (saved in browser localStorage)
-- **All Projects** — accordion list with phase breakdown
-- **Sort** by name, completion %, or phase count
-- **Search** to filter projects
-- Each phase row links directly to its dashboard
-- Copy pipeline command for any project
-
-### Phase Dashboard — `http://localhost:8080/phase/{project}/{phase}`
-
-Opens in a **new tab** per phase:
 
 | Tab | Content |
 |-----|---------|
-| Overview | YouTube chapters, platform cuts, tags |
-| Script | Full `script.md` with heading colors |
-| Short Script | 60-second `script_short.md` |
-| Infographics | Embedded card iframes + "Open full size" |
-| Audio | Player (if voiceover exists) + voiceover brief |
-| Video | Player (if rendered) + clip brief |
-| Compliance | Full compliance report |
-| All Files | Table of every file — click 👁 View to read inline |
+| Overview | YouTube chapters, platform cut timestamps, keyword tags |
+| Script | Full `script.md` — color-coded headings, inline copy |
+| Short Script | 60-second `script_short.md` for TikTok/Reels |
+| Infographics | Live iframe previews of all card HTML files |
+| Audio | Player when voiceover exists · voiceover brief when not |
+| Video | Player when rendered · clip brief when not |
+| Compliance | Full compliance report with pass/warn/fail per check |
+| All Files | Every source file — click to view, click to copy |
+
+The **Pipeline Steps** table at the top shows exactly what is done and what is pending for every phase, with action buttons for each step.
 
 ---
 
-## Quick Command Reference
+## Projects Browser
 
-| Goal | Command |
-|------|---------|
-| **Start dashboard** | `python server.py` |
-| **Open dashboard** | `http://localhost:8080` |
-| **Generate new phase** | `python pipeline.py --project chain_clarity --phase 6 --topic "NFTs" --outline "ERC-721, tickets, land registry"` |
-| **Re-run existing phase** | `python pipeline.py --project chain_clarity --phase 1 --skip-generate` |
-| **Compliance check only** | `python tools/compliance_checker.py --project chain_clarity --phase 1` |
-| **Platform cuts only** | `python tools/platform_cutter.py --project chain_clarity --phase 1 --video path/to/final.mp4` |
-| **Text content only** | `python tools/text_content_generator.py --project chain_clarity --phase 1` |
-| **TTS — Kokoro (free)** | `python tools/tts/kokoro_voiceover.py --phase 1 --voice af_heart` |
-| **TTS — Chatterbox (free GPU)** | `python tools/tts/chatterbox_voiceover.py --phase 1 --reference voice.wav` |
-| **TTS — ElevenLabs (paid)** | `python tools/tts/elevenlabs_voiceover.py --phase 1 --voice_id YOUR_ID` |
+`http://localhost:8080/projects`
 
----
-
-## `pipeline.py` — All Flags
-
-```bash
-python pipeline.py [options]
-```
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--project` | `chain_clarity` | Project (brand) folder name |
-| `--phase` | *(required)* | Phase number (integer) |
-| `--topic` | — | Video title (required unless `--skip-generate`) |
-| `--outline` | — | Key points / content outline |
-| `--duration` | `12` | Target duration in minutes |
-| `--tags` | `blockchain,crypto,web3,chainclarity` | Comma-separated tags |
-| `--video` | — | Path to master video (enables platform cuts) |
-| `--skip-generate` | off | Skip script + brief generation |
-| `--skip-voiceover` | off | Skip voiceover generation |
-| `--skip-remotion` | off | Skip Remotion card rendering |
-| `--skip-text` | off | Skip text content generation |
-
----
-
-## Chain Clarity — Current Status
-
-| Phase | Topic | Script | Cards | SRT | Comply | VO | Video |
-|-------|-------|--------|-------|-----|--------|----|-------|
-| 1 | How Blockchain Works | ✅ | ✅ 4 | ✅ | ⚠️ PASS | ❌ | ❌ |
-| 2 | Bitcoin vs Ethereum | ✅ | ✅ 3 | ✅ | ⚠️ PASS | ❌ | ❌ |
-| 3 | DeFi & Smart Contracts | ✅ | ✅ 3 | ✅ | ⚠️ PASS | ❌ | ❌ |
-| 4 | Security & Self-Custody | ✅ | ✅ 3 | ✅ | ⚠️ PASS | ❌ | ❌ |
-| 5 | Blockchain Beyond Crypto | ✅ | ✅ 3 | ✅ | ⚠️ PASS | ❌ | ❌ |
-
-**Next step for all phases:** Generate voiceover → assemble video → export platform clips.
-
-```bash
-# Run compliance check across all phases
-python tools/compliance_checker.py --project chain_clarity --phase all
-```
-
----
-
-## TTS Engine Comparison
-
-| Engine | Type | Cost | Quality | GPU? | Voice Clone |
-|--------|------|------|---------|------|-------------|
-| **ElevenLabs** | Paid | $5–22/mo | ⭐⭐⭐⭐⭐ | Cloud | Yes |
-| **Chatterbox TTS** | Free MIT | $0 | ⭐⭐⭐⭐⭐ | Yes 8GB | Yes (5s ref) |
-| **Kokoro-TTS** | Free Apache | $0 | ⭐⭐⭐⭐ | No (CPU) | No |
-| **Qwen3-TTS** *(default)* | Freemium | Pay/use | ⭐⭐⭐⭐ | Partial | Yes |
-
-**Pick by situation:**
-- No GPU, free → **Kokoro-TTS**
-- Has GPU, free + voice clone → **Chatterbox TTS**
-- Paid, best quality → **ElevenLabs Creator** ($22/mo)
-- Multilingual (Chinese/Japanese) → **Qwen3-TTS**
+- ⭐ **Favourite** any project — pinned to the top, saved in localStorage
+- 🔍 **Search** projects by name
+- **Sort** by name, completion %, or phase count
+- Each row expands to show all phases with compliance badges and open links
+- Click **↗ Open** on any phase to open its dedicated dashboard in a new tab
 
 ---
 
 ## Environment Variables
 
-See `.env.example` for the full list. Minimum required:
+Copy `.env.example` to `.env` and fill in your keys:
 
 ```env
-ANTHROPIC_API_KEY=sk-ant-...
+# REQUIRED
+ANTHROPIC_API_KEY=sk-ant-api03-...
+
+# TTS — pick one
+ELEVENLABS_API_KEY=          # paid, best quality
+DASHSCOPE_API_KEY=           # freemium, Qwen3-TTS
+# Kokoro and Chatterbox run fully locally — no key needed
+
+# Transcription — optional
+ASSEMBLYAI_API_KEY=          # $0.03/video, auto YouTube chapters
+DEEPGRAM_API_KEY=            # lowest latency
+
+# Image generation — optional
+BFL_API_KEY=                 # FLUX.1 pro, $0.055/image
+IDEOGRAM_API_KEY=            # best text-in-image, $0.08/image
+
+# Video B-roll — optional
+RUNWAY_API_KEY=              # Gen-4, $0.05/sec
+KLING_API_KEY=               # $7.99/mo
 ```
 
 ---
 
-## Credits & Acknowledgements
+## Cost to Run
 
-Bhrikuty is built on the shoulders of outstanding open-source projects, APIs, and platforms. Full credit to every tool and team listed below.
-
----
-
-### Architecture Inspiration
-
-| Project | Author | What we borrowed |
-|---------|--------|-----------------|
-| [HyperEdit](https://github.com/kevinbadi/hyperedit) | Kevin Badi | 3-agent Director/Picasso/DiCaprio architecture, context-aware intent routing, FFmpeg server pattern, dead-air removal |
+| Approach | Monthly Cost | What you get |
+|----------|-------------|-------------|
+| **All free** | $0 | Kokoro-TTS · faster-whisper · HTML cards · FFmpeg · Claude free credits |
+| **Hybrid** | ~$18–21 | ElevenLabs $5 · AssemblyAI ~$2 · Kling AI $8 · Claude API ~$3 |
+| **Full paid** | ~$50+ | ElevenLabs Creator $22 · Runway Gen-4 · Ideogram · AssemblyAI |
 
 ---
 
-### AI & Script Generation
+## Quick Command Reference
 
-| Tool | Provider | Usage in Bhrikuty |
-|------|----------|-------------------|
-| [Claude API — Sonnet 4.6](https://www.anthropic.com/claude) | Anthropic | Script generation, text content (blog, LinkedIn, thread, YouTube description), compliance analysis |
-| [Claude Code](https://claude.ai/code) | Anthropic | Built the entire web dashboard, server, and pipeline tooling during development |
+```bash
+# Start dashboard server
+python server.py
 
----
+# Generate new phase
+python pipeline.py --project BRAND --phase N --topic "Title" --outline "point1, point2"
 
-### Text-to-Speech / Voiceover
+# Re-run existing phase (skip script generation)
+python pipeline.py --project BRAND --phase N --skip-generate
 
-| Tool | License | Usage in Bhrikuty |
-|------|---------|-------------------|
-| [ElevenLabs](https://elevenlabs.io) | Commercial | Paid TTS option — `tools/tts/elevenlabs_voiceover.py` |
-| [Chatterbox TTS](https://github.com/resemble-ai/chatterbox) | MIT | Free GPU TTS with voice cloning — `tools/tts/chatterbox_voiceover.py` |
-| [Kokoro-TTS](https://github.com/hexgrad/kokoro) | Apache 2.0 | Free CPU-capable TTS, #1 on TTS Arena — `tools/tts/kokoro_voiceover.py` |
-| [Qwen3-TTS / DashScope](https://dashscope.aliyuncs.com) | Freemium | Current default multilingual TTS — `myvideo/edit/generate_voiceover.py` |
-| [F5-TTS](https://github.com/SWivid/F5-TTS) | MIT | Alternative free GPU TTS with EN/ZH bilingual support |
-| [XTTS-v2](https://github.com/coqui-ai/TTS) | Custom | 17-language voice cloning via Coqui TTS |
-| [StyleTTS2](https://github.com/yl4579/StyleTTS2) | MIT | High-quality English TTS alternative |
-| [OpenVoice v2](https://github.com/myshell-ai/OpenVoice) | MIT | Cross-lingual voice cloning |
-| [Piper TTS](https://github.com/rhasspy/piper) | MIT | Lightweight multilingual offline TTS |
+# Voiceover only
+python tools/tts/kokoro_voiceover.py --phase N --voice af_heart
 
----
+# Compliance check
+python tools/compliance_checker.py --project BRAND --phase N
 
-### Video Rendering & Motion Graphics
+# Platform cuts
+python tools/platform_cutter.py --project BRAND --phase N --video path/to/video.mp4
 
-| Tool | License | Usage in Bhrikuty |
-|------|---------|-------------------|
-| [FFmpeg](https://ffmpeg.org) | LGPL/GPL | Base video layer — transcoding, audio normalization, dead-air removal, format conversion |
-| [MoviePy](https://zulko.github.io/moviepy/) | MIT | Python-native video compositing — `tools/render/moviepy_render.py` |
-| [Remotion](https://remotion.dev) | Freemium | React-based animated infographic cards — `remotion/` |
-| [Motion Canvas](https://motioncanvas.io) | MIT | 3Blue1Brown-style mathematical explainer animations |
-| [Revideo](https://re.video) | MIT | Remotion fork with rendering API |
-| [Runway Gen-4](https://runwayml.com) | Commercial | AI-generated cinematic B-roll (~$0.05/sec) |
-| [Kling AI](https://klingai.com) | Commercial | Cost-effective AI B-roll ($7.99/mo) |
-| [Creatomate](https://creatomate.com) | Commercial | JSON-template video rendering API (~$0.38/min) |
-| [DaVinci Resolve](https://www.blackmagicdesign.com/products/davinciresolve) | Free/Paid | Pro color grading and manual editing |
+# Text content (blog, thread, article)
+python tools/text_content_generator.py --project BRAND --phase N
+```
 
 ---
 
-### Transcription & Subtitles
+## Requirements
 
-| Tool | License | Usage in Bhrikuty |
-|------|---------|-------------------|
-| [faster-whisper](https://github.com/SYSTRAN/faster-whisper) | MIT | Default free CPU transcription — `tools/transcribe.py` |
-| [WhisperX](https://github.com/m-bain/whisperX) | BSD-4 | GPU-accelerated word-level transcription with speaker diarization |
-| [Whisper.cpp](https://github.com/ggerganov/whisper.cpp) | MIT | Apple Silicon / CPU whisper — no Python dependency |
-| [Gladia Solaria-1](https://www.gladia.io) | Commercial | Paid transcription with 100-language translation (~$0.04/video) |
-| [AssemblyAI Universal-2](https://www.assemblyai.com) | Commercial | Paid transcription with auto YouTube chapters (~$0.03/video) |
-| [Deepgram Nova-3](https://deepgram.com) | Commercial | Lowest-latency cloud transcription — best for live streaming |
+```
+Python     3.11+
+Node.js    18+
+FFmpeg     (any recent version)
+```
 
----
+```bash
+# Python packages
+pip install anthropic moviepy faster-whisper
 
-### Thumbnail & Image Generation
+# Optional TTS
+pip install kokoro soundfile
+pip install elevenlabs
+pip install chatterbox-tts torch torchaudio
 
-| Tool | License | Usage in Bhrikuty |
-|------|---------|-------------------|
-| [FLUX.1 schnell](https://blackforestlabs.ai) | Apache 2.0 | Local GPU thumbnail generation (24GB VRAM) |
-| [FLUX.1 pro via BFL API](https://api.bfl.ml) | Commercial | Cloud FLUX — no GPU needed (~$0.055/image) |
-| [Ideogram v2](https://ideogram.ai) | Commercial | Best text-in-image rendering (~$0.08/image) |
-| [Recraft v3](https://www.recraft.ai) | Commercial | Vector-style brand graphics, SVG output |
-| [Midjourney v6.1](https://www.midjourney.com) | Commercial | Highest aesthetic quality for hero images |
-| [DALL-E 3](https://openai.com/dall-e-3) | Commercial | OpenAI image generation (~$0.04/image) |
-| [Adobe Firefly 3](https://firefly.adobe.com) | Commercial | IP-indemnified images for monetized content |
-| [Stable Diffusion / ComfyUI](https://github.com/comfyanonymous/ComfyUI) | GPL | Local image generation with LoRA fine-tuning |
+# Optional transcription
+pip install whisperx
+
+# Remotion
+cd remotion && npm install
+```
 
 ---
 
-### Workflow Orchestration
+## Credits & Inspirations
 
-| Tool | License | Usage in Bhrikuty |
-|------|---------|-------------------|
-| `pipeline.py` | MIT | Custom Python director — the current orchestration layer |
-| [n8n](https://n8n.io) | Fair-code | Visual 400+ integration workflow builder (self-hostable) |
-| [CrewAI](https://www.crewai.com) | MIT | Role-based multi-agent orchestration |
-| [Dify](https://dify.ai) | Apache 2.0 | Visual LLMOps pipeline builder with RAG |
-| [Flowise](https://flowiseai.com) | MIT | Drag-and-drop LLM flows |
-| [Prefect](https://www.prefect.io) | Apache 2.0 | Python-native workflow with retries and caching |
-| [Temporal](https://temporal.io) | MIT SDK | Durable fault-tolerant workflow for GPU workloads |
+### Architecture
+- [HyperEdit](https://github.com/kevinbadi/hyperedit) — 3-agent Director/Picasso/DiCaprio architecture and intent routing
 
----
+### AI & Generation
+- [Anthropic Claude](https://anthropic.com) — script generation, text content, compliance analysis
+- [Claude Code](https://claude.ai/code) — built the entire web dashboard during development
+
+### Voiceover
+- [Kokoro-TTS](https://github.com/hexgrad/kokoro) · [Chatterbox TTS](https://github.com/resemble-ai/chatterbox) · [ElevenLabs](https://elevenlabs.io) · [Qwen3-TTS](https://dashscope.aliyuncs.com) · [F5-TTS](https://github.com/SWivid/F5-TTS)
+
+### Video
+- [FFmpeg](https://ffmpeg.org) · [MoviePy](https://zulko.github.io/moviepy/) · [Remotion](https://remotion.dev) · [Motion Canvas](https://motioncanvas.io)
+
+### Transcription
+- [faster-whisper](https://github.com/SYSTRAN/faster-whisper) · [WhisperX](https://github.com/m-bain/whisperX) · [AssemblyAI](https://assemblyai.com) · [Deepgram](https://deepgram.com)
+
+### Images
+- [FLUX.1](https://blackforestlabs.ai) · [Ideogram](https://ideogram.ai) · [Recraft](https://recraft.ai) · [Midjourney](https://midjourney.com)
 
 ### Publishing Platforms
+YouTube · TikTok · Instagram · Twitter/X · LinkedIn · Blog · GitHub
 
-| Platform | What Bhrikuty creates for it |
-|----------|------------------------------|
-| [YouTube](https://www.youtube.com) | `final_1080p.mp4` · `description.txt` · `subtitles.srt` · thumbnail · chapters |
-| [TikTok](https://www.tiktok.com) | `clip_01_hook.mp4` (:15, 9:16) · `clip_02_main.mp4` (:60, 9:16) |
-| [Instagram](https://www.instagram.com) | `reel_60s.mp4` · `carousel_1–3.png` · `caption_reel.txt` |
-| [Twitter / X](https://twitter.com) | `card_clip.mp4` (:30) · `thread.txt` (7-tweet breakdown) |
-| [LinkedIn](https://www.linkedin.com) | `clip.mp4` (:45) · `article.md` (800-word professional article) |
-| [Blog / Website](https://wordpress.org) | `post.md` (1500-word SEO post with YouTube embed) |
-| [GitHub](https://github.com) | `README.md` (structured project README with code samples) |
+### Creator Inspirations
 
----
-
-### Content Creation APIs & Publishing Tools
-
-| Tool | Purpose |
-|------|---------|
-| [YouTube Data API v3](https://developers.google.com/youtube/v3) | Automated upload — title, description, tags, SRT, thumbnail, scheduled publish |
-| [Metricool](https://metricool.com) | Multi-platform scheduling and analytics |
-| [n8n YouTube Node](https://n8n.io/integrations/youtube/) | Combined pipeline + publishing in one workflow |
-
----
+| Category | Creators |
+|----------|---------|
+| Blockchain education | Whiteboard Crypto · Coin Bureau · Andreas Antonopoulos · Finematics · Patrick Collins |
+| Tech explainers | Fireship · 3Blue1Brown · Kurzgesagt · Veritasium |
+| Coding education | Traversy Media · Theo t3.gg · NetworkChuck |
+| Content strategy | Ali Abdaal · MKBHD · Colin and Samir · Alex Hormozi |
 
 ### Fonts
-
-| Font | Foundry | Usage |
-|------|---------|-------|
-| [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) | Florian Karsten | All headings across dashboard, cards, and brand assets |
-| [Inter](https://fonts.google.com/specimen/Inter) | Rasmus Andersson | Body text across all UI pages |
-| [JetBrains Mono](https://www.jetbrains.com/legalforms/fonts/) | JetBrains | Code overlays and infographic card monospace text |
+[Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) · [Inter](https://fonts.google.com/specimen/Inter) · [JetBrains Mono](https://www.jetbrains.com/legalforms/fonts/)
 
 ---
 
-### Web Dashboard (Built in this project)
+## License
 
-| File | What it does |
-|------|-------------|
-| `server.py` | Zero-dependency Python HTTP server with SSE streaming and threaded request handling |
-| `dashboard.html` | Main pipeline control — 5-step wizard, live terminal drawer, projects status table |
-| `brand.html` | Brand identity setup — colors, fonts, tone of voice, social links, content pillars |
-| `projects.html` | Projects browser — favourites (localStorage), search, sort, accordion phase list |
-| `phase_dashboard.html` | Per-phase dashboard — pipeline steps, file viewer, infographic iframes, audio/video players |
+MIT — see [LICENSE](LICENSE)
 
 ---
 
-### Python Libraries
+<div align="center">
 
-| Library | Usage |
-|---------|-------|
-| [anthropic](https://pypi.org/project/anthropic/) | Claude API for script and text generation |
-| [moviepy](https://pypi.org/project/moviepy/) | Video compositing and rendering |
-| [faster-whisper](https://pypi.org/project/faster-whisper/) | Audio transcription |
-| [kokoro](https://pypi.org/project/kokoro/) | Kokoro-TTS voiceover |
-| [soundfile](https://pypi.org/project/soundfile/) | Audio file I/O |
-| [elevenlabs](https://pypi.org/project/elevenlabs/) | ElevenLabs TTS API |
-| [dashscope](https://pypi.org/project/dashscope/) | Qwen3-TTS / DashScope API |
-| [chatterbox-tts](https://pypi.org/project/chatterbox-tts/) | Chatterbox voice cloning TTS |
-| [torch / torchaudio](https://pytorch.org) | GPU inference for Chatterbox and WhisperX |
+Built with ❤️ for content creators who want to work smarter, not harder.
 
----
+**[⭐ Star this repo](https://github.com/sanamsitoula/BhrikutyFlimDirector)** if it saves you time.
 
-### Node.js Packages (Remotion)
-
-| Package | Usage |
-|---------|-------|
-| [remotion](https://www.npmjs.com/package/remotion) | Core Remotion video rendering |
-| [@remotion/player](https://www.npmjs.com/package/@remotion/player) | In-browser preview |
-| [@remotion/renderer](https://www.npmjs.com/package/@remotion/renderer) | Server-side render to MP4 |
-
----
-
-### YouTuber & Creator Inspirations
-
-These creators directly shaped the content style, production standards, and educational philosophy behind the Bhrikuty pipeline and Chain Clarity brand.
-
-#### Blockchain & Crypto Education
-
-| Creator | Channel | What we learned |
-|---------|---------|----------------|
-| [Whiteboard Crypto](https://www.youtube.com/@WhiteboardCrypto) | YouTube | Simple visual explainer style for complex blockchain concepts — the "one analogy per concept" rule |
-| [Coin Bureau](https://www.youtube.com/@CoinBureau) | YouTube | Deep research, no hype, trust-first approach to crypto content — our tone benchmark |
-| [Andreas Antonopoulos](https://www.youtube.com/@aantonop) | YouTube | Technical depth with real-world analogies — how to explain Bitcoin to anyone |
-| [Finematics](https://www.youtube.com/@Finematics) | YouTube | DeFi and smart contract explainers with clean motion graphics |
-| [Benjamin Cowen](https://www.youtube.com/@intothecryptoverse) | YouTube | Data-first content — letting the charts and numbers lead the narrative |
-| [Patrick Collins](https://www.youtube.com/@PatrickAlphaC) | YouTube | Solidity and smart contract tutorials — technical accuracy standard |
-
-#### Educational Content & Production Quality
-
-| Creator | Channel | What we learned |
-|---------|---------|----------------|
-| [Fireship](https://www.youtube.com/@Fireship) | YouTube | Dense, high-signal-to-noise tech explainers in 100 seconds — the hook structure we follow |
-| [3Blue1Brown](https://www.youtube.com/@3blue1brown) | YouTube | Animated mathematical explanations — inspiration for Motion Canvas card animations |
-| [Kurzgesagt](https://www.youtube.com/@kurzgesagt) | YouTube | World-class script structure and visual storytelling — how every script section opens |
-| [Veritasium](https://www.youtube.com/@veritasium) | YouTube | Counter-intuitive hooks that reframe the viewer's understanding in the first 30 seconds |
-| [Mark Rober](https://www.youtube.com/@MarkRober) | YouTube | Story-first engineering — complex ideas wrapped in a compelling narrative arc |
-
-#### Coding & Tech Education
-
-| Creator | Channel | What we learned |
-|---------|---------|----------------|
-| [Traversy Media](https://www.youtube.com/@TraversyMedia) | YouTube | Clear project-based learning structure, clean pacing for technical walkthroughs |
-| [Theo — t3.gg](https://www.youtube.com/@t3dotgg) | YouTube | Opinion-driven tech takes with strong thesis statements — the LinkedIn article format |
-| [TechLead](https://www.youtube.com/@TechLead) | YouTube | Storytelling through real engineering experience |
-| [NetworkChuck](https://www.youtube.com/@NetworkChuck) | YouTube | High-energy educational delivery — keeping viewers engaged on technical topics |
-
-#### Content Strategy & Creator Business
-
-| Creator | Channel | What we learned |
-|---------|---------|----------------|
-| [Ali Abdaal](https://www.youtube.com/@aliabdaal) | YouTube | Evidence-based content creation, repurposing one video across all platforms |
-| [Matt D'Avella](https://www.youtube.com/@mattdavella) | YouTube | Minimalist cinematic production — visual restraint as a brand identity choice |
-| [Colin and Samir](https://www.youtube.com/@ColinandSamir) | YouTube | Creator economy strategy — how to build an audience that returns, not just watches |
-| [MKBHD — Marques Brownlee](https://www.youtube.com/@mkbhd) | YouTube | Production quality benchmark — color grading, b-roll, thumbnail standards |
-
-#### Short-Form & Multi-Platform
-
-| Creator | Channel | What we learned |
-|---------|---------|----------------|
-| [Gary Vaynerchuk](https://www.youtube.com/@garyvee) | YouTube / TikTok / LinkedIn | Document-don't-create, document-first multi-platform distribution strategy |
-| [Hormozi — Alex Hormozi](https://www.youtube.com/@AlexHormozi) | YouTube | Value-dense content — no filler, every sentence earns its place |
-| [Lenny Rachitsky](https://www.youtube.com/@LennysPodcast) | YouTube | Long-form interview depth repurposed into short clips, articles, and newsletters |
-
----
-
-> **Note on "Code Medin" and others:** If you know of a specific creator whose work shaped this project and is missing from this list, please [open an issue](https://github.com/sanamsitoula/BhrikutyFlimDirector/issues) or submit a PR to add them — full credit deserved.
-
----
-
-### Special Thanks
-
-- **[Chain Clarity](https://github.com/sanamsitoula/BhrikutyFlimDirector)** — the flagship brand built with this system, covering blockchain education across 7 platforms
-- **[Anthropic](https://www.anthropic.com)** — for Claude, the AI that generates every script, article, thread, and README in this pipeline
-- **The open-source community** — every free tool in this stack represents thousands of hours of contributed work
-- **Every educator on YouTube** who made technical knowledge free and accessible — this entire project exists to continue that tradition
+</div>
