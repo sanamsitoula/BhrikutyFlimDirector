@@ -133,18 +133,26 @@ def make_color_slide(index: int, title: str, brand: dict, out_png: Path,
 
 def image_to_clip(img: Path, duration: float, out_mp4: Path,
                   width: int = 1920, height: int = 1080, fps: int = 30):
-    """Convert a static image to a video clip with fade in/out."""
+    """Convert a static image to a video clip with ken-burns zoom + fade in/out."""
     fade_dur = min(0.4, duration / 4)
+    # Ken-Burns: slow zoom 1.0 → 1.06 over the clip duration
+    # zoompan filter: zoom increases by 0.0008 per frame (≈ 2% over 25 frames/sec for 3s)
+    zoom_speed = 0.001   # zoom increment per frame
+    total_frames = int(duration * fps)
+    # Use scale2ref + zoompan for smooth animated zoom
+    vf = (
+        f"scale={width*2}:{height*2}:force_original_aspect_ratio=decrease,"
+        f"pad={width*2}:{height*2}:(ow-iw)/2:(oh-ih)/2,"
+        f"zoompan=z='min(zoom+{zoom_speed:.4f},1.08)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+        f"d={total_frames}:s={width}x{height}:fps={fps},"
+        f"fade=t=in:st=0:d={fade_dur:.2f},"
+        f"fade=t=out:st={duration - fade_dur:.2f}:d={fade_dur:.2f}"
+    )
     subprocess.run([
         "ffmpeg", "-y",
         "-loop", "1", "-i", str(img),
         "-t", str(duration),
-        "-vf", (
-            f"scale={width}:{height}:force_original_aspect_ratio=decrease,"
-            f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,"
-            f"fade=t=in:st=0:d={fade_dur:.2f},"
-            f"fade=t=out:st={duration - fade_dur:.2f}:d={fade_dur:.2f}"
-        ),
+        "-vf", vf,
         "-c:v", "libx264", "-pix_fmt", "yuv420p",
         "-r", str(fps), str(out_mp4),
     ], check=True, capture_output=True)
