@@ -286,6 +286,14 @@ def main():
 
     import uuid
     run_id = uuid.uuid4().hex[:16]
+    # Ensure brand row exists in DB before creating the run (avoids FK violation)
+    bp = PROJECT_ROOT / args.project / "brand_profile.json"
+    if bp.exists():
+        try:
+            import json as _json
+            upsert_brand(_json.loads(bp.read_text(encoding="utf-8")))
+        except Exception:
+            pass
     create_run(run_id, args.project, args.phase, vars(args))
     update_phase_status(args.project, args.phase, "in_progress")
 

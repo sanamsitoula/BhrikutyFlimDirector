@@ -119,7 +119,7 @@ It's the first step to understanding global trade.
 (HEADER: `font-family: 'Space Grotesk'; font-size: 100px; color: #2D7D46;`)
 **SCARCITY AND CHOICE**
 (BODY: `font-family: 'Inter'; font-size: 60px; color: #F5A623;`)
-**The Basic Economic Problem**
+**The Core Economic Problem**
 (Small text: `font-family: 'Inter'; font-size: 30px; color: #8B9BB4;`)
 *ecoWorld.tv*
 
@@ -374,7 +374,7 @@ Their demand is called "elastic," like vacation travel.
 If airfares increase, many people postpone trips.
 They seek cheaper alternatives or stay home instead.
 Other products are less sensitive to price changes.
-Their demand is called "inelastic," like basic food.
+Their demand is called "inelastic," like everyday food.
 You still buy groceries even if prices rise slightly.
 People need food to live, regardless of cost.
 Consider gasoline prices at the pump.
@@ -432,13 +432,13 @@ It applies to everything from luxury goods to daily necessities.
 [B-ROLL: montage of all previous B-roll examples, concluding with a wide shot of a bustling, diverse marketplace.]
 
 **NARRATION:**
-You now understand the basics of microeconomics.
+You now understand the fundamentals of microeconomics.
 We covered individual choices, scarcity, and trade-offs.
 We explored how supply and demand set prices.
 We also learned about price sensitivity and elasticity.
 These concepts explain the world around you.
 From your coffee price to global market forces.
-This is just Phase 1 of your economic journey.
+This is Phase 1 of your economic journey.
 Join us next time for Macroeconomics & Global Markets.
 Subscribe to Eco World for economics that make sense.
 

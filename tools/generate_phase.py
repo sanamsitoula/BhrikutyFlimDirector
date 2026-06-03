@@ -319,10 +319,18 @@ Card brief: {card_brief}
 
 Requirements:
 - DOCTYPE html, meta viewport width=1080
-- Google Fonts CDN: Space Grotesk, Inter, JetBrains Mono
-- Brand hex colors: #00D4AA #F5A623 #8B9BB4 #0A0E1A #7B5CF0 (no CSS color names)
-- 6-step brand animation: fadeIn bg -> slideDown logo -> wordIn headline -> slideUp content -> countUp stat -> bounce CTA
-- Chain Clarity logo SVG (use exact SVG from brand_profile.json)
+- Google Fonts CDN: Space Grotesk, Inter, AND JetBrains Mono (all three required)
+  Use: https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap
+- Brand hex colors from brand_profile.json only (no CSS color names)
+- MANDATORY 6-step animation sequence with EXACT CSS timings (compliance checker enforces these):
+    Step 1: animation: fadeIn 0.2s forwards        @keyframes fadeIn
+    Step 2: animation: slideDown 0.3s forwards      @keyframes slideDown
+    Step 3: animation: wordIn 0.15s forwards        @keyframes wordIn   (each headline word)
+    Step 4: animation: slideUp 0.4s forwards        @keyframes slideUp
+    Step 5: (stat countUp if applicable)
+    Step 6: animation: bounce 0.3s forwards         @keyframes bounce
+  The strings "fadeIn 0.2s", "slideDown 0.3s", "wordIn 0.15s", "slideUp 0.4s", "bounce 0.3s"
+  MUST appear verbatim in the CSS. Use delays (e.g. 0.3s, 0.7s, 1.5s, 2.0s) to sequence them.
 - Phase label in logo area
 - CSS animations only (no external libraries)
 - JavaScript only for counter animation if needed

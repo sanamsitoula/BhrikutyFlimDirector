@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=1080, initial-scale=1.0">
     <title>Eco World - Microeconomics Card 1</title>
     <!-- Google Fonts CDN -->
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* Brand Colors */
         :root {
@@ -41,8 +41,8 @@
             align-items: center;
             position: relative;
             overflow: hidden;
-            opacity: 0; /* Initial state for fadeInBg */
-            animation: fadeInBg 1s forwards;
+            opacity: 0;
+            animation: fadeIn 0.2s forwards;
         }
 
         .header-area {
@@ -57,8 +57,8 @@
 
         .logo-wrapper, .phase-label {
             opacity: 0;
-            transform: translateY(-100%); /* Initial state for slideDownLogo */
-            animation: slideDownLogo 0.8s forwards 0.5s; /* Animates after background fade */
+            transform: translateY(-100%);
+            animation: slideDown 0.3s forwards 0.3s;
         }
 
         .phase-label {
@@ -101,8 +101,8 @@
             color: var(--neutral);
             line-height: 1.3;
             opacity: 0;
-            transform: translateY(100%); /* Initial state for slideUpContent */
-            animation: slideUpContent 0.8s forwards 2.5s; /* Animates after headline words */
+            transform: translateY(100%);
+            animation: slideUp 0.4s forwards 1.5s;
         }
 
         .cta-strip {
@@ -114,19 +114,19 @@
             align-items: center;
             font-family: var(--font-body);
             font-size: 48px;
-            color: var(--background); /* Text color contrasting with highlight */
+            color: var(--background);
             opacity: 0;
-            transform: translateY(100%); /* Initial state for bounceCTA */
-            animation: bounceCTA 0.8s forwards 3.5s; /* Animates after content */
+            transform: translateY(100%);
+            animation: bounce 0.3s forwards 2.0s;
         }
 
         /* --- Keyframe Animations --- */
 
-        @keyframes fadeInBg {
+        @keyframes fadeIn {
             to { opacity: 1; }
         }
 
-        @keyframes slideDownLogo {
+        @keyframes slideDown {
             to { transform: translateY(0); opacity: 1; }
         }
 
@@ -134,20 +134,20 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        @keyframes slideUpContent {
+        @keyframes slideUp {
             to { transform: translateY(0); opacity: 1; }
         }
 
-        @keyframes bounceCTA {
-            0% { transform: translateY(100%); opacity: 0; }
-            60% { transform: translateY(-10%); opacity: 1; }
-            100% { transform: translateY(0); opacity: 1; }
+        @keyframes bounce {
+            0%   { transform: translateY(100%); opacity: 0; }
+            60%  { transform: translateY(-8%);  opacity: 1; }
+            100% { transform: translateY(0);    opacity: 1; }
         }
 
         /* Staggered animation for headline words */
-        .headline span:nth-child(1) { animation: wordIn 0.5s forwards 1.2s; } /* "Why" */
-        .headline span:nth-child(2) { animation: wordIn 0.5s forwards 1.4s; } /* "Prices" */
-        .headline span:nth-child(3) { animation: wordIn 0.5s forwards 1.6s; } /* "Change?" */
+        .headline span:nth-child(1) { animation: wordIn 0.15s forwards 0.7s; }
+        .headline span:nth-child(2) { animation: wordIn 0.15s forwards 0.9s; }
+        .headline span:nth-child(3) { animation: wordIn 0.15s forwards 1.1s; }
 
     </style>
 </head>
