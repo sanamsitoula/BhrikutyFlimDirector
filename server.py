@@ -168,6 +168,13 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/tools-status":
             self._api_tools_status()
 
+        elif path == "/api/output-text":
+            self._api_output_text(
+                qs.get("project", ["chain_clarity"])[0],
+                int(qs.get("phase", ["1"])[0]),
+                qs.get("path", [""])[0]
+            )
+
         else:
             target = BASE_DIR / path.lstrip("/")
             if target.exists() and target.is_file():
@@ -761,6 +768,43 @@ class Handler(BaseHTTPRequestHandler):
                 if f.is_file():
                     output_files.append(str(f.relative_to(output_dir)))
 
+        # Platform outputs — structured by platform for the Outputs tab
+        _PLATFORMS = [
+            ("youtube",        "YouTube",           "▶️"),
+            ("youtube_shorts", "YouTube Shorts",    "📱"),
+            ("tiktok",         "TikTok",            "🎵"),
+            ("instagram",      "Instagram",         "📸"),
+            ("twitter",        "Twitter / X",       "🐦"),
+            ("linkedin",       "LinkedIn",          "💼"),
+            ("blog",           "Blog",              "📝"),
+            ("github",         "GitHub",            "🐙"),
+        ]
+        platform_outputs = {}
+        for pd_slug, pd_label, pd_icon in _PLATFORMS:
+            pd_dir = output_dir / pd_slug
+            files = []
+            if pd_dir.exists():
+                for f in sorted(pd_dir.rglob("*")):
+                    if f.is_file():
+                        rel  = str(f.relative_to(output_dir)).replace("\\", "/")
+                        ext  = f.suffix.lower()
+                        size = f.stat().st_size
+                        files.append({
+                            "name":    f.name,
+                            "path":    rel,
+                            "size_mb": round(size / 1024 / 1024, 2),
+                            "ext":     ext.lstrip("."),
+                            "is_video": ext in (".mp4", ".webm", ".mov"),
+                            "is_text":  ext in (".txt", ".md", ".html"),
+                            "media_url": f"/media/{project}/{phase}/{rel}",
+                        })
+            platform_outputs[pd_slug] = {
+                "label":       pd_label,
+                "icon":        pd_icon,
+                "files":       files,
+                "has_content": len(files) > 0,
+            }
+
         # Brand profile + roadmap (loaded before pipeline steps — needed for CMD strings)
         brand_profile = {}
         bp_path = PROJECT_ROOT / project / "brand_profile.json"
@@ -818,6 +862,7 @@ class Handler(BaseHTTPRequestHandler):
             "steps_done": done_count,
             "steps_total": len(steps),
             "voiceover_files": voiceover_files,
+            "platform_outputs": platform_outputs,
             "video_type": video_type,
             "brand": brand_profile,
             "roadmap_phase": roadmap_phase,
@@ -846,6 +891,19 @@ class Handler(BaseHTTPRequestHandler):
             content = file_path.read_text(encoding="utf-8", errors="replace")
             ftype = "json" if filename.endswith(".json") else "srt" if filename.endswith(".srt") else "text"
             self._send_json({"content": content, "type": ftype, "filename": filename})
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _api_output_text(self, project: str, phase: int, filepath: str):
+        if ".." in filepath or filepath.startswith("/"):
+            self._send_json({"error": "invalid path"}, 400); return
+        f = PROJECT_ROOT / project / "_output" / f"phase_{phase:02d}" / filepath
+        if not f.exists():
+            self._send_json({"error": "file not found"}, 404); return
+        try:
+            content = f.read_text(encoding="utf-8", errors="replace")
+            self._send_json({"content": content, "filename": f.name,
+                             "size": f.stat().st_size})
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 

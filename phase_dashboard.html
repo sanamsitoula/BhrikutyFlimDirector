@@ -290,6 +290,17 @@ video{max-height:480px;background:#000;}
   .cards-grid{grid-template-columns:1fr;}
 }
 
+/* ── PLATFORM OUTPUT CARDS ── */
+.platform-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;}
+.platform-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s;}
+.platform-card.has-content{border-color:rgba(0,212,170,.35);}
+.platform-card-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2);}
+.platform-card.has-content .platform-card-head{background:var(--teal-dim);}
+.platform-card-body{padding:10px 14px;}
+.output-file-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(30,42,66,.4);}
+.output-file-row:last-child{border-bottom:none;}
+.output-preview{display:none;padding:0 14px 10px;}
+.output-generate-cmd{background:#06090F;border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-top:6px;}
 /* ── SUB-STEP ROWS ── */
 .substep-row td { border-bottom:1px solid rgba(20,27,45,.9); }
 .substep-num{
@@ -439,7 +450,8 @@ function render() {
         <button class="tab-btn" onclick="switchTab('video',this)">🎬 Video</button>
         <button class="tab-btn" onclick="switchTab('compliance',this)">✅ Compliance</button>
         <button class="tab-btn" onclick="switchTab('files',this)">📁 All Files</button>
-        <button class="tab-btn" onclick="switchTab('context',this)" style="border-left:1px solid var(--border);margin-left:4px;color:var(--teal);">📋 Context</button>
+        <button class="tab-btn" onclick="switchTab('outputs',this)" style="border-left:1px solid var(--border);margin-left:4px;color:var(--gold);">📤 Outputs</button>
+        <button class="tab-btn" onclick="switchTab('context',this)" style="color:var(--teal);">📋 Context</button>
       </div>
       <div style="padding:20px;">
         <div id="tab-overview"     class="tab-panel active">${renderOverview(d)}</div>
@@ -451,6 +463,7 @@ function render() {
         <div id="tab-video"        class="tab-panel">${renderVideo(d)}</div>
         <div id="tab-compliance"   class="tab-panel">${renderFileTab('compliance_report_auto.md')}</div>
         <div id="tab-files"        class="tab-panel">${renderFilesTab(d.files, d.cards)}</div>
+        <div id="tab-outputs"      class="tab-panel">${renderOutputs(d)}</div>
         <div id="tab-context"      class="tab-panel">${renderContext(d)}</div>
       </div>
     </div>
@@ -838,6 +851,161 @@ async function setVideoType(vtype) {
       panel.innerHTML = renderOverview(phaseData);
     }
   } catch(e) { showToast('Could not save video type'); }
+}
+
+// ─────────────────────────────────────────────────
+// OUTPUTS TAB — all platform outputs in one view
+// ─────────────────────────────────────────────────
+const _PLATFORM_META = {
+  youtube:        { aspect:'16:9',  desc:'Main long-form video + description',     genCmd: 'python tools/video/create_video.py' },
+  youtube_shorts: { aspect:'9:16',  desc:'60s vertical cut for Shorts',            genCmd: 'python tools/video/create_video.py --shorts' },
+  tiktok:         { aspect:'9:16',  desc:'Hook clip (0-15s) + main cut (60s)',     genCmd: 'python tools/platform_cutter.py' },
+  instagram:      { aspect:'1:1',   desc:'Reel 60s + carousel cards',             genCmd: 'python tools/platform_cutter.py' },
+  twitter:        { aspect:'16:9',  desc:'Card clip + 7-tweet thread',             genCmd: 'python tools/text_content_generator.py' },
+  linkedin:       { aspect:'16:9',  desc:'800-word article + clip',               genCmd: 'python tools/text_content_generator.py' },
+  blog:           { aspect:'text',  desc:'Full blog post (Markdown)',             genCmd: 'python tools/text_content_generator.py' },
+  github:         { aspect:'text',  desc:'README with video embed + badges',       genCmd: 'python tools/text_content_generator.py' },
+};
+
+function renderOutputs(d) {
+  const po  = d.platform_outputs || {};
+  const all = Object.entries(po);
+  if (!all.length) {
+    return `<div style="text-align:center;padding:40px;color:var(--muted);">
+      <div style="font-size:32px;margin-bottom:12px;">📤</div>
+      No platform outputs yet. Run the pipeline to generate them.
+    </div>`;
+  }
+
+  // ── Summary bar ──────────────────────────────────────────────────────────
+  const total   = all.length;
+  const ready   = all.filter(([,v]) => v.has_content).length;
+  const pct     = Math.round(ready / total * 100);
+  const summaryBar = `
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+                padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;">
+      <div>
+        <span style="font-size:13px;font-weight:700;color:var(--text);">📤 Platform Outputs</span>
+        <span style="font-size:12px;color:var(--text2);margin-left:10px;">${ready}/${total} platforms ready</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:140px;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:var(--gold);border-radius:3px;transition:width 1s;"></div>
+        </div>
+        <span style="font-size:12px;color:var(--gold);font-weight:600;">${pct}%</span>
+        <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;" onclick="location.reload()">🔄 Refresh</button>
+      </div>
+    </div>`;
+
+  // ── Platform cards ───────────────────────────────────────────────────────
+  const cards = all.map(([slug, data]) => {
+    const meta     = _PLATFORM_META[slug] || {};
+    const files    = data.files || [];
+    const hasContent = data.has_content;
+    const videoFile  = files.find(f => f.is_video);
+    const textFiles  = files.filter(f => f.is_text);
+    const otherFiles = files.filter(f => !f.is_video && !f.is_text);
+
+    // File rows
+    const fileRows = files.map((f, fi) => {
+      const vid = f.is_video;
+      const txt = f.is_text;
+      const previewId = `op-${slug}-${fi}`;
+      return `
+        <div class="output-file-row">
+          <span style="font-size:12px;">${vid ? '🎬' : txt ? '📄' : '📁'}</span>
+          <span style="font-size:11px;color:var(--teal);font-family:'Courier New',monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(f.name)}">${esc(f.name)}</span>
+          <span style="font-size:10px;color:var(--muted);flex-shrink:0;">${f.size_mb}MB</span>
+          <div style="display:flex;gap:4px;flex-shrink:0;">
+            ${vid ? `<a href="${f.media_url}" target="_blank" class="step-action-btn view" style="font-size:10px;padding:2px 8px;text-decoration:none;">▶ Play</a>` : ''}
+            ${txt ? `<button class="step-action-btn view" style="font-size:10px;padding:2px 8px;" onclick="toggleOutputPreview('${slug}',${fi},'${d.project}',${d.phase},'${esc(f.path)}')">👁 View</button>` : ''}
+            <a href="${f.media_url}" download="${f.name}" class="step-action-btn view" style="font-size:10px;padding:2px 8px;text-decoration:none;">⬇</a>
+          </div>
+        </div>
+        <div id="${previewId}" class="output-preview"></div>`;
+    }).join('');
+
+    // Generate command
+    const proj = d.project, ph = d.phase;
+    const genCmdMap = {
+      youtube:        `python tools/video/create_video.py --project ${proj} --phase ${ph} --burn-subs`,
+      youtube_shorts: `python tools/video/create_video.py --project ${proj} --phase ${ph} --shorts`,
+      tiktok:         `python tools/platform_cutter.py --project ${proj} --phase ${ph} --video _output/phase_${String(ph).padStart(2,'0')}/youtube/final_1080p.mp4`,
+      instagram:      `python tools/platform_cutter.py --project ${proj} --phase ${ph} --video _output/phase_${String(ph).padStart(2,'0')}/youtube/final_1080p.mp4`,
+      twitter:        `python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
+      linkedin:       `python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
+      blog:           `python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
+      github:         `python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
+    };
+    const genCmd = genCmdMap[slug] || '';
+
+    const pendingContent = `
+      <div style="color:var(--muted);font-size:11px;padding:6px 0 4px;">Not generated yet.</div>
+      <div class="output-generate-cmd">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Generate</span>
+          <button class="step-action-btn view" style="font-size:10px;padding:2px 7px;" onclick="navigator.clipboard.writeText('${esc(genCmd)}').then(()=>showToast('Copied!'))">📋</button>
+        </div>
+        <code style="font-size:10px;color:var(--teal);word-break:break-all;">${esc(genCmd)}</code>
+      </div>`;
+
+    // Inline video preview (thumbnail-size)
+    const inlinePlayer = videoFile ? `
+      <div style="background:#000;border-bottom:1px solid var(--border);">
+        <video controls preload="metadata" style="width:100%;max-height:${meta.aspect==='9:16'?'200':'150'}px;display:block;object-fit:contain;">
+          <source src="${videoFile.media_url}" type="video/mp4">
+        </video>
+      </div>` : '';
+
+    return `
+      <div class="platform-card ${hasContent?'has-content':''}">
+        <div class="platform-card-head">
+          <span style="font-size:22px;flex-shrink:0;">${data.icon}</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">${esc(data.label)}</div>
+            <div style="font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${meta.desc||''} · ${meta.aspect||''}</div>
+          </div>
+          <span class="badge ${hasContent?'badge-teal':'badge-blue'}" style="flex-shrink:0;">
+            ${hasContent ? `✅ ${files.length} file${files.length>1?'s':''}` : '⬜ Pending'}
+          </span>
+        </div>
+        ${inlinePlayer}
+        <div class="platform-card-body">
+          ${hasContent ? fileRows : pendingContent}
+        </div>
+      </div>`;
+  }).join('');
+
+  return summaryBar + `<div class="platform-grid">${cards}</div>`;
+}
+
+const _outputPreviewCache = {};
+async function toggleOutputPreview(slug, fileIdx, project, phase, path) {
+  const id = `op-${slug}-${fileIdx}`;
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.style.display === 'block') { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  if (_outputPreviewCache[id]) { el.innerHTML = _outputPreviewCache[id]; return; }
+  el.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:6px;">Loading…</div>';
+  try {
+    const r = await fetch(`/api/output-text?project=${project}&phase=${phase}&path=${encodeURIComponent(path)}`);
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error||r.status);
+    const codeId = `opc-${slug}-${fileIdx}`;
+    const html = `
+      <div style="padding-top:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:10px;color:var(--muted);">${esc(data.filename)} · ${(data.size/1024).toFixed(1)} KB</span>
+          <button class="copy-content-btn" onclick="navigator.clipboard.writeText(document.getElementById('${codeId}').textContent).then(()=>showToast('Copied!'))">📋 Copy</button>
+        </div>
+        <pre id="${codeId}" style="background:#06090F;border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:11px;color:#8A97B0;white-space:pre-wrap;max-height:220px;overflow-y:auto;margin:0;">${esc(data.content)}</pre>
+      </div>`;
+    _outputPreviewCache[id] = html;
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--red);font-size:11px;padding:6px;">Error: ${e.message}</div>`;
+  }
 }
 
 // ─────────────────────────────────────────────────
@@ -1817,7 +1985,25 @@ function streamJob(job_id) {
       appendMini(ok ? '\n✅ Done!\n' : '\n❌ Failed\n', ok ? 't-teal' : 't-red');
       document.getElementById('mini-badge').textContent = ok ? 'DONE' : 'FAILED';
       document.getElementById('mini-badge').style.color = ok ? 'var(--teal)' : 'var(--red)';
-      if (ok) setTimeout(() => location.reload(), 1500);
+      if (ok) {
+        // Refresh phase data and update Outputs tab without full page reload
+        setTimeout(async () => {
+          try {
+            const r = await fetch(`/api/phase-data?project=${PROJECT}&phase=${PHASE}`);
+            if (r.ok) {
+              phaseData = await r.json();
+              // Update pipeline table + progress
+              refreshPipelineSteps();
+              // Update Outputs tab if it's active
+              const outPanel = document.getElementById('tab-outputs');
+              if (outPanel) outPanel.innerHTML = renderOutputs(phaseData);
+              // Switch to Outputs tab to show results
+              const outBtn = document.querySelector('.tab-btn[onclick*="outputs"]');
+              if (outBtn) switchTab('outputs', outBtn);
+            }
+          } catch(e) { location.reload(); }
+        }, 1200);
+      }
     }
   };
 }
