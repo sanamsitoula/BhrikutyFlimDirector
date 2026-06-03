@@ -11,6 +11,7 @@ No external dependencies — uses Python's built-in http.server.
 import subprocess
 import sys
 import os
+import re
 import json
 import threading
 import queue
@@ -18,8 +19,41 @@ import uuid
 from pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-BASE_DIR = Path(__file__).parent
+BASE_DIR     = Path(__file__).parent
 PROJECT_ROOT = BASE_DIR / "youtube_scripts" / "setup" / "projects"
+
+# Load .env
+_env = BASE_DIR / ".env"
+if _env.exists():
+    for _l in _env.read_text(encoding="utf-8").splitlines():
+        _l = _l.strip()
+        if _l and not _l.startswith("#") and "=" in _l:
+            _k, _, _v = _l.partition("=")
+            os.environ.setdefault(_k.strip(), _v.strip())
+
+# DB (optional — file-based mode works without it)
+try:
+    sys.path.insert(0, str(BASE_DIR))
+    from db.db import (upsert_brand, list_runs, create_run, finish_run,
+                       is_available as db_available)
+    from tools.init_brand import scaffold_brand
+    _DB = True
+except Exception:
+    _DB = False
+    def db_available():   return False
+    def upsert_brand(_):  return False
+    def list_runs(*_):    return []
+    def create_run(*_):   return False
+    def finish_run(*_):   return False
+    def scaffold_brand(profile, **kw):
+        # Minimal fallback: just write brand_profile.json
+        slug = profile.get("brand_slug", "")
+        d = PROJECT_ROOT / slug
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "brand_profile.json").write_text(
+            json.dumps(profile, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+        return d
 
 jobs: dict = {}  # job_id -> {status, output, q, cmd}
 
@@ -122,6 +156,13 @@ class Handler(BaseHTTPRequestHandler):
             job_id = path.split("/")[3]
             self._api_job_status(job_id)
 
+        elif re.match(r"^/api/projects/[^/]+/runs$", path):
+            slug = path.split("/")[3]
+            self._api_runs(slug)
+
+        elif path == "/api/db-status":
+            self._send_json({"available": db_available()})
+
         else:
             target = BASE_DIR / path.lstrip("/")
             if target.exists() and target.is_file():
@@ -152,6 +193,11 @@ class Handler(BaseHTTPRequestHandler):
             body = self.rfile.read(length)
             data = json.loads(body) if body else {}
             self._api_run(data)
+        elif path == "/api/save-file":
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length)
+            data = json.loads(body) if body else {}
+            self._api_save_file(data)
         else:
             self._send_json({"error": "not found"}, 404)
 
@@ -212,6 +258,10 @@ class Handler(BaseHTTPRequestHandler):
         jobs[job_id] = {"status": "running", "output": [], "q": q, "cmd": cmd}
         print(f"  [JOB {job_id}] {' '.join(cmd)}")
 
+        brand_slug = data.get("project", "")
+        phase_num  = int(data.get("phase", 0))
+        create_run(job_id, brand_slug, phase_num, data)
+
         def worker():
             env = os.environ.copy()
             proc = subprocess.Popen(
@@ -226,10 +276,12 @@ class Handler(BaseHTTPRequestHandler):
                 jobs[job_id]["output"].append(line)
                 q.put(line)
             proc.wait()
-            jobs[job_id]["status"] = "done" if proc.returncode == 0 else "failed"
+            final_status = "done" if proc.returncode == 0 else "failed"
+            jobs[job_id]["status"] = final_status
             jobs[job_id]["returncode"] = proc.returncode
-            q.put(None)  # sentinel
-            print(f"  [JOB {job_id}] finished — {jobs[job_id]['status']}")
+            finish_run(job_id, final_status)
+            q.put(None)
+            print(f"  [JOB {job_id}] finished — {final_status}")
 
         threading.Thread(target=worker, daemon=True).start()
         self._send_json({"job_id": job_id, "cmd": " ".join(cmd)})
@@ -301,16 +353,21 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json({"error": str(e)}, 500)
 
     def _api_create_brand(self, data: dict):
-        slug = data.get("brand_slug", "").strip().replace(" ", "_").lower()
+        slug = data.get("brand_slug", "").strip().replace(" ", "_")
         if not slug:
             self._send_json({"error": "brand_slug required"}, 400)
             return
-        proj_dir = PROJECT_ROOT / slug
-        proj_dir.mkdir(parents=True, exist_ok=True)
-        bp = proj_dir / "brand_profile.json"
-        bp.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-        print(f"  [BRAND] Created: {slug}")
-        self._send_json({"ok": True, "slug": slug})
+        try:
+            proj_dir = scaffold_brand(data, quiet=True)
+            print(f"  [BRAND] Scaffolded: {slug} -> {proj_dir}")
+            self._send_json({"ok": True, "slug": slug, "path": str(proj_dir)})
+        except Exception as e:
+            print(f"  [BRAND ERROR] {e}")
+            self._send_json({"error": str(e)}, 500)
+
+    def _api_runs(self, slug: str):
+        runs = list_runs(slug)
+        self._send_json(runs)
 
     def _api_update_brand(self, slug: str, data: dict):
         proj_dir = PROJECT_ROOT / slug
@@ -327,6 +384,27 @@ class Handler(BaseHTTPRequestHandler):
         bp.write_text(json.dumps(existing, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"  [BRAND] Updated: {slug}")
         self._send_json({"ok": True, "slug": slug})
+
+    def _api_save_file(self, data: dict):
+        project  = data.get("project", "").strip()
+        phase    = int(data.get("phase", 1))
+        filename = data.get("filename", "").strip()
+        content  = data.get("content", "")
+
+        if not project or not filename:
+            self._send_json({"error": "project and filename required"}, 400)
+            return
+        if any(c in filename for c in ("../", "..\\", "/", "\\")):
+            self._send_json({"error": "invalid filename"}, 400)
+            return
+
+        phase_dir = PROJECT_ROOT / project / f"phase_{phase}"
+        phase_dir.mkdir(parents=True, exist_ok=True)
+
+        file_path = phase_dir / filename
+        file_path.write_text(content, encoding="utf-8")
+        print(f"  [SAVE] {project}/phase_{phase}/{filename} ({len(content)} chars)")
+        self._send_json({"ok": True, "path": str(file_path), "size": len(content)})
 
     def _api_project_summary(self, project: str):
         proj_dir = PROJECT_ROOT / project
@@ -610,11 +688,11 @@ class QuietThreadingServer(HTTPServer):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
-    print(f"\n{'━'*52}")
-    print(f"  Bhrikuty Film Director — Dashboard Server")
+    print(f"\n{'='*52}")
+    print(f"  Bhrikuty Film Director -- Dashboard Server")
     print(f"  Open: http://localhost:{port}")
     print(f"  Projects root: {PROJECT_ROOT}")
-    print(f"{'━'*52}\n")
+    print(f"{'='*52}\n")
 
     httpd = QuietThreadingServer(("0.0.0.0", port), Handler)
     try:

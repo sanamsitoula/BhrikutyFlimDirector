@@ -31,7 +31,7 @@ def time_to_seconds(t: str) -> float:
 
 
 def run_ffmpeg(cmd: list, label: str) -> bool:
-    print(f"  → {label}")
+    print(f"  -> {label}")
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         print(f"    [ERROR] ffmpeg failed: {result.stderr[-300:]}")
@@ -92,7 +92,7 @@ def crop_to_vertical(input_path: str, output_path: str, start: float, duration: 
         "-movflags", "+faststart",
         output_path
     ]
-    return run_ffmpeg(cmd, f"Crop to 9:16 → {Path(output_path).name}")
+    return run_ffmpeg(cmd, f"Crop to 9:16 -> {Path(output_path).name}")
 
 
 def cut_horizontal(input_path: str, output_path: str, start: float, duration: float,
@@ -124,14 +124,14 @@ def cut_horizontal(input_path: str, output_path: str, start: float, duration: fl
         "-movflags", "+faststart",
         output_path
     ]
-    return run_ffmpeg(cmd, f"Cut 16:9 → {Path(output_path).name}")
+    return run_ffmpeg(cmd, f"Cut 16:9 -> {Path(output_path).name}")
 
 
 def write_caption_file(output_dir: Path, platform: str, caption: str, hashtags: list):
     caption_path = output_dir / f"caption_{platform}.txt"
     full_caption = caption + "\n\n" + " ".join(hashtags)
     caption_path.write_text(full_caption, encoding="utf-8")
-    print(f"  → caption_{platform}.txt written")
+    print(f"  -> caption_{platform}.txt written")
 
 
 def process_phase(project: str, phase_num: int, video_path: str = None):
@@ -193,7 +193,7 @@ TAGS
 {youtube_tags}
 """
     (out_base / "youtube" / "description.txt").write_text(yt_desc, encoding="utf-8")
-    print("  → youtube/description.txt")
+    print("  -> youtube/description.txt")
 
     # Write captions for each platform
     if "tiktok_hook" in cuts:
@@ -240,7 +240,7 @@ TAGS
                 out = str(out_base / "linkedin" / "clip.mp4")
                 cut_horizontal(video_path, out, start, duration, title, tags_str, phase_label)
 
-    print(f"  ✓ Phase {phase_num} platform outputs written to {out_base}")
+    print(f"  [ok] Phase {phase_num} platform outputs written to {out_base}")
 
 
 def main():

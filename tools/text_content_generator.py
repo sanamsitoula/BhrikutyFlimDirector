@@ -209,7 +209,7 @@ def write_outputs(out_base: Path, content: dict):
             full_path = out_base / rel_path
             full_path.parent.mkdir(parents=True, exist_ok=True)
             full_path.write_text(text, encoding="utf-8")
-            print(f"  ✓ {rel_path}")
+            print(f"  [ok] {rel_path}")
 
 
 def process_phase(client, project: str, phase_num: int):
@@ -290,8 +290,8 @@ def process_phase(client, project: str, phase_num: int):
 - [ ] Update repo README with `github/README.md`
 """
     checklist_path.write_text(checklist, encoding="utf-8")
-    print(f"  ✓ publish_checklist.md")
-    print(f"\n✅ Phase {phase_num} text content complete → {out_base}")
+    print(f"  [ok] publish_checklist.md")
+    print(f"\n[DONE] Phase {phase_num} text content complete -> {out_base}")
 
 
 def main():

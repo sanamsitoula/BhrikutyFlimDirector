@@ -7,9 +7,8 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue?style=flat-square&logo=python)](https://python.org)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square&logo=node.js)](https://nodejs.org)
 [![Claude API](https://img.shields.io/badge/Claude-Sonnet_4.6-orange?style=flat-square)](https://anthropic.com)
-[![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)](LICENSE)
-
-[Quick Start](#quick-start) · [Dashboard](#dashboard-pages) · [Getting Started Guide](GETTING_STARTED.md) · [Live Demo](#chain-clarity--live-example)
+[![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-blue?style=flat-square)](https://aistudio.google.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15%2B-blue?style=flat-square&logo=postgresql)](https://postgresql.org)
 
 </div>
 
@@ -17,130 +16,320 @@
 
 ## What is Bhrikuty?
 
-Bhrikuty is an end-to-end content production system. You give it a **topic** and it produces a fully **brand-compliant 7-platform content package** — YouTube video script, TikTok clips, Instagram reels, Twitter thread, LinkedIn article, blog post, and GitHub README — all driven by a single pipeline command.
-
-The system is built around three layers:
+Give it a **topic**. It produces a complete **7-platform content package** — YouTube script, TikTok clips, Instagram reels, Twitter thread, LinkedIn article, blog post, GitHub README — all brand-compliant, generated in one pipeline run.
 
 ```
-Brand  →  Project  →  Content
-  ↓           ↓           ↓
-Colors      Topic      Script
-Fonts       Phase      Voiceover
-Tone        Outline    Infographic Cards
-Pillars     Roadmap    Platform Clips
-Social                 Text Content
+Brand Profile  →  Pipeline  →  7-Platform Package
+   (once)          (per video)     (per video)
 ```
 
 ---
 
-## How It Works
+## Architecture
 
 ```
-                        TOPIC + OUTLINE
-                               │
-                               ▼
-              ┌────────────────────────────────┐
-              │     DIRECTOR (pipeline.py)      │
-              │  Script · Briefs · Compliance   │
-              └──────────────┬─────────────────┘
-                             │
-          ┌──────────────────┼──────────────────┐
-          ▼                  ▼                  ▼
-  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐
-  │   PICASSO    │  │   DiCAPRIO   │  │  TEXT ENGINE     │
-  │  Infographics│  │  Video Cuts  │  │  Blog · Thread   │
-  │  Remotion    │  │  platform_   │  │  LinkedIn · YT   │
-  │  HTML Cards  │  │  cutter.py   │  │  Instagram · GH  │
-  └──────────────┘  └──────────────┘  └──────────────────┘
-          │                  │                  │
-          └──────────────────┴──────────────────┘
-                             │
-                             ▼
-              ┌────────────────────────────────┐
-              │      COMPLIANCE CHECKER        │
-              │     17 brand rules validated   │
-              └──────────────┬─────────────────┘
-                             │
-                             ▼
-              ┌────────────────────────────────┐
-              │       _output/phase_XX/        │
-              │  youtube/  tiktok/  instagram/ │
-              │  twitter/  linkedin/ blog/     │
-              │  github/   publish_checklist   │
-              └────────────────────────────────┘
+TOPIC + OUTLINE
+      │
+      ▼
+┌─────────────────────────────────────────────┐
+│  pipeline.py  (orchestrator)                │
+│                                             │
+│  Step 1 → generate_phase.py                 │
+│           Claude (primary) or               │
+│           Gemini (auto-fallback)            │
+│  Step 2 → compliance_checker.py             │
+│  Step 3 → remotion/ (infographic cards)     │
+│  Step 4 → tools/tts/ (voiceover)            │
+│  Step 5 → text_content_generator.py         │
+│  Step 6 → platform_cutter.py (FFmpeg)       │
+└─────────────────────────────────────────────┘
+      │
+      ▼
+_output/phase_XX/
+  youtube/   tiktok/   instagram/
+  twitter/   linkedin/  blog/  github/
 ```
+
+**Data layer:**
+- Files are the source of truth for all generated content
+- PostgreSQL stores brand metadata, pipeline run history, compliance logs
+- Dashboard reads both — DB for speed, files as fallback
 
 ---
 
-## Quick Start
-
-**You need:** Python 3.11+, Node.js 18+, FFmpeg, and an Anthropic API key.
+## Quick Setup (run once)
 
 ```bash
-# 1. Clone the repo
+# 1. Clone
 git clone https://github.com/sanamsitoula/BhrikutyFlimDirector.git
 cd BhrikutyFlimDirector
 
-# 2. Install Python packages
-pip install anthropic moviepy faster-whisper
+# 2. Copy and fill in your API keys
+cp .env.example .env   # then edit .env
 
-# 3. Install Remotion
-cd remotion && npm install && cd ..
-
-# 4. Set up your API key
-copy .env.example .env
-# Open .env → add: ANTHROPIC_API_KEY=sk-ant-...
-
-# 5. Start the dashboard
-python server.py
+# 3. Install everything globally (one command)
+python install.py
 ```
 
-Open **http://localhost:8080** in your browser.
-
-> Full step-by-step instructions with screenshots and troubleshooting: **[GETTING_STARTED.md](GETTING_STARTED.md)**
+`install.py` handles all packages, DB schema, and system tool checks. You never run it per-project or per-brand — it's global, once.
 
 ---
 
-## Dashboard Pages
+## Step-by-Step Setup
 
-| URL | Page | What you do there |
-|-----|------|-------------------|
-| `http://localhost:8080/` | **Main Dashboard** | Run the pipeline, watch live output, view project status |
-| `http://localhost:8080/brand` | **Brand Setup** | Create your brand — colors, fonts, tone, social links |
-| `http://localhost:8080/projects` | **Projects Browser** | Favourite projects, search, view all phases at a glance |
-| `http://localhost:8080/phase/{project}/{num}` | **Phase Dashboard** | View scripts, infographics, compliance — per phase |
+### Step 1 — Prerequisites
 
----
+| Tool | Version | Install |
+|------|---------|---------|
+| Python | 3.11–3.13 recommended (3.14 works but Kokoro TTS unavailable) | https://python.org |
+| Node.js | 18+ | https://nodejs.org |
+| FFmpeg | any | `winget install ffmpeg` (Windows) / `brew install ffmpeg` (Mac) |
+| PostgreSQL | 15+ | https://postgresql.org |
 
-## Chain Clarity — Live Example
-
-The **Chain Clarity** brand comes pre-loaded as a working example — 5 completed phases of blockchain education content.
-
-| Phase | Title | Duration | Script | Cards | SRT | Comply |
-|-------|-------|----------|--------|-------|-----|--------|
-| 1 | How Blockchain Works — No Bank Required | 12 min | ✅ | ✅ 4 | ✅ | ⚠️ PASS |
-| 2 | Bitcoin vs Ethereum — What's Actually Different | 14 min | ✅ | ✅ 3 | ✅ | ⚠️ PASS |
-| 3 | DeFi Explained — Your Bank Has No CEO | 13 min | ✅ | ✅ 3 | ✅ | ⚠️ PASS |
-| 4 | How Crypto Gets Stolen — And How to Stop It | 11 min | ✅ | ✅ 3 | ✅ | ⚠️ PASS |
-| 5 | Blockchain Is Not Just Crypto — Real Use Cases | 12 min | ✅ | ✅ 3 | ✅ | ⚠️ PASS |
-
-Browse any phase at `http://localhost:8080/phase/chain_clarity/1`
+Verify each:
+```bash
+python --version
+node --version
+ffmpeg -version
+psql --version
+```
 
 ---
 
-## Platform Output
+### Step 2 — Configure Environment Variables
 
-One pipeline run produces a complete package for every platform:
+```bash
+cp .env.example .env
+```
 
-| Platform | Files produced | Specs |
-|----------|---------------|-------|
-| **YouTube** | `final_1080p.mp4` · `description.txt` · `subtitles.srt` | 1920×1080, H.264, SEO description, timestamps |
-| **TikTok** | `clip_01_hook.mp4` · `clip_02_main.mp4` | 1080×1920, 9:16, :15 hook + :60 main |
-| **Instagram** | `reel_60s.mp4` · `carousel_1–3.png` · `caption.txt` | 9:16 reel + 1:1 carousel |
-| **Twitter/X** | `thread.txt` · `card_clip.mp4` | 7-tweet thread + :30 clip |
-| **LinkedIn** | `article.md` · `clip.mp4` | 800-word article + :45 clip |
-| **Blog** | `post.md` | 1,500-word SEO post with YouTube embed |
-| **GitHub** | `README.md` | Structured project README |
+Open `.env` and fill in:
+
+```env
+# ── AI Providers (at least ONE required) ──────────────
+ANTHROPIC_API_KEY=sk-ant-api03-...   # Primary — Claude Sonnet 4.6
+GEMINI_API_KEY=your-gemini-key       # Fallback — Gemini 2.5 Flash (auto-used when Anthropic fails)
+
+# ── Database ──────────────────────────────────────────
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=press_jemc
+DB_USER=postgres
+DB_PASSWORD=your-password
+
+# ── TTS / Voiceover (add key for whichever you use) ───
+ELEVENLABS_API_KEY=   # Paid, best quality
+DASHSCOPE_API_KEY=    # Freemium — Qwen3-TTS
+
+# ── Optional ──────────────────────────────────────────
+ASSEMBLYAI_API_KEY=   # Auto YouTube chapters
+OPENAI_API_KEY=       # DALL-E images
+BFL_API_KEY=          # FLUX.1 images
+RUNWAY_API_KEY=       # Runway Gen-4 B-roll
+```
+
+**AI fallback logic:**
+1. Try Anthropic (Claude Sonnet) — best quality
+2. If Anthropic fails (no credits / quota) → automatically switches to Gemini 2.5 Flash
+3. Force a provider: `python pipeline.py ... --provider gemini`
+
+Get a free Gemini key: `aistudio.google.com` → Get API Key
+
+---
+
+### Step 3 — Run the Installer
+
+```bash
+python install.py
+```
+
+This installs all Python packages, applies the DB schema, sets up Remotion, and checks system tools. Run it once — it's shared across all brands, projects, and phases.
+
+```bash
+python install.py --check    # see what's installed
+python install.py --tts      # TTS engines only
+python install.py --node     # Remotion (Node.js) only
+python install.py --db       # apply DB schema only
+python install.py --core     # core packages only
+```
+
+**What gets installed:**
+
+| Package | Purpose | Status |
+|---------|---------|--------|
+| `anthropic` | Claude API (primary AI) | Required |
+| `google-genai` | Gemini API (fallback AI) | Required |
+| `psycopg2-binary` | PostgreSQL driver | Required |
+| `elevenlabs` | ElevenLabs TTS (paid) | Optional |
+| `dashscope` | Qwen3-TTS (freemium) | Optional |
+| `kokoro` | Free CPU TTS | Python ≤3.12 only on Windows |
+| `moviepy` | Video compositing | Optional |
+| `faster-whisper` | Auto transcription | Optional |
+
+> **Kokoro on Python 3.14 / Windows:** Kokoro requires compiling C extensions with MinGW GCC ≥8.4. If you're on Python 3.14, use ElevenLabs or DashScope for TTS instead.
+
+---
+
+### Step 4 — Create Your First Brand
+
+Every video series needs a brand. Run the wizard once per brand:
+
+```bash
+python tools/init_brand.py
+```
+
+Or supply flags:
+```bash
+python tools/init_brand.py \
+  --slug ecoWorld \
+  --name "Eco World" \
+  --tagline "Economics, finally making sense." \
+  --niche "Economics Education"
+```
+
+**What this creates automatically:**
+```
+youtube_scripts/setup/projects/ecoWorld/
+├── brand_profile.json       ← Full brand identity (edit to customise)
+├── brand_guidelines.md      ← Rules for your content team
+├── roadmap.json             ← 5-phase content plan scaffold
+├── tags_and_metadata.json   ← SEO tags + hashtags per platform
+├── setup_guide.md           ← Your personalised next-step guide
+├── phase_1/README.md        ← Phase 1 production checklist
+├── phase_2/README.md  ...  phase_5/README.md
+└── _output/phase_01/ ...  phase_05/   ← Export directories
+```
+
+It also inserts the brand and phase records into PostgreSQL.
+
+Also available from the web dashboard: `http://localhost:8080/brand`
+
+---
+
+### Step 5 — Run the Pipeline
+
+```bash
+python pipeline.py \
+  --project ecoWorld \
+  --phase 1 \
+  --topic "What is GDP and why does it matter?" \
+  --outline "Definition, how measured, why it changes, what it misses" \
+  --duration 12 \
+  --tags "gdp,economics,macroeconomics"
+```
+
+**Pipeline steps:**
+
+| Step | Script | Produces |
+|------|--------|---------|
+| 1 | `generate_phase.py` | `script.md`, `script_short.md`, `subtitles.srt`, `voiceover_brief.md`, `clip_brief.md`, `music_brief.md`, `infographics.md`, `content_spec.json`, `infographic_assets/card_0*.html` |
+| 2 | `compliance_checker.py` | `compliance_report_auto.md` — 17 brand rule checks |
+| 3 | `remotion/` | Animated infographic cards |
+| 4 | `tools/tts/` | `voiceover/phase_N.wav` |
+| 5 | `text_content_generator.py` | `youtube/description.txt`, `twitter/thread.txt`, `linkedin/article.md`, `blog/post.md`, `github/README.md` |
+| 6 | `platform_cutter.py` | `youtube/final_1080p.mp4`, `tiktok/clip_*.mp4`, `instagram/reel_60s.mp4` |
+
+**Skip flags:**
+```bash
+--skip-generate     # skip Step 1 (use existing files)
+--skip-voiceover    # skip Step 4
+--skip-remotion     # skip Step 3
+--skip-text         # skip Step 5
+--provider gemini   # force Gemini instead of Claude
+--provider anthropic # force Claude
+```
+
+Each run is logged to `pipeline_runs` table in PostgreSQL.
+
+---
+
+### Step 6 — Check Compliance
+
+```bash
+python tools/compliance_checker.py --project ecoWorld --phase 1
+```
+
+17 checks: forbidden words, sentence length, subtitle timing, brand colors, font CDN, animation sequence, card dimensions, SRT format, no investment advice, and more.
+
+Status: **PASS** / **PASS_WITH_WARNINGS** / **FAIL**
+
+---
+
+### Step 7 — Generate Voiceover
+
+The pipeline auto-selects the best available engine:
+
+```bash
+# Voiceover runs automatically in Step 4 of the pipeline.
+# To run manually:
+
+# ElevenLabs (paid, best quality) — needs ELEVENLABS_API_KEY
+python tools/tts/elevenlabs_voiceover.py --phase 1 --project ecoWorld
+
+# DashScope / Qwen3-TTS (freemium) — needs DASHSCOPE_API_KEY
+python tools/tts/dashscope_voiceover.py --phase 1 --project ecoWorld
+
+# Kokoro (free, CPU) — Python <=3.12 only on Windows
+pip install kokoro soundfile
+python tools/tts/kokoro_voiceover.py --phase 1 --project ecoWorld
+```
+
+---
+
+### Step 8 — Export Platform Clips
+
+After assembling your video:
+```bash
+python tools/platform_cutter.py \
+  --project ecoWorld \
+  --phase 1 \
+  --video path/to/your/final.mp4
+```
+
+Exports to `_output/phase_01/`: YouTube (16:9), TikTok (9:16), Instagram Reels (9:16), Twitter, LinkedIn.
+
+---
+
+### Step 9 — Generate Text Content
+
+```bash
+python tools/text_content_generator.py --project ecoWorld --phase 1
+```
+
+Generates: YouTube description, Twitter thread, LinkedIn article, blog post, Instagram caption, GitHub README.
+
+---
+
+### Step 10 — Dashboard
+
+```bash
+python server.py
+# Open http://localhost:8080
+```
+
+**Pages:**
+
+| URL | What it shows |
+|-----|--------------|
+| `/` | Pipeline runner + live output |
+| `/projects` | All brands + progress |
+| `/brand` | Create / edit brand |
+| `/phase/{slug}/{num}` | Phase detail |
+
+**Manual Content Editor** (at bottom of dashboard):  
+When AI credits are low — paste content from ChatGPT, Claude.ai, or Gemini web, select file type, click **Save File**. Works without any API key.
+
+**API endpoints:**
+
+| Method | Endpoint | Returns |
+|--------|----------|---------|
+| GET | `/api/brands` | All brands |
+| POST | `/api/brands` | Create brand (full scaffold) |
+| GET | `/api/projects/{slug}/summary` | Phase progress |
+| GET | `/api/projects/{slug}/runs` | Pipeline history (DB) |
+| POST | `/api/run` | Start pipeline job |
+| GET | `/api/jobs/{id}/stream` | Live output (SSE) |
+| POST | `/api/save-file` | Save pasted content |
+| GET | `/api/db-status` | PostgreSQL status |
 
 ---
 
@@ -149,344 +338,166 @@ One pipeline run produces a complete package for every platform:
 ```
 BhrikutyFlimDirector/
 │
-├── server.py                    ← Web dashboard server — run this first
-├── pipeline.py                  ← CLI entry point — Film Director
-├── dashboard.html               ← Main pipeline control UI
-├── brand.html                   ← Brand creation & management
-├── projects.html                ← Projects browser with favourites
-├── phase_dashboard.html         ← Per-phase content dashboard
-├── .env.example                 ← Copy to .env, fill in API keys
-├── GETTING_STARTED.md           ← Full 17-step setup guide
+├── install.py                    ← Global one-time setup (run once)
+├── pipeline.py                   ← CLI pipeline runner
+├── server.py                     ← Dashboard server (port 8080)
+├── .env                          ← API keys (never commit)
+├── .env.example                  ← Template
+├── requirements.txt              ← Python dependencies
+│
+├── db/
+│   ├── schema.sql                ← PostgreSQL DDL (run via install.py --db)
+│   └── db.py                     ← Connection module (graceful fallback)
 │
 ├── tools/
-│   ├── generate_phase.py        ← AI script + brief generation
-│   ├── compliance_checker.py    ← 17 brand rule checks
-│   ├── platform_cutter.py       ← Platform-specific video exports
-│   ├── text_content_generator.py← Blog · thread · article · README
-│   ├── TOOL_GUIDE.md            ← Tool installation and code samples
+│   ├── init_brand.py             ← Brand scaffold (files + DB records)
+│   ├── generate_phase.py         ← Claude/Gemini content generation
+│   ├── compliance_checker.py     ← 17-rule brand compliance
+│   ├── platform_cutter.py        ← FFmpeg platform exports
+│   ├── text_content_generator.py ← Platform-specific text content
 │   └── tts/
-│       ├── kokoro_voiceover.py  ← Free CPU voiceover
-│       ├── chatterbox_voiceover.py ← Free GPU voiceover (voice clone)
-│       └── elevenlabs_voiceover.py ← Paid voiceover (best quality)
+│       ├── kokoro_voiceover.py   ← Free TTS (Python ≤3.12)
+│       ├── elevenlabs_voiceover.py
+│       └── dashscope_voiceover.py
 │
-├── remotion/                    ← Animated infographic cards (React)
-│   ├── package.json
-│   └── scripts/render_all_cards.js
-│
-├── myvideo/edit/
-│   ├── burn_text.py             ← Text overlay on video
-│   ├── generate_voiceover.py    ← Qwen3-TTS (current default)
-│   └── clean_voice.py           ← Audio cleanup
+├── dashboard.html                ← Main pipeline UI
+├── projects.html                 ← Projects browser
+├── brand.html                    ← Brand creation/editing
+├── phase_dashboard.html          ← Per-phase detail
 │
 └── youtube_scripts/setup/projects/
-    └── {brand_slug}/            ← One folder per brand
-        ├── brand_profile.json   ← Colors, fonts, tone, social links
-        ├── roadmap.json         ← Phase plan
+    └── {brand_slug}/
+        ├── brand_profile.json
+        ├── brand_guidelines.md
+        ├── roadmap.json
         ├── tags_and_metadata.json
-        ├── phase_1/
+        ├── setup_guide.md
+        ├── phase_1/ ... phase_N/
+        │   ├── README.md          ← Checklist
         │   ├── script.md
-        │   ├── script_short.md
         │   ├── subtitles.srt
-        │   ├── voiceover_brief.md
-        │   ├── clip_brief.md
-        │   ├── music_brief.md
-        │   ├── infographics.md
-        │   ├── content_spec.json
         │   ├── compliance_report_auto.md
         │   └── infographic_assets/
-        │       ├── card_01.html
-        │       └── card_02.html
-        ├── phase_2/ … phase_N/
-        └── _output/
-            └── phase_01/
-                ├── youtube/
-                ├── tiktok/
-                ├── instagram/
-                ├── twitter/
-                ├── linkedin/
-                ├── blog/
-                └── github/
+        └── _output/phase_01/ ... phase_NN/
+            ├── youtube/
+            ├── tiktok/
+            ├── instagram/
+            ├── twitter/
+            ├── linkedin/
+            ├── blog/
+            └── github/
 ```
 
 ---
 
-## Brand Setup
+## Database
 
-Create your brand identity at `http://localhost:8080/brand`. Everything you set here flows into every piece of generated content.
+Schema is in `db/schema.sql`. Applied automatically by `python install.py --db`.
 
-| Setting | Example (Chain Clarity) |
-|---------|------------------------|
-| **Brand Name** | Chain Clarity |
-| **Tagline** | Blockchain, without the noise. |
-| **Niche** | Blockchain & Crypto Education |
-| **Primary Color** | `#00D4AA` — Electric Teal |
-| **Secondary Color** | `#F5A623` — Deep Gold |
-| **Background** | `#0A0E1A` — Deep Navy |
-| **Highlight** | `#7B5CF0` — Electric Violet |
-| **Heading Font** | Space Grotesk |
-| **Body Font** | Inter |
-| **Platforms** | YouTube · TikTok · Instagram |
-| **Forbidden Words** | moon, lambo, HODL, simply, obviously, easy, guaranteed |
+```sql
+-- Run history for a brand
+SELECT run_id, phase_num, status, started_at
+FROM pipeline_runs WHERE brand_slug = 'ecoWorld'
+ORDER BY started_at DESC;
 
-Brand profile saved to `{project}/brand_profile.json` — versioned with the project.
+-- Phase status
+SELECT phase_num, topic, status FROM phases
+WHERE brand_slug = 'ecoWorld' ORDER BY phase_num;
+
+-- Compliance history
+SELECT phase_num, overall_status, checked_at
+FROM compliance_logs WHERE brand_slug = 'ecoWorld';
+```
+
+**Tables:** `brands`, `phases`, `pipeline_runs`, `pipeline_steps`, `generated_files`, `compliance_logs`, `content_specs`
 
 ---
 
-## Content Generation
+## Manual Content Editor
 
-### From the Dashboard (no terminal needed)
+When AI credits are low, use the paste editor in the dashboard (`http://localhost:8080`):
 
-1. Open `http://localhost:8080`
-2. Fill in **New Video Project** — topic, phase, outline
-3. Click **▶ Run on Server**
-4. Watch live output in the terminal drawer
+1. Scroll to **Manual Content Editor**
+2. Select project + phase + file type
+3. Paste content (from ChatGPT, Claude.ai, Gemini web, etc.)
+4. Click **Save File**
 
-### From the Terminal
+Or via API:
+```bash
+curl -X POST http://localhost:8080/api/save-file \
+  -H "Content-Type: application/json" \
+  -d '{"project":"ecoWorld","phase":1,"filename":"script.md","content":"..."}'
+```
+
+---
+
+## TTS Engine Comparison
+
+| Engine | Cost | Requires | Quality | Python 3.14 Win |
+|--------|------|---------|---------|----------------|
+| Kokoro | Free | CPU only | ⭐⭐⭐⭐ | Not supported |
+| ElevenLabs | $5–22/mo | API key | ⭐⭐⭐⭐⭐ | Yes |
+| DashScope/Qwen3 | Freemium | API key | ⭐⭐⭐⭐ | Yes |
+| Chatterbox | Free | 8GB GPU | ⭐⭐⭐⭐⭐ | Manual install |
+
+---
+
+## Troubleshooting
+
+**`ANTHROPIC_API_KEY not set` / low credits**
+→ The pipeline automatically switches to Gemini. Set `GEMINI_API_KEY` in `.env`.
+
+**`ffmpeg not found`**
+→ Run `python install.py --check` — it detects and adds common ffmpeg paths to PATH.
+
+**`npm not found` / Remotion fails**
+→ Install Node.js 18+ from nodejs.org. Use `--skip-remotion` to bypass.
+
+**Kokoro fails to install (numpy build error)**
+→ Known issue on Python 3.14 / Windows with MinGW GCC <8.4. Use ElevenLabs or DashScope instead.
+
+**`database "press_jemc" does not exist`**
+→ Run `python install.py --db` to create the DB and apply the schema.
+
+**Port 8080 already in use**
+→ `$env:PORT=8081; python server.py` (PowerShell)
+
+**`brand_profile.json not found`**
+→ Run `python tools/init_brand.py --slug yourBrand` first.
+
+---
+
+## Example: Complete Run
 
 ```bash
+# 1. Setup (once ever)
+python install.py
+
+# 2. Create brand (once per brand)
+python tools/init_brand.py --slug ecoWorld --name "Eco World" \
+  --tagline "Economics, finally making sense." --niche "Economics Education"
+
+# 3. Run pipeline (once per video)
 python pipeline.py \
-  --project chain_clarity \
-  --phase 6 \
-  --topic "How NFTs Actually Work" \
-  --outline "ERC-721 standard, real use cases, concert tickets, land registry, resale royalties" \
-  --duration 12 \
-  --tags "nft,blockchain,crypto,web3,chainclarity"
-```
+  --project ecoWorld --phase 1 \
+  --topic "What is GDP?" \
+  --outline "Definition, measurement, why it rises/falls, what it misses" \
+  --duration 12 --tags "gdp,economics,macro"
 
-### All pipeline flags
+# 4. Check compliance
+python tools/compliance_checker.py --project ecoWorld --phase 1
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--project` | `chain_clarity` | Brand/project folder name |
-| `--phase` | *(required)* | Phase number |
-| `--topic` | — | Video title |
-| `--outline` | — | Key points |
-| `--duration` | `12` | Target minutes |
-| `--tags` | `blockchain,crypto,web3` | Comma-separated tags |
-| `--video` | — | Path to master video (enables cuts) |
-| `--skip-generate` | off | Skip script generation |
-| `--skip-voiceover` | off | Skip voiceover |
-| `--skip-remotion` | off | Skip card rendering |
-| `--skip-text` | off | Skip text content |
+# 5. Export clips (after assembling video)
+python tools/platform_cutter.py --project ecoWorld --phase 1 \
+  --video _output/phase_01/final.mp4
 
----
+# 6. Generate text content
+python tools/text_content_generator.py --project ecoWorld --phase 1
 
-## Voiceover / TTS
-
-Choose the engine that fits your budget and hardware:
-
-| Engine | Cost | GPU? | Voice Clone | Quality | Command |
-|--------|------|------|-------------|---------|---------|
-| **Kokoro-TTS** | Free | No | No | ⭐⭐⭐⭐ | `pip install kokoro soundfile` |
-| **Chatterbox TTS** | Free | Yes (8GB) | Yes (5s ref) | ⭐⭐⭐⭐⭐ | `pip install chatterbox-tts torch` |
-| **ElevenLabs** | $5–22/mo | Cloud | Yes | ⭐⭐⭐⭐⭐ | `pip install elevenlabs` |
-| **Qwen3-TTS** | Pay/use | Partial | Yes | ⭐⭐⭐⭐ | `pip install dashscope` |
-
-```bash
-# Kokoro — free, no GPU
-python tools/tts/kokoro_voiceover.py --phase 1 --voice af_heart
-
-# Chatterbox — free, GPU required
-python tools/tts/chatterbox_voiceover.py --phase 1 --reference voice.wav
-
-# ElevenLabs — paid, best quality
-python tools/tts/elevenlabs_voiceover.py --phase 1 --voice_id YOUR_VOICE_ID
+# 7. Track everything
+python server.py   # open http://localhost:8080
 ```
 
 ---
 
-## Compliance Checker
-
-All generated content is automatically checked against 17 brand rules:
-
-```bash
-# Check one phase
-python tools/compliance_checker.py --project chain_clarity --phase 1
-
-# Check all phases
-python tools/compliance_checker.py --project chain_clarity --phase all
-```
-
-Checks include: tone of voice, color codes, typography, subtitle length, forbidden words, brand hashtags, animation sequences, and more.
-
-Results: **PASS** · **PASS_WITH_WARNINGS** · **FAIL**
-
----
-
-## Phase Dashboard
-
-Every phase has its own browser dashboard at:
-
-```
-http://localhost:8080/phase/{project}/{phase_number}
-```
-
-| Tab | Content |
-|-----|---------|
-| Overview | YouTube chapters, platform cut timestamps, keyword tags |
-| Script | Full `script.md` — color-coded headings, inline copy |
-| Short Script | 60-second `script_short.md` for TikTok/Reels |
-| Infographics | Live iframe previews of all card HTML files |
-| Audio | Player when voiceover exists · voiceover brief when not |
-| Video | Player when rendered · clip brief when not |
-| Compliance | Full compliance report with pass/warn/fail per check |
-| All Files | Every source file — click to view, click to copy |
-
-The **Pipeline Steps** table at the top shows exactly what is done and what is pending for every phase, with action buttons for each step.
-
----
-
-## Projects Browser
-
-`http://localhost:8080/projects`
-
-- ⭐ **Favourite** any project — pinned to the top, saved in localStorage
-- 🔍 **Search** projects by name
-- **Sort** by name, completion %, or phase count
-- Each row expands to show all phases with compliance badges and open links
-- Click **↗ Open** on any phase to open its dedicated dashboard in a new tab
-
----
-
-## Environment Variables
-
-Copy `.env.example` to `.env` and fill in your keys:
-
-```env
-# REQUIRED
-ANTHROPIC_API_KEY=sk-ant-api03-...
-
-# TTS — pick one
-ELEVENLABS_API_KEY=          # paid, best quality
-DASHSCOPE_API_KEY=           # freemium, Qwen3-TTS
-# Kokoro and Chatterbox run fully locally — no key needed
-
-# Transcription — optional
-ASSEMBLYAI_API_KEY=          # $0.03/video, auto YouTube chapters
-DEEPGRAM_API_KEY=            # lowest latency
-
-# Image generation — optional
-BFL_API_KEY=                 # FLUX.1 pro, $0.055/image
-IDEOGRAM_API_KEY=            # best text-in-image, $0.08/image
-
-# Video B-roll — optional
-RUNWAY_API_KEY=              # Gen-4, $0.05/sec
-KLING_API_KEY=               # $7.99/mo
-```
-
----
-
-## Cost to Run
-
-| Approach | Monthly Cost | What you get |
-|----------|-------------|-------------|
-| **All free** | $0 | Kokoro-TTS · faster-whisper · HTML cards · FFmpeg · Claude free credits |
-| **Hybrid** | ~$18–21 | ElevenLabs $5 · AssemblyAI ~$2 · Kling AI $8 · Claude API ~$3 |
-| **Full paid** | ~$50+ | ElevenLabs Creator $22 · Runway Gen-4 · Ideogram · AssemblyAI |
-
----
-
-## Quick Command Reference
-
-```bash
-# Start dashboard server
-python server.py
-
-# Generate new phase
-python pipeline.py --project BRAND --phase N --topic "Title" --outline "point1, point2"
-
-# Re-run existing phase (skip script generation)
-python pipeline.py --project BRAND --phase N --skip-generate
-
-# Voiceover only
-python tools/tts/kokoro_voiceover.py --phase N --voice af_heart
-
-# Compliance check
-python tools/compliance_checker.py --project BRAND --phase N
-
-# Platform cuts
-python tools/platform_cutter.py --project BRAND --phase N --video path/to/video.mp4
-
-# Text content (blog, thread, article)
-python tools/text_content_generator.py --project BRAND --phase N
-```
-
----
-
-## Requirements
-
-```
-Python     3.11+
-Node.js    18+
-FFmpeg     (any recent version)
-```
-
-```bash
-# Python packages
-pip install anthropic moviepy faster-whisper
-
-# Optional TTS
-pip install kokoro soundfile
-pip install elevenlabs
-pip install chatterbox-tts torch torchaudio
-
-# Optional transcription
-pip install whisperx
-
-# Remotion
-cd remotion && npm install
-```
-
----
-
-## Credits & Inspirations
-
-### Architecture
-- [HyperEdit](https://github.com/kevinbadi/hyperedit) — 3-agent Director/Picasso/DiCaprio architecture and intent routing
-
-### AI & Generation
-- [Anthropic Claude](https://anthropic.com) — script generation, text content, compliance analysis
-- [Claude Code](https://claude.ai/code) — built the entire web dashboard during development
-
-### Voiceover
-- [Kokoro-TTS](https://github.com/hexgrad/kokoro) · [Chatterbox TTS](https://github.com/resemble-ai/chatterbox) · [ElevenLabs](https://elevenlabs.io) · [Qwen3-TTS](https://dashscope.aliyuncs.com) · [F5-TTS](https://github.com/SWivid/F5-TTS)
-
-### Video
-- [FFmpeg](https://ffmpeg.org) · [MoviePy](https://zulko.github.io/moviepy/) · [Remotion](https://remotion.dev) · [Motion Canvas](https://motioncanvas.io)
-
-### Transcription
-- [faster-whisper](https://github.com/SYSTRAN/faster-whisper) · [WhisperX](https://github.com/m-bain/whisperX) · [AssemblyAI](https://assemblyai.com) · [Deepgram](https://deepgram.com)
-
-### Images
-- [FLUX.1](https://blackforestlabs.ai) · [Ideogram](https://ideogram.ai) · [Recraft](https://recraft.ai) · [Midjourney](https://midjourney.com)
-
-### Publishing Platforms
-YouTube · TikTok · Instagram · Twitter/X · LinkedIn · Blog · GitHub
-
-### Creator Inspirations
-
-| Category | Creators |
-|----------|---------|
-| Blockchain education | Whiteboard Crypto · Coin Bureau · Andreas Antonopoulos · Finematics · Patrick Collins |
-| Tech explainers | Fireship · 3Blue1Brown · Kurzgesagt · Veritasium |
-| Coding education | Traversy Media · Theo t3.gg · NetworkChuck |
-| Content strategy | Ali Abdaal · MKBHD · Colin and Samir · Alex Hormozi |
-
-### Fonts
-[Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) · [Inter](https://fonts.google.com/specimen/Inter) · [JetBrains Mono](https://www.jetbrains.com/legalforms/fonts/)
-
----
-
-## License
-
-MIT — see [LICENSE](LICENSE)
-
----
-
-<div align="center">
-
-Built with ❤️ for content creators who want to work smarter, not harder.
-
-**[⭐ Star this repo](https://github.com/sanamsitoula/BhrikutyFlimDirector)** if it saves you time.
-
-</div>
+*Bhrikuty Film Director — AI content production system*

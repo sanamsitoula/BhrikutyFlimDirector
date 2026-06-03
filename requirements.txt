@@ -1,0 +1,35 @@
+# Bhrikuty Film Director — Python Dependencies
+# Install all: pip install -r requirements.txt
+#
+# Minimum required:
+#   pip install anthropic psycopg2-binary
+#
+# For voiceover (pick one or more):
+#   pip install kokoro soundfile              (free, CPU, recommended)
+#   pip install chatterbox-tts torch          (free, GPU, best quality)
+#   pip install elevenlabs                    (paid, simplest)
+#   pip install dashscope                     (freemium, Qwen3-TTS)
+#
+# For video assembly:
+#   pip install moviepy                       (optional — video compositing)
+#   pip install faster-whisper               (optional — auto-transcription)
+
+# ── AI Providers ──────────────────────────────────────
+anthropic>=0.40.0            # Primary — Claude Sonnet
+google-genai>=0.8.0          # Fallback — Gemini Flash (auto-used when Anthropic fails)
+
+# ── Database ──────────────────────────────────────────
+psycopg2-binary>=2.9.0
+
+# ── TTS — choose one or more ──────────────────────────
+# kokoro
+# soundfile
+# chatterbox-tts
+# torch
+# torchaudio
+# elevenlabs
+# dashscope
+
+# ── Video (optional) ──────────────────────────────────
+# moviepy
+# faster-whisper

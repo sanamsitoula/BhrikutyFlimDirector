@@ -2316,6 +2316,170 @@
   </div>
 </div>
 
+<!-- ======== MANUAL CONTENT EDITOR ======== -->
+<div class="section" id="section-manual-editor" style="margin-top:32px;">
+  <div class="section-header">
+    <h2>Manual Content Editor</h2>
+    <span class="badge badge-gold">Paste &amp; Save</span>
+    <span style="margin-left:8px;color:var(--text-secondary);font-size:12px;">
+      Use this when AI credits are low — paste content generated elsewhere (ChatGPT, Gemini, Claude.ai) and save it directly to the project.
+    </span>
+  </div>
+
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;">
+
+    <!-- Controls row -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end;">
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <label style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;">Project</label>
+        <select id="me-project" onchange="meLoadProjectPhases()" style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-size:13px;min-width:160px;">
+          <option value="">-- select project --</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <label style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;">Phase</label>
+        <select id="me-phase" style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-size:13px;min-width:100px;">
+          <option value="1">Phase 1</option>
+          <option value="2">Phase 2</option>
+          <option value="3">Phase 3</option>
+          <option value="4">Phase 4</option>
+          <option value="5">Phase 5</option>
+          <option value="6">Phase 6</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <label style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;">File</label>
+        <select id="me-file" style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-size:13px;min-width:200px;">
+          <option value="script.md">script.md (full YouTube script)</option>
+          <option value="script_short.md">script_short.md (60-sec short)</option>
+          <option value="voiceover_brief.md">voiceover_brief.md</option>
+          <option value="clip_brief.md">clip_brief.md (shot list)</option>
+          <option value="music_brief.md">music_brief.md</option>
+          <option value="infographics.md">infographics.md</option>
+          <option value="subtitles.srt">subtitles.srt</option>
+          <option value="compliance_report_auto.md">compliance_report_auto.md</option>
+          <option value="content_spec.json">content_spec.json</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
+        <button onclick="meLoadFile()" style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary);padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;">
+          Load Existing
+        </button>
+        <button onclick="meSaveFile()" style="background:var(--teal);border:none;color:#000;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+          Save File
+        </button>
+      </div>
+    </div>
+
+    <!-- File hint -->
+    <div id="me-hint" style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;padding:8px 12px;background:var(--bg-secondary);border-radius:6px;border-left:3px solid var(--teal);">
+      Select a project, phase, and file type above, then paste your content below and click <strong>Save File</strong>.
+    </div>
+
+    <!-- Textarea -->
+    <textarea id="me-content"
+      placeholder="Paste your content here...&#10;&#10;For script.md: paste the full YouTube script with sections, timecodes, and narration.&#10;For subtitles.srt: paste the SRT formatted captions.&#10;For content_spec.json: paste valid JSON only."
+      style="width:100%;height:420px;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);padding:16px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;resize:vertical;outline:none;transition:border-color .2s;"
+      onfocus="this.style.borderColor='var(--teal)'"
+      onblur="this.style.borderColor='var(--border)'"
+    ></textarea>
+
+    <!-- Status bar -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+      <span id="me-char-count" style="font-size:11px;color:var(--text-muted);">0 characters</span>
+      <span id="me-status" style="font-size:12px;color:var(--text-secondary);"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Manual Editor ─────────────────────────────────────────────────────────────
+
+// Update char count live
+document.getElementById('me-content').addEventListener('input', function() {
+  const n = this.value.length;
+  document.getElementById('me-char-count').textContent = n.toLocaleString() + ' characters';
+});
+
+// Populate project dropdown on page load
+async function mePopulateProjects() {
+  try {
+    const r = await fetch('/api/brands');
+    if (!r.ok) return;
+    const brands = await r.json();
+    const sel = document.getElementById('me-project');
+    brands.forEach(b => {
+      const o = document.createElement('option');
+      o.value = b._slug || b.brand_slug;
+      o.textContent = b.brand_name || b._slug;
+      sel.appendChild(o);
+    });
+  } catch(e) { /* server not running */ }
+}
+
+function meLoadProjectPhases() {
+  // Could dynamically load phase count from API — for now phases 1-6 are always shown
+}
+
+async function meLoadFile() {
+  const project  = document.getElementById('me-project').value;
+  const phase    = document.getElementById('me-phase').value;
+  const filename = document.getElementById('me-file').value;
+
+  if (!project) { meStatus('Select a project first', 'var(--gold)'); return; }
+
+  meStatus('Loading...', 'var(--text-secondary)');
+  try {
+    const r = await fetch(`/api/file?project=${encodeURIComponent(project)}&phase=${phase}&file=${encodeURIComponent(filename)}`);
+    if (!r.ok) { meStatus('File not found — paste content to create it', 'var(--gold)'); return; }
+    const d = await r.json();
+    document.getElementById('me-content').value = d.content || '';
+    document.getElementById('me-content').dispatchEvent(new Event('input'));
+    meStatus('Loaded from disk', 'var(--teal)');
+  } catch(e) {
+    meStatus('Server not reachable', 'var(--red)');
+  }
+}
+
+async function meSaveFile() {
+  const project  = document.getElementById('me-project').value;
+  const phase    = document.getElementById('me-phase').value;
+  const filename = document.getElementById('me-file').value;
+  const content  = document.getElementById('me-content').value;
+
+  if (!project) { meStatus('Select a project first', 'var(--gold)'); return; }
+  if (!content.trim()) { meStatus('Content is empty — nothing to save', 'var(--gold)'); return; }
+
+  meStatus('Saving...', 'var(--text-secondary)');
+  try {
+    const r = await fetch('/api/save-file', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ project, phase: parseInt(phase), filename, content })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      meStatus(`Saved: ${filename} (${(d.size/1000).toFixed(1)} KB)`, 'var(--teal)');
+      document.getElementById('me-hint').innerHTML =
+        `<strong style="color:var(--teal)">Saved!</strong> File written to <code>phase_${phase}/${filename}</code>. Run compliance check next.`;
+    } else {
+      meStatus('Save failed: ' + (d.error || 'unknown error'), 'var(--red)');
+    }
+  } catch(e) {
+    meStatus('Server not reachable — is python server.py running?', 'var(--red)');
+  }
+}
+
+function meStatus(msg, color) {
+  const el = document.getElementById('me-status');
+  el.textContent = msg;
+  el.style.color = color || 'var(--text-secondary)';
+}
+
+// Init on load
+mePopulateProjects();
+</script>
+
 <!-- ======== TERMINAL DRAWER ======== -->
 <div class="terminal-drawer" id="terminal-drawer">
   <div class="terminal-topbar">

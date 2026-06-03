@@ -1,0 +1,53 @@
+{
+  "brand_name": "Eco World",
+  "niche": "Economics Education",
+  "youtube": {
+    "channel_keywords": [
+      "Microeconomics Basics",
+      "Macroeconomics & Global Markets",
+      "Trade & International Economics",
+      "Asia & Emerging Economies",
+      "Everyday Economics Explained"
+    ],
+    "default_tags": [
+      "economics education",
+      "education",
+      "explainer",
+      "learn"
+    ]
+  },
+  "tiktok": {
+    "hashtags": [
+      "#microeconomicsbasics",
+      "#macroeconomics&globalmarkets",
+      "#trade&internationaleconomics",
+      "#learnontiktok",
+      "#education",
+      "#economicseducation"
+    ]
+  },
+  "instagram": {
+    "hashtags": [
+      "#microeconomicsbasics",
+      "#macroeconomics&globalmarkets",
+      "#trade&internationaleconomics",
+      "#asia&emergingeconomies",
+      "#everydayeconomicsexplained",
+      "#education",
+      "#learning",
+      "#explainer",
+      "#economicseducation"
+    ]
+  },
+  "seo_keywords": [
+    "Microeconomics Basics",
+    "Macroeconomics & Global Markets",
+    "Trade & International Economics",
+    "Asia & Emerging Economies",
+    "Everyday Economics Explained",
+    "Economics Education",
+    "Economics Education explained",
+    "learn Economics Education"
+  ],
+  "updated_at": "2026-06-03T10:57:45.361324"
+}

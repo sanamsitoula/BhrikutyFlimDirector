@@ -1,14 +1,18 @@
 """
-generate_phase.py — Dynamically generate all 13 phase production files via Claude API
+generate_phase.py — Generate all phase production files via Claude (primary) or Gemini (fallback)
+
 Usage:
   python tools/generate_phase.py \\
-    --project chain_clarity \\
+    --project ecoWorld \\
     --phase 6 \\
-    --topic "NFTs and Digital Ownership" \\
-    --outline "What are NFTs, ERC-721 standard, real use cases, risks, future"
+    --topic "Economics of the World" \\
+    --outline "GDP, trade, inflation, Asia, China, India"
 
-Requires: ANTHROPIC_API_KEY environment variable
-          pip install anthropic
+Requires (at least one):
+  ANTHROPIC_API_KEY — Claude Sonnet (primary)
+  GEMINI_API_KEY    — Gemini Flash (fallback when Anthropic fails or has no credits)
+
+  pip install anthropic google-generativeai
 """
 
 import json
@@ -18,16 +22,49 @@ import argparse
 import sys
 from pathlib import Path
 
+# Load .env
+_env = Path(__file__).parent.parent / ".env"
+if _env.exists():
+    for _l in _env.read_text(encoding="utf-8").splitlines():
+        _l = _l.strip()
+        if _l and not _l.startswith("#") and "=" in _l:
+            _k, _, _v = _l.partition("=")
+            os.environ.setdefault(_k.strip(), _v.strip())
+
+# ── Anthropic ─────────────────────────────────────────────────────────────────
 try:
-    import anthropic
+    import anthropic as _anthropic_lib
+    _ANTHROPIC_OK = bool(os.environ.get("ANTHROPIC_API_KEY"))
 except ImportError:
-    print("[ERROR] anthropic package not installed. Run: pip install anthropic")
+    _anthropic_lib = None
+    _ANTHROPIC_OK = False
+
+# ── Gemini ────────────────────────────────────────────────────────────────────
+try:
+    from google import genai as _genai
+    from google.genai import types as _genai_types
+    _GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
+    _GEMINI_CLIENT = _genai.Client(api_key=_GEMINI_KEY) if _GEMINI_KEY else None
+    _GEMINI_OK = bool(_GEMINI_KEY)
+except ImportError:
+    _genai = None
+    _genai_types = None
+    _GEMINI_CLIENT = None
+    _GEMINI_OK = False
+
+if not _ANTHROPIC_OK and not _GEMINI_OK:
+    print("[ERROR] No AI API key configured.")
+    print("  Set ANTHROPIC_API_KEY (pip install anthropic)  — primary")
+    print("  Set GEMINI_API_KEY    (pip install google-generativeai) — fallback")
     sys.exit(1)
 
 PROJECT_ROOT = Path(__file__).parent.parent / "youtube_scripts" / "setup" / "projects"
-TOOLS_DIR = Path(__file__).parent
+TOOLS_DIR    = Path(__file__).parent
 
-MODEL = "claude-sonnet-4-6"
+CLAUDE_MODEL  = "claude-sonnet-4-6"
+GEMINI_MODEL  = "gemini-2.5-flash"
+
+_BILLING_ERRORS = ("credit balance", "quota", "billing", "rate limit", "overloaded")
 
 
 def load_brand(project: str) -> dict:
@@ -70,14 +107,63 @@ CONTENT STANDARDS:
 {guidelines[:2000] if guidelines else ""}"""
 
 
-def call_claude(client, system_prompt: str, user_prompt: str, max_tokens: int = 4000) -> str:
-    message = client.messages.create(
-        model=MODEL,
+def _call_anthropic(client, system_prompt: str, user_prompt: str, max_tokens: int) -> str:
+    msg = client.messages.create(
+        model=CLAUDE_MODEL,
         max_tokens=max_tokens,
         system=system_prompt,
         messages=[{"role": "user", "content": user_prompt}]
     )
-    return message.content[0].text
+    return msg.content[0].text
+
+
+def _call_gemini(system_prompt: str, user_prompt: str) -> str:
+    import time
+    last_err = None
+    for attempt in range(4):
+        if attempt > 0:
+            wait = 2 ** attempt
+            print(f"  [GEMINI] Retry {attempt}/3 in {wait}s (503 overload)...")
+            time.sleep(wait)
+        try:
+            response = _GEMINI_CLIENT.models.generate_content(
+                model=GEMINI_MODEL,
+                config=_genai_types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                ),
+                contents=user_prompt,
+            )
+            return response.text
+        except Exception as e:
+            last_err = e
+            if "503" not in str(e) and "UNAVAILABLE" not in str(e):
+                raise
+    raise last_err
+
+
+def call_ai(client, system_prompt: str, user_prompt: str, max_tokens: int = 4000) -> str:
+    """Call Claude first; fall back to Gemini if Anthropic fails (billing/quota/auth)."""
+    if client is not None:
+        try:
+            return _call_anthropic(client, system_prompt, user_prompt, max_tokens)
+        except Exception as e:
+            err = str(e).lower()
+            is_recoverable = any(k in err for k in _BILLING_ERRORS)
+            if is_recoverable and _GEMINI_OK:
+                print(f"  [WARN] Anthropic failed ({str(e)[:80]}). Switching to Gemini...")
+            elif not _GEMINI_OK:
+                raise
+            else:
+                raise
+    # Gemini path
+    if not _GEMINI_OK:
+        raise RuntimeError("No AI provider available. Set ANTHROPIC_API_KEY or GEMINI_API_KEY.")
+    return _call_gemini(system_prompt, user_prompt)
+
+
+# Keep old name as alias so nothing else breaks
+def call_claude(client, system_prompt, user_prompt, max_tokens=4000):
+    return call_ai(client, system_prompt, user_prompt, max_tokens)
 
 
 def generate_script(client, system_prompt: str, phase: int, topic: str, outline: str, duration_min: int) -> str:
@@ -203,7 +289,7 @@ Requirements:
 - DOCTYPE html, meta viewport width=1080
 - Google Fonts CDN: Space Grotesk, Inter, JetBrains Mono
 - Brand hex colors: #00D4AA #F5A623 #8B9BB4 #0A0E1A #7B5CF0 (no CSS color names)
-- 6-step brand animation: fadeIn bg → slideDown logo → wordIn headline → slideUp content → countUp stat → bounce CTA
+- 6-step brand animation: fadeIn bg -> slideDown logo -> wordIn headline -> slideUp content -> countUp stat -> bounce CTA
 - Chain Clarity logo SVG (use exact SVG from brand_profile.json)
 - Phase label in logo area
 - CSS animations only (no external libraries)
@@ -254,7 +340,7 @@ def write_phase_files(phase_dir: Path, assets_dir: Path, files: dict):
             path.write_text(json.dumps(content, indent=2), encoding="utf-8")
         else:
             path.write_text(content, encoding="utf-8")
-        print(f"  ✓ {filename}")
+        print(f"  [ok] {filename}")
 
 
 def run_compliance_check(project: str, phase: int):
@@ -271,21 +357,32 @@ def run_compliance_check(project: str, phase: int):
 
 
 def main():
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        print("[ERROR] ANTHROPIC_API_KEY not set.")
-        sys.exit(1)
-
-    parser = argparse.ArgumentParser(description="Generate all phase production files via Claude API")
-    parser.add_argument("--project", default="chain_clarity")
-    parser.add_argument("--phase", type=int, required=True)
-    parser.add_argument("--topic", required=True, help="Video title / topic")
-    parser.add_argument("--outline", required=True, help="Key subtopics comma-separated")
+    parser = argparse.ArgumentParser(
+        description="Generate all phase production files via Claude (primary) or Gemini (fallback)"
+    )
+    parser.add_argument("--project",  default="chain_clarity")
+    parser.add_argument("--phase",    type=int, required=True)
+    parser.add_argument("--topic",    required=True, help="Video title / topic")
+    parser.add_argument("--outline",  default="", help="Key subtopics comma-separated")
     parser.add_argument("--duration", type=int, default=12, help="Target duration in minutes")
-    parser.add_argument("--tags", default="blockchain,crypto,web3,chainclarity", help="Comma-separated tags")
+    parser.add_argument("--tags",     default="education,explainer", help="Comma-separated tags")
+    parser.add_argument("--provider", choices=["auto", "anthropic", "gemini"], default="auto",
+                        help="Force a specific AI provider (default: auto = Anthropic then Gemini)")
     args = parser.parse_args()
 
-    client = anthropic.Anthropic(api_key=api_key)
+    # Build Anthropic client if available and not forced to Gemini
+    client = None
+    if _ANTHROPIC_OK and args.provider in ("auto", "anthropic"):
+        client = _anthropic_lib.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        print(f"  [AI] Primary provider: Claude ({CLAUDE_MODEL})")
+    elif _GEMINI_OK:
+        print(f"  [AI] Provider: Gemini ({GEMINI_MODEL})")
+    else:
+        print("[ERROR] No AI provider available.")
+        sys.exit(1)
+
+    if args.provider == "gemini":
+        client = None  # Force Gemini path
     brand = load_brand(args.project)
     guidelines = load_brand_guidelines(args.project)
     system_prompt = build_system_prompt(brand, guidelines)
@@ -337,8 +434,8 @@ def main():
     print("\nRunning compliance check...")
     run_compliance_check(args.project, args.phase)
 
-    print(f"\n✅ Phase {args.phase} generated successfully!")
-    print(f"   → {phase_dir}")
+    print(f"\n[DONE] Phase {args.phase} generated successfully!")
+    print(f"   -> {phase_dir}")
     print(f"\nNext: python tools/text_content_generator.py --phase {args.phase}")
     print(f"Next: python tools/platform_cutter.py --phase {args.phase} --video <path>")
 

@@ -1,0 +1,198 @@
+{
+  "brand_slug": "ecoWorld",
+  "brand_name": "Eco World",
+  "total_phases": 5,
+  "phases": [
+    {
+      "phase": 1,
+      "title": "Microeconomics Basics",
+      "status": "pending",
+      "learning_goals": [
+        "Understand the core concepts of Microeconomics Basics",
+        "Explain Microeconomics Basics to a complete beginner",
+        "Apply Microeconomics Basics knowledge in real-world scenarios"
+      ],
+      "content_breakdown": [
+        {
+          "type": "long-form",
+          "duration_min": 12,
+          "platform": "YouTube"
+        },
+        {
+          "type": "short-form",
+          "duration_min": 1,
+          "platform": "TikTok / Instagram Reels"
+        },
+        {
+          "type": "infographic",
+          "card_count": 4,
+          "platform": "Instagram / Twitter"
+        },
+        {
+          "type": "article",
+          "words": 1500,
+          "platform": "Blog / LinkedIn"
+        },
+        {
+          "type": "thread",
+          "tweets": 7,
+          "platform": "Twitter / X"
+        }
+      ],
+      "topics": []
+    },
+    {
+      "phase": 2,
+      "title": "Macroeconomics & Global Markets",
+      "status": "pending",
+      "learning_goals": [
+        "Understand the core concepts of Macroeconomics & Global Markets",
+        "Explain Macroeconomics & Global Markets to a complete beginner",
+        "Apply Macroeconomics & Global Markets knowledge in real-world scenarios"
+      ],
+      "content_breakdown": [
+        {
+          "type": "long-form",
+          "duration_min": 12,
+          "platform": "YouTube"
+        },
+        {
+          "type": "short-form",
+          "duration_min": 1,
+          "platform": "TikTok / Instagram Reels"
+        },
+        {
+          "type": "infographic",
+          "card_count": 4,
+          "platform": "Instagram / Twitter"
+        },
+        {
+          "type": "article",
+          "words": 1500,
+          "platform": "Blog / LinkedIn"
+        },
+        {
+          "type": "thread",
+          "tweets": 7,
+          "platform": "Twitter / X"
+        }
+      ],
+      "topics": []
+    },
+    {
+      "phase": 3,
+      "title": "Trade & International Economics",
+      "status": "pending",
+      "learning_goals": [
+        "Understand the core concepts of Trade & International Economics",
+        "Explain Trade & International Economics to a complete beginner",
+        "Apply Trade & International Economics knowledge in real-world scenarios"
+      ],
+      "content_breakdown": [
+        {
+          "type": "long-form",
+          "duration_min": 12,
+          "platform": "YouTube"
+        },
+        {
+          "type": "short-form",
+          "duration_min": 1,
+          "platform": "TikTok / Instagram Reels"
+        },
+        {
+          "type": "infographic",
+          "card_count": 4,
+          "platform": "Instagram / Twitter"
+        },
+        {
+          "type": "article",
+          "words": 1500,
+          "platform": "Blog / LinkedIn"
+        },
+        {
+          "type": "thread",
+          "tweets": 7,
+          "platform": "Twitter / X"
+        }
+      ],
+      "topics": []
+    },
+    {
+      "phase": 4,
+      "title": "Asia & Emerging Economies",
+      "status": "pending",
+      "learning_goals": [
+        "Understand the core concepts of Asia & Emerging Economies",
+        "Explain Asia & Emerging Economies to a complete beginner",
+        "Apply Asia & Emerging Economies knowledge in real-world scenarios"
+      ],
+      "content_breakdown": [
+        {
+          "type": "long-form",
+          "duration_min": 12,
+          "platform": "YouTube"
+        },
+        {
+          "type": "short-form",
+          "duration_min": 1,
+          "platform": "TikTok / Instagram Reels"
+        },
+        {
+          "type": "infographic",
+          "card_count": 4,
+          "platform": "Instagram / Twitter"
+        },
+        {
+          "type": "article",
+          "words": 1500,
+          "platform": "Blog / LinkedIn"
+        },
+        {
+          "type": "thread",
+          "tweets": 7,
+          "platform": "Twitter / X"
+        }
+      ],
+      "topics": []
+    },
+    {
+      "phase": 5,
+      "title": "Everyday Economics Explained",
+      "status": "pending",
+      "learning_goals": [
+        "Understand the core concepts of Everyday Economics Explained",
+        "Explain Everyday Economics Explained to a complete beginner",
+        "Apply Everyday Economics Explained knowledge in real-world scenarios"
+      ],
+      "content_breakdown": [
+        {
+          "type": "long-form",
+          "duration_min": 12,
+          "platform": "YouTube"
+        },
+        {
+          "type": "short-form",
+          "duration_min": 1,
+          "platform": "TikTok / Instagram Reels"
+        },
+        {
+          "type": "infographic",
+          "card_count": 4,
+          "platform": "Instagram / Twitter"
+        },
+        {
+          "type": "article",
+          "words": 1500,
+          "platform": "Blog / LinkedIn"
+        },
+        {
+          "type": "thread",
+          "tweets": 7,
+          "platform": "Twitter / X"
+        }
+      ],
+      "topics": []
+    }
+  ],
+  "created_at": "2026-06-03T10:57:45.361006"
+}
