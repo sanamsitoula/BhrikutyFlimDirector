@@ -304,3 +304,89 @@ def upsert_content_spec(brand_slug: str, phase_num: int, spec: dict) -> bool:
     except Exception as e:
         log.warning("upsert_content_spec failed: %s", e)
         return False
+
+
+# ── Generated files tracker ───────────────────────────────────────────────────
+
+def record_file(brand_slug: str, phase_num: int, file_type: str,
+                file_path: str, file_size: int, run_id: str | None) -> bool:
+    """Insert a generated-file record (idempotent — skips exact duplicates)."""
+    try:
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO generated_files
+                    (brand_slug, phase_num, file_type, file_path, file_size_bytes, run_id)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT DO NOTHING
+            """, (brand_slug, phase_num, file_type, file_path, file_size, run_id))
+        return True
+    except Exception as e:
+        log.warning("record_file failed: %s", e)
+        return False
+
+
+def list_files(brand_slug: str, phase_num: int | None = None) -> list:
+    """Return generated files for a brand (optionally filtered by phase)."""
+    try:
+        with get_conn() as conn:
+            cur = conn.cursor()
+            if phase_num is not None:
+                cur.execute("""
+                    SELECT file_type, file_path, file_size_bytes, generated_at
+                    FROM generated_files
+                    WHERE brand_slug = %s AND phase_num = %s
+                    ORDER BY generated_at DESC
+                """, (brand_slug, phase_num))
+            else:
+                cur.execute("""
+                    SELECT phase_num, file_type, file_path, file_size_bytes, generated_at
+                    FROM generated_files WHERE brand_slug = %s
+                    ORDER BY phase_num, generated_at DESC
+                """, (brand_slug,))
+            return [dict(r) for r in cur.fetchall()]
+    except Exception as e:
+        log.warning("list_files failed: %s", e)
+        return []
+
+
+# ── Pipeline step tracking ────────────────────────────────────────────────────
+
+def upsert_pipeline_step(run_id: str, step_num: int, step_name: str,
+                         status: str, output: str = "") -> bool:
+    try:
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO pipeline_steps (run_id, step_num, step_name, status, output, started_at)
+                VALUES (%s, %s, %s, %s, %s, NOW())
+                ON CONFLICT (run_id, step_num) DO UPDATE SET
+                    step_name   = EXCLUDED.step_name,
+                    status      = EXCLUDED.status,
+                    output      = EXCLUDED.output,
+                    finished_at = CASE WHEN EXCLUDED.status IN ('done','failed')
+                                  THEN NOW() ELSE pipeline_steps.finished_at END
+            """, (run_id, step_num, step_name, status, output))
+        return True
+    except Exception as e:
+        log.warning("upsert_pipeline_step failed: %s", e)
+        return False
+
+
+# ── DB summary ────────────────────────────────────────────────────────────────
+
+def get_db_summary() -> dict:
+    """Return row counts for all tables — useful for dashboard health check."""
+    tables = ["brands", "phases", "pipeline_runs", "pipeline_steps",
+              "generated_files", "compliance_logs", "content_specs"]
+    result = {}
+    try:
+        with get_conn() as conn:
+            cur = conn.cursor()
+            for t in tables:
+                cur.execute(f"SELECT COUNT(*) AS n FROM {t}")
+                row = cur.fetchone()
+                result[t] = row["n"] if row else 0
+    except Exception as e:
+        log.warning("get_db_summary failed: %s", e)
+    return result

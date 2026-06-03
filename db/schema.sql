@@ -64,7 +64,8 @@ CREATE TABLE IF NOT EXISTS pipeline_steps (
     status      VARCHAR(50)  DEFAULT 'pending',
     output      TEXT,
     started_at  TIMESTAMP,
-    finished_at TIMESTAMP
+    finished_at TIMESTAMP,
+    UNIQUE (run_id, step_num)
 );
 
 -- ── Generated files tracker ───────────────────────────────────
@@ -76,7 +77,8 @@ CREATE TABLE IF NOT EXISTS generated_files (
     file_path       TEXT,
     file_size_bytes BIGINT,
     run_id          VARCHAR(64) REFERENCES pipeline_runs(run_id),
-    generated_at    TIMESTAMP DEFAULT NOW()
+    generated_at    TIMESTAMP DEFAULT NOW(),
+    UNIQUE (brand_slug, phase_num, file_path)
 );
 
 -- ── Compliance logs ───────────────────────────────────────────

@@ -11,6 +11,17 @@ import argparse
 from pathlib import Path
 from datetime import date
 
+# Optional DB integration
+try:
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from db.db import save_compliance, upsert_content_spec, is_available as _db_ok
+    _DB = True
+except Exception:
+    _DB = False
+    def save_compliance(*_): return False
+    def upsert_content_spec(*_): return False
+    def _db_ok(): return False
+
 PROJECT_ROOT = Path(__file__).parent.parent / "youtube_scripts" / "setup" / "projects"
 
 
@@ -384,6 +395,12 @@ def main():
         results = run_checks(args.project, phase_num)
         brand = load_brand(args.project)
         report_path = write_report(results, args.project, phase_num, brand)
+
+        # Persist compliance result to DB
+        if _db_ok():
+            checks_list = [{"check": k, "status": v["status"]}
+                           for k, v in results["checks"].items()]
+            save_compliance(args.project, phase_num, "auto", results["overall"], checks_list)
 
         if not args.quiet:
             for check_name, check_data in results["checks"].items():

@@ -726,8 +726,36 @@ def main():
     write_phase_files(phase_dir, assets_dir, files)
 
     # Write cards manifest for tracking
-    _write_cards_manifest(args.project, args.phase, args.topic, assets_dir,
-                          ["card_01.html", "card_02.html", "card_03.html"])
+    card_filenames = [k for k in files if k.startswith("card_")]
+    _write_cards_manifest(args.project, args.phase, args.topic, assets_dir, card_filenames)
+
+    # Sync to DB (best-effort — never blocks the pipeline)
+    try:
+        import sys as _sys
+        _sys.path.insert(0, str(Path(__file__).parent.parent))
+        from db.db import (upsert_brand, upsert_phase, upsert_content_spec,
+                           record_file, is_available as _db_ok)
+        if _db_ok():
+            # Brand
+            bp = PROJECT_ROOT / args.project / "brand_profile.json"
+            if bp.exists():
+                upsert_brand(json.loads(bp.read_text(encoding="utf-8")))
+            # Phase
+            upsert_phase(args.project, args.phase, args.topic, args.tags)
+            # Content spec
+            spec_path = phase_dir / "content_spec.json"
+            if spec_path.exists():
+                upsert_content_spec(args.project, args.phase,
+                                    json.loads(spec_path.read_text(encoding="utf-8")))
+            # Files
+            for fname in files:
+                fp = (assets_dir if fname.startswith("card_") else phase_dir) / fname
+                if fp.exists():
+                    record_file(args.project, args.phase, fp.suffix.lstrip("."),
+                                fname, fp.stat().st_size, None)
+            print("  [DB] Phase data synced to PostgreSQL")
+    except Exception as _e:
+        print(f"  [DB] Sync skipped: {_e}")
 
     print("\nRunning compliance check...")
     run_compliance_check(args.project, args.phase)

@@ -168,6 +168,12 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/db-status":
             self._send_json({"available": db_available()})
 
+        elif path == "/api/db-summary":
+            self._api_db_summary()
+
+        elif path == "/api/db-sync":
+            self._api_db_sync(qs.get("brand", [""])[0])
+
         elif path == "/api/tools-status":
             self._api_tools_status()
 
@@ -456,6 +462,14 @@ class Handler(BaseHTTPRequestHandler):
         file_path = phase_dir / filename
         file_path.write_text(content, encoding="utf-8")
         print(f"  [SAVE] {project}/phase_{phase}/{filename} ({len(content)} chars)")
+        # Track in DB (best-effort)
+        try:
+            from db.db import record_file, is_available as _dbok
+            if _dbok():
+                record_file(project, phase, file_path.suffix.lstrip("."),
+                            filename, len(content.encode()), None)
+        except Exception:
+            pass
         self._send_json({"ok": True, "path": str(file_path), "size": len(content)})
 
     def _api_project_summary(self, project: str):
@@ -1037,6 +1051,26 @@ class Handler(BaseHTTPRequestHandler):
             "project": project, "phase": phase,
             "base":    str(base), "tree": _tree(base)
         })
+
+    def _api_db_summary(self):
+        try:
+            from db.db import get_db_summary
+            self._send_json({"available": True, "tables": get_db_summary()})
+        except Exception as e:
+            self._send_json({"available": False, "error": str(e)})
+
+    def _api_db_sync(self, brand: str = ""):
+        try:
+            sys.path.insert(0, str(BASE_DIR))
+            from db.sync import sync_brand, sync_all
+            if brand:
+                result = sync_brand(brand)
+            else:
+                result = sync_all()
+            self._send_json({"ok": True, "result": result})
+        except Exception as e:
+            print(f"  [DB SYNC ERROR] {e}")
+            self._send_json({"ok": False, "error": str(e)})
 
     def _api_output_text(self, project: str, phase: int, filepath: str):
         if ".." in filepath or filepath.startswith("/"):
