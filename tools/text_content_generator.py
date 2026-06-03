@@ -55,6 +55,13 @@ GEMINI_MODEL = "gemini-2.5-flash"
 _BILLING_ERRORS = ("credit balance", "quota", "billing", "rate limit", "overloaded",
                    "invalid_request_error", "insufficient_quota", "payment")
 
+# DashScope / Qwen (OpenAI-compatible endpoint)
+_DS_KEY      = os.environ.get("DASHSCOPE_API_KEY", "")
+_DS_BASE_URL = os.environ.get("DASHSCOPE_BASE_URL",
+               "https://dashscope.aliyuncs.com/compatible-mode/v1")
+_DS_MODEL    = os.environ.get("DASHSCOPE_MODEL", "qwen-max")
+_DS_OK       = bool(_DS_KEY)
+
 
 def load_brand(project: str) -> dict:
     path = PROJECT_ROOT / project / "brand_profile.json"
@@ -86,27 +93,7 @@ Target audience: {brand["target_audience"]}
 Platforms: {", ".join(brand["platforms"])}"""
 
 
-def call_claude(client, system_prompt: str, user_prompt: str) -> str:
-    """Call Anthropic; auto-fall back to Gemini on billing/quota errors."""
-    if client is not None:
-        try:
-            msg = client.messages.create(
-                model=MODEL, max_tokens=2000, system=system_prompt,
-                messages=[{"role": "user", "content": user_prompt}]
-            )
-            return msg.content[0].text
-        except Exception as e:
-            err = str(e).lower()
-            recoverable = any(k in err for k in _BILLING_ERRORS)
-            if recoverable and _GEMINI_OK:
-                print(f"  [WARN] Anthropic failed ({str(e)[:80]}). Switching to Gemini...")
-            elif not _GEMINI_OK:
-                raise
-            else:
-                raise
-    # Gemini fallback
-    if not _GEMINI_OK:
-        raise RuntimeError("No AI provider available. Set ANTHROPIC_API_KEY or GEMINI_API_KEY.")
+def _call_gemini_txt(system_prompt: str, user_prompt: str) -> str:
     import time, re as _re
     last_err = None
     for attempt in range(4):
@@ -121,7 +108,8 @@ def call_claude(client, system_prompt: str, user_prompt: str) -> str:
             last_err = e
             s = str(e)
             if "429" in s or "RESOURCE_EXHAUSTED" in s:
-                m = _re.search(r'retryDelay[^0-9]*(\d+)', s)
+                import re as __re
+                m = __re.search(r'retryDelay[^0-9]*(\d+)', s)
                 wait = int(m.group(1)) + 5 if m else 65
                 print(f"  [GEMINI] Rate limit. Waiting {wait}s (attempt {attempt+1}/4)...")
                 time.sleep(wait)
@@ -130,6 +118,52 @@ def call_claude(client, system_prompt: str, user_prompt: str) -> str:
             else:
                 raise
     raise last_err
+
+
+def _call_dashscope_txt(system_prompt: str, user_prompt: str) -> str:
+    try:
+        from openai import OpenAI as _OAI
+    except ImportError:
+        raise RuntimeError("pip install openai  # needed for DashScope/Qwen")
+    c = _OAI(api_key=_DS_KEY, base_url=_DS_BASE_URL)
+    resp = c.chat.completions.create(
+        model=_DS_MODEL, max_tokens=2000,
+        messages=[{"role": "system", "content": system_prompt},
+                  {"role": "user",   "content": user_prompt}],
+    )
+    return resp.choices[0].message.content
+
+
+def call_claude(client, system_prompt: str, user_prompt: str) -> str:
+    """Call Anthropic; auto-fall back to Gemini then DashScope/Qwen."""
+    if client is not None:
+        try:
+            msg = client.messages.create(
+                model=MODEL, max_tokens=2000, system=system_prompt,
+                messages=[{"role": "user", "content": user_prompt}]
+            )
+            return msg.content[0].text
+        except Exception as e:
+            err = str(e).lower()
+            recoverable = any(k in err for k in _BILLING_ERRORS)
+            if recoverable:
+                if _GEMINI_OK:
+                    print(f"  [WARN] Anthropic failed ({str(e)[:80]}). Switching to Gemini...")
+                elif _DS_OK:
+                    print(f"  [WARN] Anthropic failed ({str(e)[:80]}). Switching to Qwen...")
+                    return _call_dashscope_txt(system_prompt, user_prompt)
+                else:
+                    raise
+            else:
+                raise
+    # Gemini fallback
+    if _GEMINI_OK:
+        return _call_gemini_txt(system_prompt, user_prompt)
+    # DashScope last resort
+    if _DS_OK:
+        print("  [INFO] Using Qwen (DashScope) for text content...")
+        return _call_dashscope_txt(system_prompt, user_prompt)
+    raise RuntimeError("No AI provider available. Set ANTHROPIC_API_KEY, GEMINI_API_KEY, or DASHSCOPE_API_KEY.")
 
 
 def generate_youtube_description(client, brand_ctx: str, spec: dict, script: str) -> str:

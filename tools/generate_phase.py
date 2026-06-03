@@ -60,10 +60,20 @@ except ImportError:
     _GEMINI_CLIENT = None
     _GEMINI_OK = False
 
-if not _ANTHROPIC_OK and not _GEMINI_OK:
+# ── DashScope / Qwen (OpenAI-compatible endpoint) ─────────────────────────────
+_DASHSCOPE_KEY      = os.environ.get("DASHSCOPE_API_KEY", "")
+_DASHSCOPE_BASE_URL = os.environ.get(
+    "DASHSCOPE_BASE_URL",
+    "https://dashscope.aliyuncs.com/compatible-mode/v1"  # default (non-workspace keys)
+)
+_DASHSCOPE_MODEL    = os.environ.get("DASHSCOPE_MODEL", "qwen-max")
+_DASHSCOPE_OK       = bool(_DASHSCOPE_KEY)
+
+if not _ANTHROPIC_OK and not _GEMINI_OK and not _DASHSCOPE_OK:
     print("[ERROR] No AI API key configured.")
-    print("  Set ANTHROPIC_API_KEY (pip install anthropic)  — primary")
+    print("  Set ANTHROPIC_API_KEY (pip install anthropic)        — primary")
     print("  Set GEMINI_API_KEY    (pip install google-generativeai) — fallback")
+    print("  Set DASHSCOPE_API_KEY (workspace key from modelstudio.console.alibabacloud.com)")
     sys.exit(1)
 
 PROJECT_ROOT = Path(__file__).parent.parent / "youtube_scripts" / "setup" / "projects"
@@ -173,24 +183,77 @@ def _call_gemini(system_prompt: str, user_prompt: str) -> str:
     raise last_err
 
 
+def _call_dashscope(system_prompt: str, user_prompt: str, max_tokens: int = 4000) -> str:
+    """Call Qwen via DashScope OpenAI-compatible endpoint. Works with both standard and
+    workspace keys (sk-ws-*). Requires: pip install openai"""
+    try:
+        from openai import OpenAI as _OAI
+    except ImportError:
+        raise RuntimeError("openai package not installed — run: pip install openai")
+    client = _OAI(api_key=_DASHSCOPE_KEY, base_url=_DASHSCOPE_BASE_URL)
+    resp = client.chat.completions.create(
+        model=_DASHSCOPE_MODEL,
+        max_tokens=max_tokens,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user",   "content": user_prompt},
+        ],
+    )
+    return resp.choices[0].message.content
+
+
+# Module-level active provider (set by main() based on --provider flag)
+_ACTIVE_PROVIDER = "auto"
+
+
 def call_ai(client, system_prompt: str, user_prompt: str, max_tokens: int = 4000) -> str:
-    """Call Claude first; fall back to Gemini if Anthropic fails (billing/quota/auth)."""
+    """Call AI with provider routing + fallback chain:
+       Anthropic -> Gemini -> DashScope/Qwen
+    """
+    # Forced DashScope
+    if _ACTIVE_PROVIDER == "dashscope":
+        if not _DASHSCOPE_OK:
+            raise RuntimeError("DASHSCOPE_API_KEY not set — add it to .env")
+        print(f"  [AI] Provider: Qwen ({_DASHSCOPE_MODEL}) via DashScope")
+        return _call_dashscope(system_prompt, user_prompt, max_tokens)
+
+    # Forced Gemini
+    if _ACTIVE_PROVIDER == "gemini":
+        if not _GEMINI_OK:
+            raise RuntimeError("GEMINI_API_KEY not set")
+        return _call_gemini(system_prompt, user_prompt)
+
+    # Anthropic (primary / forced)
     if client is not None:
         try:
             return _call_anthropic(client, system_prompt, user_prompt, max_tokens)
         except Exception as e:
             err = str(e).lower()
             is_recoverable = any(k in err for k in _BILLING_ERRORS)
-            if is_recoverable and _GEMINI_OK:
-                print(f"  [WARN] Anthropic failed ({str(e)[:80]}). Switching to Gemini...")
-            elif not _GEMINI_OK:
-                raise
+            if is_recoverable:
+                if _GEMINI_OK:
+                    print(f"  [WARN] Anthropic failed ({str(e)[:80]}). Switching to Gemini...")
+                elif _DASHSCOPE_OK:
+                    print(f"  [WARN] Anthropic failed ({str(e)[:80]}). Switching to Qwen...")
+                    return _call_dashscope(system_prompt, user_prompt, max_tokens)
+                else:
+                    raise
             else:
                 raise
-    # Gemini path
-    if not _GEMINI_OK:
-        raise RuntimeError("No AI provider available. Set ANTHROPIC_API_KEY or GEMINI_API_KEY.")
-    return _call_gemini(system_prompt, user_prompt)
+
+    # Gemini fallback
+    if _GEMINI_OK:
+        return _call_gemini(system_prompt, user_prompt)
+
+    # DashScope last-resort
+    if _DASHSCOPE_OK:
+        print("  [INFO] Using Qwen (DashScope) as last resort...")
+        return _call_dashscope(system_prompt, user_prompt, max_tokens)
+
+    raise RuntimeError(
+        "No AI provider available.\n"
+        "  Set ANTHROPIC_API_KEY or GEMINI_API_KEY or DASHSCOPE_API_KEY in .env"
+    )
 
 
 # Keep old name as alias so nothing else breaks
@@ -513,8 +576,10 @@ def main():
     parser.add_argument("--outline",  default="", help="Key subtopics comma-separated")
     parser.add_argument("--duration", type=int, default=12, help="Target duration in minutes")
     parser.add_argument("--tags",     default="education,explainer", help="Comma-separated tags")
-    parser.add_argument("--provider", choices=["auto", "anthropic", "gemini"], default="auto",
-                        help="Force a specific AI provider (default: auto = Anthropic then Gemini)")
+    parser.add_argument("--provider",
+                        choices=["auto", "anthropic", "gemini", "openai", "dashscope"],
+                        default="auto",
+                        help="AI provider: auto | anthropic | gemini | openai | dashscope")
     parser.add_argument("--only",     default="",
                         help="Generate a single file instead of all 9. "
                              "Options: script.md | script_short.md | subtitles.srt | "
@@ -523,19 +588,32 @@ def main():
                              "content_spec.json")
     args = parser.parse_args()
 
-    # Build Anthropic client if available and not forced to Gemini
-    client = None
-    if _ANTHROPIC_OK and args.provider in ("auto", "anthropic"):
-        client = _anthropic_lib.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-        print(f"  [AI] Primary provider: Claude ({CLAUDE_MODEL})")
-    elif _GEMINI_OK:
-        print(f"  [AI] Provider: Gemini ({GEMINI_MODEL})")
-    else:
-        print("[ERROR] No AI provider available.")
-        sys.exit(1)
+    # Set global provider + build Anthropic client if needed
+    global _ACTIVE_PROVIDER
+    _ACTIVE_PROVIDER = args.provider
 
-    if args.provider == "gemini":
-        client = None  # Force Gemini path
+    client = None
+    if args.provider == "dashscope":
+        if not _DASHSCOPE_OK:
+            print("[ERROR] DASHSCOPE_API_KEY not set in .env"); sys.exit(1)
+        print(f"  [AI] Provider: Qwen ({_DASHSCOPE_MODEL}) via DashScope")
+    elif args.provider == "gemini":
+        if not _GEMINI_OK:
+            print("[ERROR] GEMINI_API_KEY not set in .env"); sys.exit(1)
+        print(f"  [AI] Provider: Gemini ({GEMINI_MODEL})")
+    elif args.provider == "openai":
+        print(f"  [AI] Provider: ChatGPT (GPT-4o) via OpenAI")
+    else:  # auto or anthropic
+        if _ANTHROPIC_OK and args.provider in ("auto", "anthropic"):
+            client = _anthropic_lib.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+            print(f"  [AI] Primary provider: Claude ({CLAUDE_MODEL})")
+        elif _GEMINI_OK:
+            print(f"  [AI] Fallback provider: Gemini ({GEMINI_MODEL})")
+        elif _DASHSCOPE_OK:
+            print(f"  [AI] Fallback provider: Qwen ({_DASHSCOPE_MODEL})")
+        else:
+            print("[ERROR] No AI provider available. Set ANTHROPIC_API_KEY, GEMINI_API_KEY, or DASHSCOPE_API_KEY.")
+            sys.exit(1)
     brand = load_brand(args.project)
     guidelines = load_brand_guidelines(args.project)
     system_prompt = build_system_prompt(brand, guidelines)
