@@ -64,10 +64,12 @@ except ImportError:
 _DASHSCOPE_KEY      = os.environ.get("DASHSCOPE_API_KEY", "")
 _DASHSCOPE_BASE_URL = os.environ.get(
     "DASHSCOPE_BASE_URL",
-    "https://dashscope.aliyuncs.com/compatible-mode/v1"  # default (non-workspace keys)
+    "https://dashscope.aliyuncs.com/compatible-mode/v1"
 )
+_DASHSCOPE_KEY2     = os.environ.get("DASHSCOPE_API_KEY_2", "")
+_DASHSCOPE_BASE2    = os.environ.get("DASHSCOPE_BASE_URL_2", _DASHSCOPE_BASE_URL)
 _DASHSCOPE_MODEL    = os.environ.get("DASHSCOPE_MODEL", "qwen-max")
-_DASHSCOPE_OK       = bool(_DASHSCOPE_KEY)
+_DASHSCOPE_OK       = bool(_DASHSCOPE_KEY) or bool(_DASHSCOPE_KEY2)
 
 if not _ANTHROPIC_OK and not _GEMINI_OK and not _DASHSCOPE_OK:
     print("[ERROR] No AI API key configured.")
@@ -184,22 +186,44 @@ def _call_gemini(system_prompt: str, user_prompt: str) -> str:
 
 
 def _call_dashscope(system_prompt: str, user_prompt: str, max_tokens: int = 4000) -> str:
-    """Call Qwen via DashScope OpenAI-compatible endpoint. Works with both standard and
-    workspace keys (sk-ws-*). Requires: pip install openai"""
+    """Call Qwen via DashScope OpenAI-compatible endpoint.
+    Tries primary key first; on any failure automatically falls back to secondary key.
+    Requires: pip install openai"""
     try:
         from openai import OpenAI as _OAI
     except ImportError:
         raise RuntimeError("openai package not installed — run: pip install openai")
-    client = _OAI(api_key=_DASHSCOPE_KEY, base_url=_DASHSCOPE_BASE_URL)
-    resp = client.chat.completions.create(
-        model=_DASHSCOPE_MODEL,
-        max_tokens=max_tokens,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user",   "content": user_prompt},
-        ],
-    )
-    return resp.choices[0].message.content
+
+    # Build list of (key, base_url, label) to try in order
+    configs = []
+    if _DASHSCOPE_KEY:
+        configs.append((_DASHSCOPE_KEY,  _DASHSCOPE_BASE_URL, "DashScope primary"))
+    if _DASHSCOPE_KEY2:
+        configs.append((_DASHSCOPE_KEY2, _DASHSCOPE_BASE2,    "DashScope secondary"))
+    if not configs:
+        raise RuntimeError("No DASHSCOPE_API_KEY or DASHSCOPE_API_KEY_2 set in .env")
+
+    last_err = None
+    for key, base_url, label in configs:
+        try:
+            client = _OAI(api_key=key, base_url=base_url)
+            resp = client.chat.completions.create(
+                model=_DASHSCOPE_MODEL,
+                max_tokens=max_tokens,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user",   "content": user_prompt},
+                ],
+            )
+            if label != "DashScope primary":
+                print(f"  [OK] {label} succeeded")
+            return resp.choices[0].message.content
+        except Exception as e:
+            print(f"  [WARN] {label} failed ({str(e)[:80]})"
+                  + (" — trying secondary..." if configs.index((key, base_url, label)) < len(configs)-1 else ""))
+            last_err = e
+
+    raise last_err
 
 
 # Module-level active provider (set by main() based on --provider flag)

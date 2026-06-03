@@ -55,12 +55,14 @@ GEMINI_MODEL = "gemini-2.5-flash"
 _BILLING_ERRORS = ("credit balance", "quota", "billing", "rate limit", "overloaded",
                    "invalid_request_error", "insufficient_quota", "payment")
 
-# DashScope / Qwen (OpenAI-compatible endpoint)
+# DashScope / Qwen (OpenAI-compatible endpoint) — primary + secondary
 _DS_KEY      = os.environ.get("DASHSCOPE_API_KEY", "")
 _DS_BASE_URL = os.environ.get("DASHSCOPE_BASE_URL",
                "https://dashscope.aliyuncs.com/compatible-mode/v1")
+_DS_KEY2     = os.environ.get("DASHSCOPE_API_KEY_2", "")
+_DS_BASE2    = os.environ.get("DASHSCOPE_BASE_URL_2", _DS_BASE_URL)
 _DS_MODEL    = os.environ.get("DASHSCOPE_MODEL", "qwen-max")
-_DS_OK       = bool(_DS_KEY)
+_DS_OK       = bool(_DS_KEY) or bool(_DS_KEY2)
 
 
 def load_brand(project: str) -> dict:
@@ -121,17 +123,35 @@ def _call_gemini_txt(system_prompt: str, user_prompt: str) -> str:
 
 
 def _call_dashscope_txt(system_prompt: str, user_prompt: str) -> str:
+    """Try primary DashScope key; on failure auto-fall back to secondary key."""
     try:
         from openai import OpenAI as _OAI
     except ImportError:
         raise RuntimeError("pip install openai  # needed for DashScope/Qwen")
-    c = _OAI(api_key=_DS_KEY, base_url=_DS_BASE_URL)
-    resp = c.chat.completions.create(
-        model=_DS_MODEL, max_tokens=2000,
-        messages=[{"role": "system", "content": system_prompt},
-                  {"role": "user",   "content": user_prompt}],
-    )
-    return resp.choices[0].message.content
+
+    configs = []
+    if _DS_KEY:  configs.append((_DS_KEY,  _DS_BASE_URL, "DashScope primary"))
+    if _DS_KEY2: configs.append((_DS_KEY2, _DS_BASE2,    "DashScope secondary"))
+    if not configs:
+        raise RuntimeError("No DASHSCOPE_API_KEY or DASHSCOPE_API_KEY_2 set in .env")
+
+    last_err = None
+    for key, base_url, label in configs:
+        try:
+            c = _OAI(api_key=key, base_url=base_url)
+            resp = c.chat.completions.create(
+                model=_DS_MODEL, max_tokens=2000,
+                messages=[{"role": "system", "content": system_prompt},
+                           {"role": "user",  "content": user_prompt}],
+            )
+            if label != "DashScope primary":
+                print(f"  [OK] {label} succeeded")
+            return resp.choices[0].message.content
+        except Exception as e:
+            print(f"  [WARN] {label} failed ({str(e)[:80]})"
+                  + (" — trying secondary..." if configs.index((key, base_url, label)) < len(configs)-1 else ""))
+            last_err = e
+    raise last_err
 
 
 def call_claude(client, system_prompt: str, user_prompt: str) -> str:
