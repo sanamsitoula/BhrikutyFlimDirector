@@ -1,11 +1,11 @@
 {
   "phase_1_auto": {
     "date": "2026-06-03",
-    "overall": "PASS_WITH_WARNINGS",
+    "overall": "PASS",
     "checks": {
       "tone_of_voice": "PASS",
       "color_codes": "PASS",
-      "typography": "WARN",
+      "typography": "PASS",
       "animation_sequence": "PASS",
       "subtitles": "PASS",
       "sound_identity": "PASS"

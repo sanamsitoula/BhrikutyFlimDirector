@@ -353,7 +353,7 @@ Format as Markdown.""", max_tokens=1500)
 
 
 def generate_music_brief(client, system_prompt: str, topic: str) -> str:
-    return call_claude(client, system_prompt, f"""Write a music brief for a Chain Clarity video about: {topic}
+    return call_claude(client, system_prompt, f"""Write a music brief for this video about: {topic}
 
 Include:
 - Overall mood (3-4 sentences)
