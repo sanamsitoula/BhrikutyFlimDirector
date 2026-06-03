@@ -47,8 +47,15 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent / "youtube_scripts" / "setup"
 
 # Default English voice — clear, neutral narrator style
 DEFAULT_VOICE = "longxiaochun"
-# Model — cosyvoice-v1 for multilingual, sambert-zhichu-v1 for Chinese
-DEFAULT_MODEL = "cosyvoice-v1"
+
+# TTS models to try in order (script auto-discovers which one is deployed)
+TTS_MODELS_TO_TRY = [
+    "cosyvoice-v2",          # CosyVoice 2.0 — best quality
+    "cosyvoice-v1",          # CosyVoice 1.0 — legacy
+    "cosyvoice-turbo",       # faster variant
+    "sambert-zhichu-v1",     # Chinese narrator (fallback)
+]
+DEFAULT_MODEL = "cosyvoice-v2"
 
 
 # ── API credentials (primary + secondary) ─────────────────────────────────────
@@ -117,22 +124,37 @@ def synthesize_chunk(text: str, api_key: str, api_url: str,
         "model": model,
         "input": {"text": text},
         "parameters": {
-            "voice":        voice,
-            "format":       "mp3",
-            "sample_rate":  44100,
-            "volume":       50,
-            "speech_rate":  0,   # 0 = normal speed
-            "pitch_rate":   0,
+            "voice":       voice,
+            "format":      "mp3",
+            "sample_rate": 44100,
+            "volume":      50,
+            "speech_rate": 0,
+            "pitch_rate":  0,
         },
     }
     r = requests.post(url, json=payload, headers=headers, timeout=60)
     if r.status_code == 200:
         return r.content
-    raise RuntimeError(f"TTS API {r.status_code}: {r.text[:300]}")
+    raise RuntimeError(f"{r.status_code}: {r.text[:300]}")
+
+
+def discover_tts_model(api_key: str, api_url: str) -> str | None:
+    """Try each model name until one works. Returns the working model name or None."""
+    test_text = "Hello."
+    for model in TTS_MODELS_TO_TRY:
+        try:
+            synthesize_chunk(test_text, api_key, api_url, "longxiaochun", model)
+            print(f"  [OK] TTS model found: {model}")
+            return model
+        except RuntimeError as e:
+            if "Model not exist" in str(e) or "404" in str(e):
+                continue  # model not deployed — try next
+            raise  # other error (auth, network) — stop
+    return None
 
 
 def synthesize_with_fallback(text: str, voice: str, model: str) -> bytes:
-    """Try primary key, then secondary key automatically."""
+    """Try primary key + secondary key. Auto-discover model if needed."""
     configs = _get_configs()
     if not configs:
         raise RuntimeError(
@@ -146,11 +168,23 @@ def synthesize_with_fallback(text: str, voice: str, model: str) -> bytes:
             if label != "primary":
                 print(f"    [OK] {label} succeeded")
             return data
-        except Exception as e:
-            print(f"    [WARN] DashScope {label} failed: {str(e)[:80]}"
-                  + (" — trying secondary..." if configs.index((key, url, label)) < len(configs)-1 else ""))
-            last_err = e
-    raise last_err
+        except RuntimeError as e:
+            err = str(e)
+            if "Model not exist" in err or "404" in err:
+                # Model not deployed on this workspace — try to discover
+                print(f"    [INFO] Model '{model}' not found on {label}. Trying other models...")
+                found = discover_tts_model(key, url)
+                if found:
+                    return synthesize_chunk(text, key, url, voice, found)
+                print(f"    [WARN] No TTS model found on {label}.")
+                print(f"           To fix: deploy CosyVoice 2.0 in Model Studio console:")
+                print(f"           modelstudio.console.alibabacloud.com")
+                print(f"           → Model Square → CosyVoice → Deploy → Default Workspace")
+            else:
+                print(f"    [WARN] DashScope {label} failed: {err[:80]}"
+                      + (" — trying secondary..." if configs.index((key, url, label)) < len(configs)-1 else ""))
+            last_err = RuntimeError(err)
+    raise last_err or RuntimeError("All DashScope providers failed")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -168,7 +202,25 @@ def main():
                         help="Max chars per TTS chunk (default: 300)")
     parser.add_argument("--output",     default="",
                         help="Output filename (default: phase_N.mp3)")
+    parser.add_argument("--discover",   action="store_true",
+                        help="Check which TTS models are deployed on your workspace and exit")
     args = parser.parse_args()
+
+    if args.discover:
+        print("\nChecking which TTS models are available on your workspace...\n")
+        configs = _get_configs()
+        if not configs:
+            print("[ERROR] No DASHSCOPE_API_KEY set in .env"); sys.exit(1)
+        for key, url, label in configs:
+            print(f"  [{label}]  {url}")
+            found = discover_tts_model(key, url)
+            if found:
+                print(f"  -> Working model: {found}")
+            else:
+                print(f"  -> No TTS model deployed yet.")
+                print(f"     Deploy at: modelstudio.console.alibabacloud.com")
+                print(f"     -> Model Square -> CosyVoice 2.0 -> Deploy -> Default Workspace")
+        return
 
     phase_dir = PROJECT_ROOT / args.project / f"phase_{args.phase}"
     script_path = phase_dir / "script.md"
