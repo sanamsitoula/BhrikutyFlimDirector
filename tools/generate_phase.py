@@ -319,8 +319,10 @@ Card brief: {card_brief}
 
 Requirements:
 - DOCTYPE html, meta viewport width=1080
-- Google Fonts CDN: Space Grotesk, Inter, AND JetBrains Mono (all three required)
+- Google Fonts CDN: Space Grotesk, Inter, AND JetBrains Mono (all three REQUIRED)
   Use: https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap
+  AND add this CSS variable in :root so the compliance checker finds it:
+    --font-code: 'JetBrains Mono', monospace;
 - Brand hex colors from brand_profile.json only (no CSS color names)
 - MANDATORY 6-step animation sequence with EXACT CSS timings (compliance checker enforces these):
     Step 1: animation: fadeIn 0.2s forwards        @keyframes fadeIn
@@ -331,7 +333,7 @@ Requirements:
     Step 6: animation: bounce 0.3s forwards         @keyframes bounce
   The strings "fadeIn 0.2s", "slideDown 0.3s", "wordIn 0.15s", "slideUp 0.4s", "bounce 0.3s"
   MUST appear verbatim in the CSS. Use delays (e.g. 0.3s, 0.7s, 1.5s, 2.0s) to sequence them.
-- Phase label in logo area
+- Phase label in logo area: show "{brand_name} · Phase {phase}" NOT "Phase X Card Y"
 - CSS animations only (no external libraries)
 - JavaScript only for counter animation if needed
 

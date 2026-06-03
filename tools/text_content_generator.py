@@ -157,7 +157,7 @@ def generate_twitter_thread(client, brand_ctx: str, spec: dict, script: str) -> 
     user = f"""Write a 7-tweet Twitter thread about this video:
 
 Title: {spec['title']}
-Key insight: {spec['youtube'].get('description_hook', spec['title'])}
+Key insight: {spec.get('youtube', {}).get('description_hook', spec.get('title', ''))}
 
 Script excerpt:
 {script[:800]}
@@ -232,8 +232,8 @@ def generate_instagram_caption(client, brand_ctx: str, spec: dict) -> str:
     user = f"""Write an Instagram caption for this video content:
 
 Title: {spec['title']}
-Hook: {spec['youtube'].get('description_hook', '')[:200]}
-Hashtags to include: {' '.join(spec['hashtags'][:12])}
+Hook: {spec.get('youtube', {}).get('description_hook', spec.get('title', ''))[:200]}
+Hashtags to include: {' '.join(spec.get('hashtags', [])[:12])}
 
 Requirements:
 - Line 1: strong hook (max 125 chars — visible before 'more')

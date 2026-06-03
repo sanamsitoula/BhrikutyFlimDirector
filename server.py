@@ -745,6 +745,15 @@ class Handler(BaseHTTPRequestHandler):
         phase_topic   = roadmap_phase.get("title", spec.get("title", ""))
         phase_outline = ", ".join(roadmap_phase.get("learning_goals", [])[:3])
 
+        # Video type preference
+        video_type = "broll"
+        vt_path = phase_dir / "video_type.json"
+        if vt_path.exists():
+            try:
+                video_type = json.loads(vt_path.read_text(encoding="utf-8")).get("video_type", "broll")
+            except Exception:
+                pass
+
         steps = self._pipeline_steps(phase_dir, files, cards, output_files,
                                      project=project, phase=phase,
                                      topic=phase_topic, outline=phase_outline)
@@ -768,6 +777,7 @@ class Handler(BaseHTTPRequestHandler):
             "pipeline_steps": steps,
             "steps_done": done_count,
             "steps_total": len(steps),
+            "video_type": video_type,
             "brand": brand_profile,
             "roadmap_phase": roadmap_phase,
         })

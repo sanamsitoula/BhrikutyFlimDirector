@@ -205,6 +205,12 @@ def create_run(run_id: str, brand_slug: str, phase_num: int, args: dict) -> bool
     try:
         with get_conn() as conn:
             cur = conn.cursor()
+            # Ensure brand row exists so FK on pipeline_runs never fires
+            cur.execute("""
+                INSERT INTO brands (slug, name)
+                VALUES (%s, %s)
+                ON CONFLICT (slug) DO NOTHING
+            """, (brand_slug, brand_slug))
             cur.execute("""
                 INSERT INTO pipeline_runs (run_id, brand_slug, phase_num, args)
                 VALUES (%s, %s, %s, %s)

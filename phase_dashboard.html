@@ -698,8 +698,53 @@ function handleStepAction(action, stepName) {
 // ─────────────────────────────────────────────────
 // OVERVIEW TAB
 // ─────────────────────────────────────────────────
+// ── Video type definitions ────────────────────────────────────────────────────
+const VIDEO_TYPES = [
+  { id: 'broll',  icon: '🎞️',  label: 'B-Roll Footage',
+    desc: 'Professional stock or custom footage. Best for polished YouTube videos.',
+    steps: ['Source b-roll clips (Pexels, Storyblocks, Kling AI)', 'Record voiceover (TTS or manual mic)', 'Assemble: intro + voiceover + b-roll + cards + outro', 'Export 1080p, cut Shorts 9:16'] },
+  { id: 'screen', icon: '🖥️',  label: 'Screen Recording',
+    desc: 'Record your screen with OBS or similar. Great for tutorials.',
+    steps: ['Set up OBS / ShareX for 1920×1080 recording', 'Record while reading from script.md', 'Trim dead air, add voiceover or keep live audio', 'Add card overlays + brand intro/outro'] },
+  { id: 'anim',   icon: '✨',  label: 'Animation Only',
+    desc: 'Remotion-generated video from infographic cards + voiceover. No footage needed.',
+    steps: ['Generate infographic cards (Step 1.8)', 'Generate voiceover (Step 3)', 'Run Remotion render to compose cards + audio', 'Auto-exports YouTube + Shorts + Reels'] },
+  { id: 'manual', icon: '🎙️',  label: 'Manual / Custom',
+    desc: 'Bring your own video. Pipeline handles audio, cards, cuts, and text content.',
+    steps: ['Provide your own mp4 as --video path/to/file.mp4', 'Pipeline adds voiceover, subtitles, and card overlays', 'Auto-cuts for all platforms'] },
+];
+
+const TTS_GUIDE = {
+  dashscope: {
+    name: 'Qwen-TTS (DashScope)',
+    cost: 'Freemium — generous free tier',
+    steps: [
+      '1. Go to <a href="https://dashscope.aliyuncs.com" target="_blank" style="color:var(--teal);">dashscope.aliyuncs.com</a>',
+      '2. Sign up with Alibaba Cloud account',
+      '3. Navigate to Model Studio → API Keys',
+      '4. Create a new API key',
+      '5. Add to .env: <code style="color:var(--teal);">DASHSCOPE_API_KEY=sk-xxx</code>',
+      '6. Run: <code style="color:var(--teal);">python tools/tts/chatterbox_voiceover.py --project ecoWorld --phase 1</code>',
+    ]
+  },
+  manual: {
+    name: 'Manual Voice Recording',
+    cost: 'Free — use your own microphone',
+    steps: [
+      '1. Open script.md and read the NARRATION sections',
+      '2. Record using Audacity (free) or any recorder at 44.1kHz WAV',
+      '3. Export as WAV or MP3',
+      '4. Save to: <code style="color:var(--teal);">phase_1/voiceover/phase_1.wav</code>',
+      '5. The pipeline detects it and marks TTS step as Done',
+    ]
+  }
+};
+
 function renderOverview(d) {
-  const yt = d.youtube || {};
+  const yt   = d.youtube || {};
+  const vtype = d.video_type || 'broll';
+  const vtInfo = VIDEO_TYPES.find(v => v.id === vtype) || VIDEO_TYPES[0];
+
   const chapters = (yt.chapters || []).map(c =>
     `<div class="yt-chapter"><span class="yt-ts">${c.timestamp}</span><span class="yt-ch-title">${c.title}</span></div>`
   ).join('') || '<div style="color:var(--muted);font-size:12px;">No chapter data</div>';
@@ -714,13 +759,54 @@ function renderOverview(d) {
 
   const tags = (d.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
 
+  // Video type radio buttons
+  const vtRadios = VIDEO_TYPES.map(v => `
+    <label style="display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:8px;border:1px solid ${v.id===vtype?'var(--teal)':'var(--border)'};cursor:pointer;background:${v.id===vtype?'var(--teal-dim)':'var(--bg)'};transition:all .2s;">
+      <input type="radio" name="video_type" value="${v.id}" ${v.id===vtype?'checked':''} onchange="setVideoType('${v.id}')" style="margin-top:2px;accent-color:var(--teal);">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);">${v.icon} ${v.label}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${v.desc}</div>
+      </div>
+    </label>`).join('');
+
+  const vtSteps = vtInfo.steps.map((s,i) =>
+    `<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(30,42,66,.4);">
+      <span style="width:18px;height:18px;border-radius:50%;background:var(--teal-dim);color:var(--teal);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</span>
+      <span style="font-size:12px;color:var(--text2);">${s}</span>
+    </div>`).join('');
+
+  // TTS guide
+  const ttsGuide = Object.entries(TTS_GUIDE).map(([id, t]) => `
+    <div style="margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">${t.name} <span class="badge badge-teal" style="font-size:9px;">${t.cost}</span></div>
+      ${t.steps.map(s => `<div style="font-size:11px;color:var(--text2);padding:2px 0;">${s}</div>`).join('')}
+    </div>`).join('');
+
   return `<div class="overview-grid">
+
+    <!-- Video Type -->
+    <div class="overview-card" style="grid-column:1/-1;">
+      <h4>Video Production Type <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:6px;">choose how you will produce the video</span></h4>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;">${vtRadios}</div>
+      <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Steps for ${vtInfo.icon} ${vtInfo.label}</div>
+        ${vtSteps}
+      </div>
+    </div>
+
+    <!-- TTS / Voice Guide -->
+    <div class="overview-card">
+      <h4>🎙️ TTS / Voice Options</h4>
+      <div style="margin-top:8px;">${ttsGuide}</div>
+    </div>
+
+    <!-- YouTube Chapters + Cuts -->
     <div class="overview-card">
       <h4>YouTube Chapters</h4>
       ${chapters}
     </div>
     <div class="overview-card">
-      <h4>Platform Cuts (from content_spec)</h4>
+      <h4>Platform Cuts</h4>
       ${cutRows}
     </div>
     <div class="overview-card" style="grid-column:1/-1;">
@@ -732,6 +818,26 @@ function renderOverview(d) {
       <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-top:4px;">${esc(yt.description_hook)}</p>
     </div>` : ''}
   </div>`;
+}
+
+async function setVideoType(vtype) {
+  try {
+    await fetch('/api/save-file', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        project: PROJECT, phase: PHASE,
+        filename: 'video_type.json',
+        content: JSON.stringify({video_type: vtype}, null, 2)
+      })
+    });
+    showToast(`Video type set: ${VIDEO_TYPES.find(v=>v.id===vtype)?.label}`);
+    // Re-render overview with new selection
+    const panel = document.getElementById('tab-overview');
+    if (panel && phaseData) {
+      phaseData.video_type = vtype;
+      panel.innerHTML = renderOverview(phaseData);
+    }
+  } catch(e) { showToast('Could not save video type'); }
 }
 
 // ─────────────────────────────────────────────────
