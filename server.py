@@ -698,6 +698,97 @@ class Handler(BaseHTTPRequestHandler):
              "cmd": f'python pipeline.py --project {proj} --phase {ph} --skip-generate --skip-voiceover --skip-remotion'},
         ]
 
+    # ── Production brief helpers ─────────────────────────────────────────────
+
+    @staticmethod
+    def _analyze_script(path: Path) -> dict:
+        if not path.exists():
+            return {}
+        text = path.read_text(encoding="utf-8", errors="replace")
+        words      = len(text.split())
+        sections   = re.findall(r'^##\s+(.+)', text, re.MULTILINE)
+        # Extract spoken-only word count (NARRATION: blocks)
+        spoken_lines, in_spoken = [], False
+        for line in text.split("\n"):
+            s = line.strip()
+            if re.match(r'^(NARRATION|SPOKEN)\s*:', s, re.IGNORECASE):
+                in_spoken = True
+                continue
+            if re.match(r'^#{1,4}\s', s) or s.startswith("[") or s.startswith("ON-SCREEN"):
+                in_spoken = False; continue
+            if in_spoken and s:
+                spoken_lines.append(s)
+        spoken_words = len(" ".join(spoken_lines).split())
+        # Key concepts: bold text phrases
+        concepts = list(dict.fromkeys(re.findall(r'\*\*([^*]{3,40})\*\*', text)))[:10]
+        return {
+            "word_count":           words,
+            "spoken_word_count":    spoken_words,
+            "section_count":        len(sections),
+            "sections":             sections[:10],
+            "estimated_duration_min": round(spoken_words / 150, 1) if spoken_words else round(words / 150, 1),
+            "key_concepts":         concepts,
+        }
+
+    @staticmethod
+    def _analyze_infographics(path: Path) -> dict:
+        if not path.exists():
+            return {"total": 0, "cards": []}
+        text = path.read_text(encoding="utf-8", errors="replace")
+        # Match "Card N: Title" or "### Card N — Title"
+        matches = re.findall(r'(?:###?\s*)?Card\s+(\d+)\s*[:\-—]+\s*(.+)', text, re.IGNORECASE)
+        cards = [{"num": int(n), "title": t.strip()} for n, t in matches]
+        # Deduplicate by card number
+        seen, unique = set(), []
+        for c in cards:
+            if c["num"] not in seen:
+                seen.add(c["num"]); unique.append(c)
+        return {"total": len(unique) or max(3, len(re.findall(r'Card\s+\d+', text, re.IGNORECASE))),
+                "cards": unique}
+
+    @staticmethod
+    def _analyze_music(path: Path) -> dict:
+        if not path.exists():
+            return {}
+        text = path.read_text(encoding="utf-8", errors="replace")
+        bpm_match = re.search(r'(\d{2,3})\s*[-–]\s*(\d{2,3})\s*BPM', text, re.IGNORECASE)
+        moods     = re.findall(r'(?:mood|feel)[^\n]*:\s*([^\n]+)', text, re.IGNORECASE)
+        searches  = re.findall(r'"([^"]{5,60})"', text)[:5]
+        return {
+            "bpm":          f"{bpm_match.group(1)}-{bpm_match.group(2)}" if bpm_match else "",
+            "mood":         moods[0].strip() if moods else "",
+            "search_terms": searches,
+        }
+
+    @staticmethod
+    def _analyze_voiceover(vo_dir: Path) -> dict:
+        if not vo_dir.exists():
+            return {"exists": False}
+        audio = [f for f in sorted(vo_dir.iterdir())
+                 if f.suffix.lower() in (".wav", ".mp3", ".ogg", ".m4a")]
+        if not audio:
+            return {"exists": False}
+        f = audio[0]
+        size_mb = round(f.stat().st_size / 1024 / 1024, 2)
+        # Try ffprobe for duration
+        dur_s = 0.0
+        try:
+            r = subprocess.run(
+                ["ffprobe", "-v", "quiet", "-show_entries", "format=duration",
+                 "-of", "default=noprint_wrappers=1:nokey=1", str(f)],
+                capture_output=True, text=True, timeout=10)
+            dur_s = float(r.stdout.strip())
+        except Exception:
+            pass
+        mins, secs = divmod(int(dur_s), 60)
+        return {
+            "exists":    True,
+            "filename":  f.name,
+            "size_mb":   size_mb,
+            "duration_s": dur_s,
+            "duration_display": f"{mins}m {secs:02d}s" if dur_s else "",
+        }
+
     def _api_phase_data(self, project: str, phase: int):
         phase_dir = PROJECT_ROOT / project / f"phase_{phase}"
         if not phase_dir.exists():
@@ -746,6 +837,11 @@ class Handler(BaseHTTPRequestHandler):
                     cards_manifest = json.loads(cm.read_text(encoding="utf-8"))
                 except Exception:
                     pass
+
+        # Production brief analyses
+        script_analysis      = self._analyze_script(phase_dir / "script.md")
+        infographics_analysis= self._analyze_infographics(phase_dir / "infographics.md")
+        music_analysis       = self._analyze_music(phase_dir / "music_brief.md")
 
         # Voiceover audio files
         voiceover_files = []
@@ -862,6 +958,10 @@ class Handler(BaseHTTPRequestHandler):
             "steps_done": done_count,
             "steps_total": len(steps),
             "voiceover_files": voiceover_files,
+            "voiceover_analysis": self._analyze_voiceover(vo_dir),
+            "script_analysis":    script_analysis,
+            "infographics_analysis": infographics_analysis,
+            "music_analysis":     music_analysis,
             "platform_outputs": platform_outputs,
             "video_type": video_type,
             "brand": brand_profile,

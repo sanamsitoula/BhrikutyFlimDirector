@@ -454,7 +454,7 @@ function render() {
         <button class="tab-btn" onclick="switchTab('context',this)" style="color:var(--teal);">📋 Context</button>
       </div>
       <div style="padding:20px;">
-        <div id="tab-overview"     class="tab-panel active">${renderOverview(d)}</div>
+        <div id="tab-overview"     class="tab-panel active">${renderOverview(d)}${renderProductionBrief(d)}</div>
         <div id="tab-script"       class="tab-panel">${renderFileTab('script.md')}</div>
         <div id="tab-short"        class="tab-panel">${renderFileTab('script_short.md')}</div>
         <div id="tab-infographics" class="tab-panel">${renderInfographics(d.cards, d.card_urls||{}, d.cards_manifest||{})}</div>
@@ -706,6 +706,167 @@ function handleStepAction(action, stepName) {
   } else {
     showToast(`Open: ${stepName}`);
   }
+}
+
+// ─────────────────────────────────────────────────
+// PRODUCTION BRIEF — rich details from analysed files
+// ─────────────────────────────────────────────────
+function renderProductionBrief(d) {
+  const sa   = d.script_analysis      || {};
+  const ia   = d.infographics_analysis|| {};
+  const ma   = d.music_analysis       || {};
+  const va   = d.voiceover_analysis   || {};
+  const rp   = d.roadmap_phase        || {};
+  const b    = d.brand                || {};
+  const po   = d.platform_outputs     || {};
+
+  // ── Script section ────────────────────────────────────────────────────────
+  const hasScript = !!sa.word_count;
+  const scriptSection = hasScript ? `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+      ${[
+        ['📝 Words',    sa.word_count?.toLocaleString() || '—'],
+        ['🎙️ Spoken',  sa.spoken_word_count?.toLocaleString() || '—'],
+        ['📑 Sections', sa.section_count || '—'],
+        ['⏱️ Duration', sa.estimated_duration_min ? sa.estimated_duration_min+'min' : '—'],
+      ].map(([label, val]) => `
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted);">${label}</div>
+          <div style="font-size:16px;font-weight:700;color:var(--teal);margin-top:2px;">${val}</div>
+        </div>`).join('')}
+    </div>
+    ${sa.sections?.length ? `
+      <div style="margin-bottom:8px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;">Script Sections</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          ${sa.sections.map(s => `<span class="tag" style="font-size:10px;">${esc(s)}</span>`).join('')}
+        </div>
+      </div>` : ''}
+    ${sa.key_concepts?.length ? `
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;">Key Concepts</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          ${sa.key_concepts.map(c => `<span style="padding:2px 8px;background:var(--teal-dim);border:1px solid rgba(0,212,170,.25);border-radius:6px;font-size:11px;color:var(--teal);">${esc(c)}</span>`).join('')}
+        </div>
+      </div>` : ''}` : '<div style="color:var(--muted);font-size:12px;">script.md not generated yet.</div>';
+
+  // ── Voiceover section ─────────────────────────────────────────────────────
+  const voSection = va.exists ? `
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:160px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);">${esc(va.filename)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${va.duration_display||''} · ${va.size_mb} MB</div>
+      </div>
+      ${va.duration_s ? `
+        <div style="flex:1;min-width:120px;">
+          <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+            <div style="width:100%;height:100%;background:linear-gradient(to right,var(--teal),#00EDBC);border-radius:2px;"></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;">${va.duration_display} estimated speaking time</div>
+        </div>` : ''}
+      <audio controls preload="none" style="height:32px;flex-shrink:0;accent-color:var(--teal);max-width:200px;">
+        <source src="/media/${d.project}/${d.phase}/voiceover/${esc(va.filename)}" type="audio/${va.filename?.endsWith('.mp3')?'mpeg':'wav'}">
+      </audio>
+    </div>` : `<div style="color:var(--muted);font-size:12px;">No voiceover audio yet. See Audio tab to generate.</div>`;
+
+  // ── Infographics section ──────────────────────────────────────────────────
+  const cardCount   = ia.total || d.cards?.length || 0;
+  const cardList    = ia.cards?.length
+    ? ia.cards.map(c => `
+        <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(30,42,66,.4);">
+          <span style="width:22px;height:22px;border-radius:5px;background:var(--teal-dim);color:var(--teal);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${c.num}</span>
+          <span style="font-size:12px;color:var(--text2);">${esc(c.title)}</span>
+        </div>`).join('')
+    : (d.cards||[]).map((c, i) => `
+        <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(30,42,66,.4);">
+          <span style="width:22px;height:22px;border-radius:5px;background:var(--teal-dim);color:var(--teal);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</span>
+          <span style="font-size:12px;color:var(--teal);font-family:'Courier New',monospace;">${esc(c)}</span>
+        </div>`).join('');
+  const infoSection = cardCount
+    ? `<div style="margin-bottom:8px;font-size:11px;color:var(--muted);">${cardCount} cards · auto-detected from infographics.md</div>` + cardList
+    : '<div style="color:var(--muted);font-size:12px;">Generate infographics.md first (Step 1.6), then cards (Step 1.8).</div>';
+
+  // ── Music section ────────────────────────────────────────────────────────
+  const musicSection = (ma.bpm || ma.mood || ma.search_terms?.length) ? `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        ${ma.bpm  ? `<div style="margin-bottom:6px;"><span style="font-size:10px;color:var(--muted);">BPM </span><span style="font-size:13px;font-weight:600;color:var(--text);">${esc(ma.bpm)}</span></div>` : ''}
+        ${ma.mood ? `<div style="font-size:12px;color:var(--text2);">${esc(ma.mood.slice(0,80))}</div>` : ''}
+      </div>
+      ${ma.search_terms?.length ? `
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;">Open-source search terms</div>
+          ${ma.search_terms.map(t => `<div style="font-size:11px;color:var(--text2);">🔍 "${esc(t)}"</div>`).join('')}
+        </div>` : ''}
+    </div>` : '<div style="color:var(--muted);font-size:12px;">Generate music_brief.md first (Step 1.5).</div>';
+
+  // ── Text content output specs ─────────────────────────────────────────────
+  const bd  = rp.content_breakdown || [];
+  const textSpecs = bd.length ? bd.map(cb => {
+    const platIcon = {'YouTube':'▶️','TikTok':'🎵','Instagram':'📸','Blog':'📝','LinkedIn':'💼','Twitter':'🐦'}[cb.platform?.split('/')[0].trim()] || '📄';
+    const desc = cb.type==='long-form'   ? `${cb.duration_min}-min video`
+               : cb.type==='short-form'  ? `${cb.duration_min}-min cut`
+               : cb.type==='infographic' ? `${cb.card_count} cards`
+               : cb.type==='article'     ? `${cb.words} words`
+               : cb.type==='thread'      ? `${cb.tweets} tweets`
+               : cb.type;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(30,42,66,.4);">
+      <span style="font-size:13px;">${platIcon}</span>
+      <span style="font-size:12px;color:var(--text);flex:1;">${esc(cb.platform)}</span>
+      <span class="badge badge-blue" style="font-size:10px;">${desc}</span>
+    </div>`;
+  }).join('') : '<div style="color:var(--muted);font-size:12px;">Content breakdown from roadmap.json</div>';
+
+  // ── Final output summary ──────────────────────────────────────────────────
+  const readyPlatforms = Object.entries(po).filter(([,v]) => v.has_content).map(([,v]) => v.icon+' '+v.label);
+  const pendingPlatforms = Object.entries(po).filter(([,v]) => !v.has_content).map(([,v]) => v.label);
+  const finalSection = `
+    ${readyPlatforms.length ? `
+      <div style="margin-bottom:8px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--teal);margin-bottom:5px;">✅ Ready (${readyPlatforms.length})</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;">${readyPlatforms.map(p=>`<span class="badge badge-teal" style="font-size:10px;">${esc(p)}</span>`).join('')}</div>
+      </div>` : ''}
+    ${pendingPlatforms.length ? `
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;">⬜ Not yet generated (${pendingPlatforms.length})</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;">${pendingPlatforms.map(p=>`<span class="badge badge-blue" style="font-size:10px;">${esc(p)}</span>`).join('')}</div>
+      </div>` : ''}`;
+
+  // ── Assemble ──────────────────────────────────────────────────────────────
+  const section = (icon, title, status, content) => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2);">
+        <span style="font-size:16px;">${icon}</span>
+        <span style="font-size:12px;font-weight:700;color:var(--text);flex:1;">${title}</span>
+        ${status ? `<span class="badge ${status.cls}">${status.label}</span>` : ''}
+      </div>
+      <div style="padding:12px 14px;">${content}</div>
+    </div>`;
+
+  return `
+    <div style="margin-top:20px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">
+        📋 Production Brief — Full Details
+      </div>
+      ${section('📄', 'Script',
+        hasScript ? {cls:'badge-teal',label:`${sa.word_count?.toLocaleString()||0} words`} : {cls:'badge-blue',label:'Pending'},
+        scriptSection)}
+      ${section('🎧', 'Voiceover',
+        va.exists ? {cls:'badge-teal',label:va.duration_display||'Ready'} : {cls:'badge-blue',label:'Pending'},
+        voSection)}
+      ${section('🃏', `Infographic Cards (${cardCount} total)`,
+        cardCount ? {cls:'badge-teal',label:`${cardCount} cards`} : {cls:'badge-blue',label:'Pending'},
+        infoSection)}
+      ${section('🎵', 'Music Brief',
+        ma.bpm ? {cls:'badge-teal',label:`${ma.bpm} BPM`} : {cls:'badge-blue',label:'Pending'},
+        musicSection)}
+      ${section('📝', 'Text Content Output',
+        null, textSpecs)}
+      ${section('🎬', 'Final Output — Platform Status',
+        {cls: readyPlatforms.length>0 ? 'badge-teal' : 'badge-blue',
+         label: `${readyPlatforms.length}/${Object.keys(po).length} ready`},
+        finalSection)}
+    </div>`;
 }
 
 // ─────────────────────────────────────────────────

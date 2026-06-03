@@ -366,21 +366,26 @@ Format as Markdown.""", max_tokens=800)
 
 
 def generate_infographics_brief(client, system_prompt: str, topic: str, script: str) -> str:
-    return call_claude(client, system_prompt, f"""Write an infographics brief for 3 animated cards for: {topic}
+    return call_claude(client, system_prompt, f"""Analyze this script and write an infographics brief for animated cards for: {topic}
 
 Based on this script:
-{script[:2000]}
+{script[:2500]}
 
-For each card:
-- Title
-- Concept (what it visualizes)
-- Layout description
-- Color rules (hex only)
-- 6-step animation sequence (brand standard)
-- Stat/data point
-- CTA strip text
+INSTRUCTIONS:
+1. Count the key concepts/sections in the script that deserve their own visual card.
+   Typically 3-6 cards — one per major concept. Never fewer than 3 or more than 6.
+2. For EACH card write a section starting exactly with: ### Card N: [Title]
+   (where N is the card number and Title is a short, punchy headline)
 
-Format as Markdown. All hex colors must be from brand palette: #00D4AA #F5A623 #8B9BB4 #0A0E1A #7B5CF0""", max_tokens=2000)
+For each card include:
+- **Concept**: what core idea this card visualizes
+- **Key stat or data point**: one number or fact to feature large
+- **Layout**: describe the visual arrangement
+- **Color rules**: hex codes from brand palette only
+- **6-step animation sequence**: fadeIn bg → slideDown logo → wordIn headline → slideUp content → countUp stat → bounce CTA
+- **CTA strip text**: call-to-action for the strip at the bottom
+
+Format as Markdown. Use only hex colors from the brand palette.""", max_tokens=2500)
 
 
 def generate_clip_brief(client, system_prompt: str, topic: str, script: str) -> str:
@@ -568,9 +573,16 @@ def _generate_single(client, system_prompt: str, args, phase_dir: Path, assets_d
     elif only == "clip_brief.md":
         _write("clip_brief.md", generate_clip_brief(client, system_prompt, topic, script))
 
-    elif only in ("card_01.html", "card_02.html", "card_03.html"):
-        num   = int(only[5])
-        brief = f"Card {num} from brief:\n{infobr[num*200:(num+1)*400]}" if infobr else f"Card {num}"
+    elif re.match(r'card_\d{2}\.html', only):
+        num = int(re.search(r'(\d+)', only).group(1))
+        # Extract the relevant section from infographics.md
+        brief = f"Card {num}"
+        m = re.search(
+            rf'(?:###?\s*)?Card\s+{num}\s*[:\-—]+(.+?)(?=(?:###?\s*)?Card\s+\d+|\Z)',
+            infobr, re.IGNORECASE | re.DOTALL
+        ) if infobr else None
+        if m:
+            brief = f"Card {num}:\n{m.group(1).strip()[:500]}"
         _write(only, generate_html_card(client, system_prompt, args.phase, num, topic, brief), in_assets=True)
         _write_cards_manifest(args.project, args.phase, topic, assets_dir, [only])
 
@@ -605,11 +617,11 @@ def main():
                         default="auto",
                         help="AI provider: auto | anthropic | gemini | openai | dashscope")
     parser.add_argument("--only",     default="",
-                        help="Generate a single file instead of all 9. "
+                        help="Generate a single file instead of all. "
                              "Options: script.md | script_short.md | subtitles.srt | "
                              "voiceover_brief.md | music_brief.md | infographics.md | "
                              "clip_brief.md | card_01.html | card_02.html | card_03.html | "
-                             "content_spec.json")
+                             "card_04.html | ... (any card_NN.html) | content_spec.json")
     args = parser.parse_args()
 
     # Set global provider + build Anthropic client if needed
@@ -690,11 +702,23 @@ def main():
     print("[7/9] Generating clip_brief.md...")
     files["clip_brief.md"] = generate_clip_brief(client, system_prompt, args.topic, script)
 
-    print("[8/9] Generating HTML infographic cards...")
-    for card_num in range(1, 4):
-        card_brief = f"Card {card_num} from brief:\n{infographics_brief[card_num*200:(card_num+1)*400]}"
+    # Determine card count from infographics brief (dynamic, not hardcoded)
+    card_titles = re.findall(r'(?:###?\s*)?Card\s+(\d+)\s*[:\-—]+\s*(.+)', infographics_brief, re.IGNORECASE)
+    num_cards = max(3, len(set(int(n) for n, _ in card_titles))) if card_titles else 3
+    num_cards = min(num_cards, 8)  # cap at 8
+
+    print(f"[8/9] Generating HTML infographic cards ({num_cards} cards from infographics brief)...")
+    for card_num in range(1, num_cards + 1):
+        # Extract the section of the brief relevant to this card
+        card_brief = f"Card {card_num}"
+        m = re.search(
+            rf'(?:###?\s*)?Card\s+{card_num}\s*[:\-—]+(.+?)(?=(?:###?\s*)?Card\s+\d+|\Z)',
+            infographics_brief, re.IGNORECASE | re.DOTALL
+        )
+        if m:
+            card_brief = f"Card {card_num}:\n{m.group(1).strip()[:500]}"
         html = generate_html_card(client, system_prompt, args.phase, card_num, args.topic, card_brief)
-        files[f"card_0{card_num}.html"] = html
+        files[f"card_{card_num:02d}.html"] = html
 
     print("[9/9] Generating content_spec.json...")
     files["content_spec.json"] = generate_content_spec(args.phase, args.topic, script, tags)
