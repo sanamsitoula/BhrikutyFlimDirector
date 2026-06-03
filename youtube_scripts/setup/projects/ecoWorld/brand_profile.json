@@ -12,6 +12,7 @@
   "tone_of_voice": {
     "primary": "Friendly professor explaining complex ideas with everyday analogies — clear, conversational, never jargon-heavy, never condescending",
     "sentence_style": "Short declarative sentences. Max 15 words per sentence in scripts. No passive voice. Lead with the concept, follow with the analogy.",
+    "analogy_style": "Everyday life — grocery stores, household budgets, local markets, traffic, weather. Never use finance jargon to explain finance concepts.",
     "forbidden_words": [
       "simply",
       "just",
@@ -25,35 +26,37 @@
   },
   "colors": {
     "primary": {
-      "hex": "#cc1979",
-      "usage": "headers, CTAs, key stats",
-      "name": "Primary"
+      "name": "Forest Green",
+      "hex": "#2D7D46",
+      "usage": "headers, CTAs, key stats"
     },
     "secondary": {
-      "hex": "#b59c73",
-      "usage": "accents, icons, stat callouts",
-      "name": "Secondary"
+      "name": "Amber",
+      "hex": "#F5A623",
+      "usage": "accents, icons, stat callouts"
     },
     "neutral": {
-      "hex": "#386fc7",
-      "usage": "body text, secondary labels",
-      "name": "Neutral"
+      "name": "Warm Gray",
+      "hex": "#8B9BB4",
+      "usage": "body text, secondary labels"
     },
     "background": {
-      "hex": "#377b56",
-      "usage": "card and screen backgrounds",
-      "name": "Background"
+      "name": "Deep Charcoal",
+      "hex": "#0F1A14",
+      "usage": "card and screen backgrounds"
     },
     "highlight": {
-      "hex": "#83a0ce",
-      "usage": "emphasis, pull quotes, chapter markers",
-      "name": "Highlight"
+      "name": "Sky Blue",
+      "hex": "#3B82F6",
+      "usage": "emphasis, pull quotes, chapter markers"
     }
   },
   "typography": {
     "heading_font": "Space Grotesk",
     "body_font": "Inter",
     "code_font": "JetBrains Mono",
+    "min_body_size_px": 48,
+    "min_header_size_px": 72,
     "max_words_per_line": 7
   },
   "logo": {

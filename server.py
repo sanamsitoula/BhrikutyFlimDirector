@@ -203,6 +203,32 @@ class Handler(BaseHTTPRequestHandler):
             body = self.rfile.read(length)
             data = json.loads(body) if body else {}
             self._api_save_file(data)
+        elif path == "/api/upload-audio":
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length)
+            import cgi as _cgi
+            # Parse multipart form data
+            ctype = self.headers.get("Content-Type", "")
+            env = {"REQUEST_METHOD": "POST", "CONTENT_TYPE": ctype, "CONTENT_LENGTH": str(length)}
+            fs = _cgi.FieldStorage(fp=__import__('io').BytesIO(body), environ=env, keep_blank_values=True)
+            project  = fs.getvalue("project", "")
+            phase    = int(fs.getvalue("phase", "1"))
+            filename = fs.getvalue("filename", "") or "phase_manual.mp3"
+            if not project:
+                self._send_json({"error": "project required"}, 400); return
+            if any(c in filename for c in ("../", "..\\", "/", "\\")):
+                self._send_json({"error": "invalid filename"}, 400); return
+            audio_item = fs["audio"] if "audio" in fs else None
+            if audio_item is None:
+                self._send_json({"error": "audio field missing"}, 400); return
+            vo_dir = PROJECT_ROOT / project / f"phase_{phase}" / "voiceover"
+            vo_dir.mkdir(parents=True, exist_ok=True)
+            out_path = vo_dir / filename
+            out_path.write_bytes(audio_item.file.read())
+            size_mb = round(out_path.stat().st_size / 1024 / 1024, 2)
+            print(f"  [AUDIO] Uploaded: {project}/phase_{phase}/voiceover/{filename} ({size_mb} MB)")
+            self._send_json({"ok": True, "path": str(out_path), "size_mb": size_mb,
+                             "url": f"/media/{project}/{phase}/voiceover/{filename}"})
         elif path == "/api/run-step":
             length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(length)
@@ -638,7 +664,7 @@ class Handler(BaseHTTPRequestHandler):
              "done": out_has(".mp4"),
              "key_files": ["_output/youtube/final_1080p.mp4"],
              "action": "run:video",
-             "cmd": f'python pipeline.py --project {proj} --phase {ph} --skip-generate --video path/to/recording.mp4'},
+             "cmd": f'# From infographic cards + voiceover (no raw footage needed):\npython tools/video/create_video.py --project {proj} --phase {ph} --burn-subs --shorts\n\n# OR from raw screen recording:\npython pipeline.py --project {proj} --phase {ph} --skip-generate --video path/to/recording.mp4'},
 
             {"num": 6, "name": "Auto-Transcribe (SRT)",
              "done": has("subtitles.srt") and sz("subtitles.srt") > 500,

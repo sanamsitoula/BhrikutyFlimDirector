@@ -543,7 +543,7 @@ function getStepHint(num, d) {
     2: `Checks tone, colors${primary?' ('+primary+')':''}, typography, animation, sound identity`,
     3: `~${duration}min audio · Kokoro / ElevenLabs TTS · pacing from voiceover_brief.md`,
     4: `${ig?ig.card_count:4} cards · 1080×1080px (Instagram) · ${primary}${secondary?' + '+secondary:''}`,
-    5: `1920×1080 MP4 · voiceover + b-roll + subtitles burned`,
+    5: `python tools/video/create_video.py --project ${d?.project||PROJECT} --phase ${d?.phase||PHASE} --burn-subs --shorts`,
     6: `Auto-generate SRT caption file from voiceover audio`,
     7: `TikTok 9:16 · Instagram 1:1 · Twitter 16:9`,
     8: `${ar?ar.words:1500}-word article · ${th?th.tweets:7}-tweet thread · LinkedIn post`,
@@ -1331,6 +1331,19 @@ function renderAudio(d) {
   }
 
   // ── Audio files found — show players ────────────────────────────────────
+  const uploadBar = `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;
+                padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;">
+      <div>
+        <span style="font-size:12px;font-weight:600;color:var(--text);">Replace or add audio</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">Upload .mp3 / .wav / .ogg to swap out this voiceover</span>
+      </div>
+      <label style="cursor:pointer;" title="Upload audio file">
+        <input type="file" accept=".mp3,.wav,.ogg,.m4a" style="display:none;" onchange="uploadAudio(this)">
+        <span class="step-action-btn run" style="font-size:11px;padding:5px 12px;">⬆ Upload Audio</span>
+      </label>
+    </div>`;
+
   const players = files.map((f, i) => {
     const mimeMap = { wav:'audio/wav', mp3:'audio/mpeg', ogg:'audio/ogg', m4a:'audio/mp4', flac:'audio/flac' };
     const mime = mimeMap[f.ext] || 'audio/wav';
@@ -1365,7 +1378,7 @@ function renderAudio(d) {
 
     <details style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
       <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);list-style:none;display:flex;align-items:center;gap:6px;">
-        <span>🎙️</span> Generate another voiceover (replace or add)
+        <span>🎙️</span> Regenerate voiceover with a different engine
       </summary>
       <div style="margin-top:12px;">${ttsGrid}</div>
     </details>
@@ -1692,6 +1705,32 @@ async function runPhase() {
 
 async function runVoiceover() {
   showToast('See Audio tab for TTS options (Edge TTS recommended — free, no API key)');
+}
+
+async function uploadAudio(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('project',  PROJECT);
+  fd.append('phase',    String(PHASE));
+  fd.append('filename', file.name);
+  fd.append('audio',    file);
+  showToast(`Uploading ${file.name}…`);
+  try {
+    const r = await fetch('/api/upload-audio', { method: 'POST', body: fd });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || r.status);
+    showToast(`✅ Uploaded ${file.name} (${data.size_mb} MB)`);
+    // Refresh phase data to show new player
+    const rd = await fetch(`/api/phase-data?project=${PROJECT}&phase=${PHASE}`);
+    if (rd.ok) { phaseData = await rd.json(); }
+    // Re-render audio tab
+    const panel = document.getElementById('tab-audio');
+    if (panel && phaseData) panel.innerHTML = renderAudio(phaseData);
+  } catch(e) {
+    showToast(`❌ Upload failed: ${e.message}`);
+  }
+  input.value = '';  // reset so same file can be re-uploaded
 }
 
 // ── Browser Web Speech API preview ──────────────────────────────────────────
