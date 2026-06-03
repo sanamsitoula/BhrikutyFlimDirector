@@ -620,10 +620,177 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-## Credits
+## Credits & Acknowledgements
 
-- [HyperEdit](https://github.com/kevinbadi/hyperedit) — 3-agent architecture, intent routing, FFmpeg pattern
-- [Remotion](https://remotion.dev) — Code-as-video React components
-- [WhisperX](https://github.com/m-bain/whisperX) — Word-level transcription
-- [Chatterbox TTS](https://github.com/resemble-ai/chatterbox) — Open-source voice cloning
-- [Kokoro-TTS](https://github.com/hexgrad/kokoro) — #1 TTS Arena open model
+Bhrikuty is built on the shoulders of outstanding open-source projects, APIs, and platforms. Full credit to every tool and team listed below.
+
+---
+
+### Architecture Inspiration
+
+| Project | Author | What we borrowed |
+|---------|--------|-----------------|
+| [HyperEdit](https://github.com/kevinbadi/hyperedit) | Kevin Badi | 3-agent Director/Picasso/DiCaprio architecture, context-aware intent routing, FFmpeg server pattern, dead-air removal |
+
+---
+
+### AI & Script Generation
+
+| Tool | Provider | Usage in Bhrikuty |
+|------|----------|-------------------|
+| [Claude API — Sonnet 4.6](https://www.anthropic.com/claude) | Anthropic | Script generation, text content (blog, LinkedIn, thread, YouTube description), compliance analysis |
+| [Claude Code](https://claude.ai/code) | Anthropic | Built the entire web dashboard, server, and pipeline tooling during development |
+
+---
+
+### Text-to-Speech / Voiceover
+
+| Tool | License | Usage in Bhrikuty |
+|------|---------|-------------------|
+| [ElevenLabs](https://elevenlabs.io) | Commercial | Paid TTS option — `tools/tts/elevenlabs_voiceover.py` |
+| [Chatterbox TTS](https://github.com/resemble-ai/chatterbox) | MIT | Free GPU TTS with voice cloning — `tools/tts/chatterbox_voiceover.py` |
+| [Kokoro-TTS](https://github.com/hexgrad/kokoro) | Apache 2.0 | Free CPU-capable TTS, #1 on TTS Arena — `tools/tts/kokoro_voiceover.py` |
+| [Qwen3-TTS / DashScope](https://dashscope.aliyuncs.com) | Freemium | Current default multilingual TTS — `myvideo/edit/generate_voiceover.py` |
+| [F5-TTS](https://github.com/SWivid/F5-TTS) | MIT | Alternative free GPU TTS with EN/ZH bilingual support |
+| [XTTS-v2](https://github.com/coqui-ai/TTS) | Custom | 17-language voice cloning via Coqui TTS |
+| [StyleTTS2](https://github.com/yl4579/StyleTTS2) | MIT | High-quality English TTS alternative |
+| [OpenVoice v2](https://github.com/myshell-ai/OpenVoice) | MIT | Cross-lingual voice cloning |
+| [Piper TTS](https://github.com/rhasspy/piper) | MIT | Lightweight multilingual offline TTS |
+
+---
+
+### Video Rendering & Motion Graphics
+
+| Tool | License | Usage in Bhrikuty |
+|------|---------|-------------------|
+| [FFmpeg](https://ffmpeg.org) | LGPL/GPL | Base video layer — transcoding, audio normalization, dead-air removal, format conversion |
+| [MoviePy](https://zulko.github.io/moviepy/) | MIT | Python-native video compositing — `tools/render/moviepy_render.py` |
+| [Remotion](https://remotion.dev) | Freemium | React-based animated infographic cards — `remotion/` |
+| [Motion Canvas](https://motioncanvas.io) | MIT | 3Blue1Brown-style mathematical explainer animations |
+| [Revideo](https://re.video) | MIT | Remotion fork with rendering API |
+| [Runway Gen-4](https://runwayml.com) | Commercial | AI-generated cinematic B-roll (~$0.05/sec) |
+| [Kling AI](https://klingai.com) | Commercial | Cost-effective AI B-roll ($7.99/mo) |
+| [Creatomate](https://creatomate.com) | Commercial | JSON-template video rendering API (~$0.38/min) |
+| [DaVinci Resolve](https://www.blackmagicdesign.com/products/davinciresolve) | Free/Paid | Pro color grading and manual editing |
+
+---
+
+### Transcription & Subtitles
+
+| Tool | License | Usage in Bhrikuty |
+|------|---------|-------------------|
+| [faster-whisper](https://github.com/SYSTRAN/faster-whisper) | MIT | Default free CPU transcription — `tools/transcribe.py` |
+| [WhisperX](https://github.com/m-bain/whisperX) | BSD-4 | GPU-accelerated word-level transcription with speaker diarization |
+| [Whisper.cpp](https://github.com/ggerganov/whisper.cpp) | MIT | Apple Silicon / CPU whisper — no Python dependency |
+| [Gladia Solaria-1](https://www.gladia.io) | Commercial | Paid transcription with 100-language translation (~$0.04/video) |
+| [AssemblyAI Universal-2](https://www.assemblyai.com) | Commercial | Paid transcription with auto YouTube chapters (~$0.03/video) |
+| [Deepgram Nova-3](https://deepgram.com) | Commercial | Lowest-latency cloud transcription — best for live streaming |
+
+---
+
+### Thumbnail & Image Generation
+
+| Tool | License | Usage in Bhrikuty |
+|------|---------|-------------------|
+| [FLUX.1 schnell](https://blackforestlabs.ai) | Apache 2.0 | Local GPU thumbnail generation (24GB VRAM) |
+| [FLUX.1 pro via BFL API](https://api.bfl.ml) | Commercial | Cloud FLUX — no GPU needed (~$0.055/image) |
+| [Ideogram v2](https://ideogram.ai) | Commercial | Best text-in-image rendering (~$0.08/image) |
+| [Recraft v3](https://www.recraft.ai) | Commercial | Vector-style brand graphics, SVG output |
+| [Midjourney v6.1](https://www.midjourney.com) | Commercial | Highest aesthetic quality for hero images |
+| [DALL-E 3](https://openai.com/dall-e-3) | Commercial | OpenAI image generation (~$0.04/image) |
+| [Adobe Firefly 3](https://firefly.adobe.com) | Commercial | IP-indemnified images for monetized content |
+| [Stable Diffusion / ComfyUI](https://github.com/comfyanonymous/ComfyUI) | GPL | Local image generation with LoRA fine-tuning |
+
+---
+
+### Workflow Orchestration
+
+| Tool | License | Usage in Bhrikuty |
+|------|---------|-------------------|
+| `pipeline.py` | MIT | Custom Python director — the current orchestration layer |
+| [n8n](https://n8n.io) | Fair-code | Visual 400+ integration workflow builder (self-hostable) |
+| [CrewAI](https://www.crewai.com) | MIT | Role-based multi-agent orchestration |
+| [Dify](https://dify.ai) | Apache 2.0 | Visual LLMOps pipeline builder with RAG |
+| [Flowise](https://flowiseai.com) | MIT | Drag-and-drop LLM flows |
+| [Prefect](https://www.prefect.io) | Apache 2.0 | Python-native workflow with retries and caching |
+| [Temporal](https://temporal.io) | MIT SDK | Durable fault-tolerant workflow for GPU workloads |
+
+---
+
+### Publishing Platforms
+
+| Platform | What Bhrikuty creates for it |
+|----------|------------------------------|
+| [YouTube](https://www.youtube.com) | `final_1080p.mp4` · `description.txt` · `subtitles.srt` · thumbnail · chapters |
+| [TikTok](https://www.tiktok.com) | `clip_01_hook.mp4` (:15, 9:16) · `clip_02_main.mp4` (:60, 9:16) |
+| [Instagram](https://www.instagram.com) | `reel_60s.mp4` · `carousel_1–3.png` · `caption_reel.txt` |
+| [Twitter / X](https://twitter.com) | `card_clip.mp4` (:30) · `thread.txt` (7-tweet breakdown) |
+| [LinkedIn](https://www.linkedin.com) | `clip.mp4` (:45) · `article.md` (800-word professional article) |
+| [Blog / Website](https://wordpress.org) | `post.md` (1500-word SEO post with YouTube embed) |
+| [GitHub](https://github.com) | `README.md` (structured project README with code samples) |
+
+---
+
+### Content Creation APIs & Publishing Tools
+
+| Tool | Purpose |
+|------|---------|
+| [YouTube Data API v3](https://developers.google.com/youtube/v3) | Automated upload — title, description, tags, SRT, thumbnail, scheduled publish |
+| [Metricool](https://metricool.com) | Multi-platform scheduling and analytics |
+| [n8n YouTube Node](https://n8n.io/integrations/youtube/) | Combined pipeline + publishing in one workflow |
+
+---
+
+### Fonts
+
+| Font | Foundry | Usage |
+|------|---------|-------|
+| [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) | Florian Karsten | All headings across dashboard, cards, and brand assets |
+| [Inter](https://fonts.google.com/specimen/Inter) | Rasmus Andersson | Body text across all UI pages |
+| [JetBrains Mono](https://www.jetbrains.com/legalforms/fonts/) | JetBrains | Code overlays and infographic card monospace text |
+
+---
+
+### Web Dashboard (Built in this project)
+
+| File | What it does |
+|------|-------------|
+| `server.py` | Zero-dependency Python HTTP server with SSE streaming and threaded request handling |
+| `dashboard.html` | Main pipeline control — 5-step wizard, live terminal drawer, projects status table |
+| `brand.html` | Brand identity setup — colors, fonts, tone of voice, social links, content pillars |
+| `projects.html` | Projects browser — favourites (localStorage), search, sort, accordion phase list |
+| `phase_dashboard.html` | Per-phase dashboard — pipeline steps, file viewer, infographic iframes, audio/video players |
+
+---
+
+### Python Libraries
+
+| Library | Usage |
+|---------|-------|
+| [anthropic](https://pypi.org/project/anthropic/) | Claude API for script and text generation |
+| [moviepy](https://pypi.org/project/moviepy/) | Video compositing and rendering |
+| [faster-whisper](https://pypi.org/project/faster-whisper/) | Audio transcription |
+| [kokoro](https://pypi.org/project/kokoro/) | Kokoro-TTS voiceover |
+| [soundfile](https://pypi.org/project/soundfile/) | Audio file I/O |
+| [elevenlabs](https://pypi.org/project/elevenlabs/) | ElevenLabs TTS API |
+| [dashscope](https://pypi.org/project/dashscope/) | Qwen3-TTS / DashScope API |
+| [chatterbox-tts](https://pypi.org/project/chatterbox-tts/) | Chatterbox voice cloning TTS |
+| [torch / torchaudio](https://pytorch.org) | GPU inference for Chatterbox and WhisperX |
+
+---
+
+### Node.js Packages (Remotion)
+
+| Package | Usage |
+|---------|-------|
+| [remotion](https://www.npmjs.com/package/remotion) | Core Remotion video rendering |
+| [@remotion/player](https://www.npmjs.com/package/@remotion/player) | In-browser preview |
+| [@remotion/renderer](https://www.npmjs.com/package/@remotion/renderer) | Server-side render to MP4 |
+
+---
+
+### Special Thanks
+
+- **[Chain Clarity](https://github.com/sanamsitoula/BhrikutyFlimDirector)** — the flagship brand built with this system, covering blockchain education across 7 platforms
+- **[Anthropic](https://www.anthropic.com)** — for Claude, the AI that generates every script, article, thread, and README in this pipeline
+- **The open-source community** — every free tool in this stack represents thousands of hours of contributed work
