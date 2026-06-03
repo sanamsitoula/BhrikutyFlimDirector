@@ -263,22 +263,60 @@ Status: **PASS** / **PASS_WITH_WARNINGS** / **FAIL**
 
 ### Step 7 — Voiceover
 
+**Option 1 — Edge TTS (recommended, free, no API key, Python 3.14+):**
 ```bash
-# ElevenLabs (paid, best) — needs ELEVENLABS_API_KEY
-python tools/tts/elevenlabs_voiceover.py --project ecoWorld --phase 1
+pip install edge-tts
+python tools/tts/edge_tts_voiceover.py --project ecoWorld --phase 1
 
-# DashScope Qwen-TTS (freemium) — needs DASHSCOPE_API_KEY
-python tools/tts/dashscope_voiceover.py --project ecoWorld --phase 1
+# List all 300+ Microsoft neural voices
+python tools/tts/edge_tts_voiceover.py --list-voices
 
-# Kokoro (free, CPU) — Python <=3.12 Windows
-python tools/tts/kokoro_voiceover.py --project ecoWorld --phase 1
+# Pick a different voice
+python tools/tts/edge_tts_voiceover.py --project ecoWorld --phase 1 --voice en-GB-RyanNeural
 ```
 
-**Manual voice recording (no API needed):**
-1. Open `phase_1/script.md`, read the `NARRATION:` sections
-2. Record with Audacity or any recorder at 44.1 kHz WAV
-3. Save to `phase_1/voiceover/phase_1.wav`
-4. Pipeline auto-detects it — TTS step shows Done
+| Voice | Style |
+|-------|-------|
+| `en-US-JennyNeural` *(default)* | Warm, clear — great for education |
+| `en-US-GuyNeural` | Professional male narrator |
+| `en-US-AriaNeural` | Expressive, natural |
+| `en-GB-SoniaNeural` | Polished UK female |
+| `en-GB-RyanNeural` | Deep documentary-style male |
+| `en-AU-NatashaNeural` | Friendly Australian |
+
+**Option 2 — DashScope CosyVoice 2.0 (freemium, high quality):**
+```bash
+# Step 1: Deploy CosyVoice 2.0 in your workspace
+#   → modelstudio.console.alibabacloud.com
+#   → Model Square → search "CosyVoice 2.0" → Deploy → Default Workspace
+#   Wait ~2 min for status: Running
+
+# Step 2: Verify deployment
+python tools/tts/dashscope_voiceover.py --discover
+
+# Step 3: Generate
+python tools/tts/dashscope_voiceover.py --project ecoWorld --phase 1 --voice longxiaochun
+```
+
+The script auto-discovers which CosyVoice model is deployed (`cosyvoice-v2`, `cosyvoice-v1`, `cosyvoice-turbo`).
+Primary key fails → automatically tries the secondary key.
+
+**Option 3 — ElevenLabs (paid, industry standard):**
+```bash
+# Set ELEVENLABS_API_KEY in .env
+python tools/tts/elevenlabs_voiceover.py --project ecoWorld --phase 1
+```
+
+**Option 4 — Manual voice recording (no install, no API):**
+1. Open `phase_1/script.md`, read the `NARRATION:` sections aloud
+2. Record with Audacity at 44.1 kHz WAV or MP3
+3. Save to `phase_1/voiceover/phase_1.wav` (or `.mp3`)
+4. Dashboard detects it — Audio tab shows player automatically
+
+**Option 5 — Browser preview (instant, zero install):**
+Open the phase dashboard → **Audio tab** → click **▶ Play Script**.
+The browser reads your script aloud using the built-in Web Speech API.
+Good for checking pacing before committing to a full render.
 
 ---
 
@@ -322,11 +360,12 @@ The per-phase dashboard is the main working interface. Tabs:
 
 | Tab | What it shows |
 |-----|--------------|
-| **Overview** | Video type selector (B-Roll / Screen / Animation / Manual), TTS guide, chapters, platform cuts, tags |
+| **Overview** | Video type selector (B-Roll / Screen / Animation / Manual), TTS options guide, chapters, platform cuts, tags |
 | **Script** | `script.md` viewer + inline editor |
 | **Short Script** | `script_short.md` — 60s TikTok/Reels cut |
-| **Infographics** | Card previews with clickable URLs + Copy All URLs |
+| **Infographics** | Card previews + clickable URLs + Copy All URLs |
 | **Subtitles** | `subtitles.srt` viewer |
+| **Audio** | HTML5 player for each voiceover file · Download · Copy URL · TTS generation options · **🔊 Play Script** (browser preview, zero install) |
 | **Audio** | Voiceover player + voiceover brief |
 | **Video** | Inline video player + clip brief |
 | **Compliance** | `compliance_report_auto.md` |
@@ -420,9 +459,11 @@ BhrikutyFlimDirector/
 │   ├── platform_cutter.py        ← FFmpeg platform exports
 │   ├── text_content_generator.py ← Platform text (Gemini fallback)
 │   └── tts/
-│       ├── kokoro_voiceover.py
-│       ├── elevenlabs_voiceover.py
-│       └── dashscope_voiceover.py
+│       ├── edge_tts_voiceover.py     ← Free, no API key, Python 3.14+ (recommended)
+│       ├── dashscope_voiceover.py    ← DashScope CosyVoice (deploy model first)
+│       ├── elevenlabs_voiceover.py   ← Paid, best quality
+│       ├── chatterbox_voiceover.py   ← Free, needs GPU
+│       └── kokoro_voiceover.py       ← Free CPU, Python ≤3.12
 │
 ├── dashboard.html                ← Main pipeline UI + Script AI selector
 ├── projects.html                 ← Projects browser
@@ -463,12 +504,27 @@ BhrikutyFlimDirector/
 
 ## TTS Engine Comparison
 
-| Engine | Cost | Python 3.14 Win | Notes |
-|--------|------|----------------|-------|
-| Kokoro | Free | Not supported | CPU, Python ≤3.12 |
-| ElevenLabs | $5–22/mo | Yes | Best quality, voice cloning |
-| DashScope/Qwen3 | Freemium | Yes | Multilingual, generous free tier |
-| Chatterbox | Free | Manual install | GPU, emotion control |
+| Engine | Cost | Python 3.14 | API Key | Notes |
+|--------|------|-------------|---------|-------|
+| **Edge TTS** ⭐ | Free | ✅ | None | Microsoft neural voices, 300+ voices, best for Python 3.14 |
+| DashScope CosyVoice 2.0 | Freemium | ✅ | `DASHSCOPE_API_KEY` | Deploy model in workspace first — `--discover` to check |
+| ElevenLabs | $5–22/mo | ✅ | `ELEVENLABS_API_KEY` | Best quality, voice cloning, 32+ languages |
+| Chatterbox | Free | Manual | None | GPU required, MIT, emotion control |
+| Kokoro | Free | ❌ | None | CPU only, Python ≤3.12 on Windows |
+
+**Recommended:** `edge-tts` — free, no API key, high quality, works on Python 3.14.
+
+### DashScope CosyVoice — Deploy Guide
+
+1. Go to `modelstudio.console.alibabacloud.com`
+2. Left sidebar → **Model Square** → search `CosyVoice`
+3. Click **CosyVoice 2.0** → **Deploy** → select **Default Workspace**
+4. Wait ~2 min for status: **Running**
+5. Verify: `python tools/tts/dashscope_voiceover.py --discover`
+6. Generate: `python tools/tts/dashscope_voiceover.py --project ecoWorld --phase 1`
+
+The script auto-tries `cosyvoice-v2` → `cosyvoice-v1` → `cosyvoice-turbo` until one responds.
+If primary workspace key fails, it automatically tries the secondary key.
 
 ---
 
@@ -520,8 +576,11 @@ python tools/generate_phase.py --project ecoWorld --phase 1 --only subtitles.srt
 # 5. Check compliance
 python tools/compliance_checker.py --project ecoWorld --phase 1
 
-# 6. Generate voiceover
-python tools/tts/dashscope_voiceover.py --project ecoWorld --phase 1
+# 6. Generate voiceover (free, no API key needed)
+pip install edge-tts
+python tools/tts/edge_tts_voiceover.py --project ecoWorld --phase 1
+# OR with DashScope (deploy CosyVoice 2.0 in workspace first):
+# python tools/tts/dashscope_voiceover.py --project ecoWorld --phase 1
 
 # 7. Generate text content (falls back to Gemini if Anthropic has no credits)
 python tools/text_content_generator.py --project ecoWorld --phase 1
@@ -548,7 +607,16 @@ python server.py   # http://localhost:8080
 → `python install.py --check` detects and patches PATH. Or `winget install ffmpeg`.
 
 **Kokoro fails to install**
-→ Known issue on Python 3.14 / Windows. Use ElevenLabs or DashScope instead.
+→ Known issue on Python 3.14 / Windows. Use Edge TTS instead: `pip install edge-tts`
+
+**DashScope TTS: "Model not exist" (404)**
+→ CosyVoice is not deployed in your workspace yet.
+→ Deploy at: `modelstudio.console.alibabacloud.com` → Model Square → CosyVoice 2.0 → Deploy
+→ Check deployment: `python tools/tts/dashscope_voiceover.py --discover`
+
+**No audio showing in Audio tab**
+→ Audio files must be in `phase_N/voiceover/` with `.wav`, `.mp3`, or `.ogg` extension.
+→ Restart `server.py` after adding files.
 
 **`database does not exist`**
 → `python install.py --db` creates the DB and applies schema.
