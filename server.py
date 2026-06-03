@@ -112,6 +112,9 @@ class Handler(BaseHTTPRequestHandler):
         elif path in ("/brand", "/brand.html"):
             self._serve_file(BASE_DIR / "brand.html", "text/html; charset=utf-8")
 
+        elif path in ("/tools", "/tools.html"):
+            self._serve_file(BASE_DIR / "tools.html", "text/html; charset=utf-8")
+
         elif path == "/api/brands":
             self._api_brands()
 
@@ -167,6 +170,12 @@ class Handler(BaseHTTPRequestHandler):
 
         elif path == "/api/tools-status":
             self._api_tools_status()
+
+        elif path == "/api/browse":
+            self._api_browse(
+                qs.get("project", [""])[0],
+                qs.get("phase",   ["0"])[0]
+            )
 
         elif path == "/api/output-text":
             self._api_output_text(
@@ -993,6 +1002,41 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json({"content": content, "type": ftype, "filename": filename})
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
+
+    def _api_browse(self, project: str, phase_str: str):
+        """Return a directory tree for a project (and optionally a phase)."""
+        phase = int(phase_str) if phase_str and phase_str.isdigit() else 0
+        base = (PROJECT_ROOT / project / f"phase_{phase}") if phase else (PROJECT_ROOT / project)
+        if not base.exists():
+            self._send_json({"error": "not found"}, 404); return
+
+        SKIP = {"__pycache__", ".git", "node_modules", ".venv"}
+        MAX_DEPTH = 3
+
+        def _tree(d: Path, depth: int = 0) -> list:
+            if depth >= MAX_DEPTH:
+                return []
+            items = []
+            try:
+                entries = sorted(d.iterdir(), key=lambda x: (x.is_file(), x.name.lower()))
+            except PermissionError:
+                return []
+            for f in entries:
+                if f.name.startswith(".") or f.name in SKIP:
+                    continue
+                rel = str(f.relative_to(base)).replace("\\", "/")
+                if f.is_dir():
+                    items.append({"name": f.name, "type": "dir", "path": rel,
+                                  "children": _tree(f, depth + 1)})
+                else:
+                    items.append({"name": f.name, "type": "file", "path": rel,
+                                  "size": f.stat().st_size, "ext": f.suffix.lstrip(".")})
+            return items
+
+        self._send_json({
+            "project": project, "phase": phase,
+            "base":    str(base), "tree": _tree(base)
+        })
 
     def _api_output_text(self, project: str, phase: int, filepath: str):
         if ".." in filepath or filepath.startswith("/"):

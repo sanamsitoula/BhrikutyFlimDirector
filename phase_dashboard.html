@@ -344,7 +344,8 @@ video{max-height:480px;background:#000;}
   <span class="nav-title" id="nav-title">Loading…</span>
   <div class="nav-right">
     <span id="nav-compliance" class="badge">—</span>
-    <button class="btn btn-ghost" id="btn-open-main" onclick="window.open('/','_blank')">🔗 Main Dashboard</button>
+    <a href="/tools" target="_blank" class="btn btn-ghost" style="font-size:12px;">🛠️ Tools</a>
+  <button class="btn btn-ghost" id="btn-open-main" onclick="window.open('/','_blank')">🔗 Main Dashboard</button>
     <button class="btn btn-gold" id="btn-run" onclick="runPhase()">▶ Run Pipeline</button>
   </div>
 </nav>
@@ -1752,18 +1753,22 @@ function renderVideo(d) {
 // ALL FILES TAB
 // ─────────────────────────────────────────────────
 function renderFilesTab(files, cards) {
-  const fileIconMap = { md:'📄', srt:'💬', json:'⚙️', html:'🎨' };
+  const fileIconMap = { md:'📄', srt:'💬', json:'⚙️', html:'🎨', mp3:'🎧', wav:'🎧', mp4:'🎬', png:'🖼️', jpg:'🖼️' };
 
   const rows = files.map(f => {
-    const ext  = f.name.split('.').pop();
+    const ext  = f.name.split('.').pop().toLowerCase();
     const icon = fileIconMap[ext] || '📁';
     const kb   = (f.size / 1024).toFixed(1);
+    const isMedia = ['mp3','wav','mp4','ogg','m4a'].includes(ext);
+    const isView  = ['md','srt','json','html','txt'].includes(ext);
     return `<tr>
       <td style="padding:9px 12px;width:28px;">${icon}</td>
       <td style="padding:9px 12px;font-family:'Courier New',monospace;font-size:12px;color:var(--teal);">${f.name}</td>
       <td style="padding:9px 12px;font-size:11px;color:var(--muted);">${kb} KB</td>
-      <td style="padding:9px 12px;text-align:right;">
-        <button class="step-action-btn view" onclick="viewFile('${f.name}')">👁 View</button>
+      <td style="padding:9px 12px;text-align:right;display:flex;gap:4px;justify-content:flex-end;">
+        ${isView ? `<button class="step-action-btn view" onclick="viewFile('${f.name}')">👁 View</button>` : ''}
+        ${isMedia? `<a href="/media/${PROJECT}/${PHASE}/${f.name}" target="_blank" class="step-action-btn view" style="text-decoration:none;">▶ Play</a>` : ''}
+        <a href="/media/${PROJECT}/${PHASE}/${f.name}" download="${f.name}" class="step-action-btn view" style="font-size:10px;padding:4px 8px;text-decoration:none;">⬇</a>
       </td>
     </tr>`;
   }).join('');
