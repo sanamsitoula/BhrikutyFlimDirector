@@ -789,8 +789,66 @@ Bhrikuty is built on the shoulders of outstanding open-source projects, APIs, an
 
 ---
 
+### YouTuber & Creator Inspirations
+
+These creators directly shaped the content style, production standards, and educational philosophy behind the Bhrikuty pipeline and Chain Clarity brand.
+
+#### Blockchain & Crypto Education
+
+| Creator | Channel | What we learned |
+|---------|---------|----------------|
+| [Whiteboard Crypto](https://www.youtube.com/@WhiteboardCrypto) | YouTube | Simple visual explainer style for complex blockchain concepts — the "one analogy per concept" rule |
+| [Coin Bureau](https://www.youtube.com/@CoinBureau) | YouTube | Deep research, no hype, trust-first approach to crypto content — our tone benchmark |
+| [Andreas Antonopoulos](https://www.youtube.com/@aantonop) | YouTube | Technical depth with real-world analogies — how to explain Bitcoin to anyone |
+| [Finematics](https://www.youtube.com/@Finematics) | YouTube | DeFi and smart contract explainers with clean motion graphics |
+| [Benjamin Cowen](https://www.youtube.com/@intothecryptoverse) | YouTube | Data-first content — letting the charts and numbers lead the narrative |
+| [Patrick Collins](https://www.youtube.com/@PatrickAlphaC) | YouTube | Solidity and smart contract tutorials — technical accuracy standard |
+
+#### Educational Content & Production Quality
+
+| Creator | Channel | What we learned |
+|---------|---------|----------------|
+| [Fireship](https://www.youtube.com/@Fireship) | YouTube | Dense, high-signal-to-noise tech explainers in 100 seconds — the hook structure we follow |
+| [3Blue1Brown](https://www.youtube.com/@3blue1brown) | YouTube | Animated mathematical explanations — inspiration for Motion Canvas card animations |
+| [Kurzgesagt](https://www.youtube.com/@kurzgesagt) | YouTube | World-class script structure and visual storytelling — how every script section opens |
+| [Veritasium](https://www.youtube.com/@veritasium) | YouTube | Counter-intuitive hooks that reframe the viewer's understanding in the first 30 seconds |
+| [Mark Rober](https://www.youtube.com/@MarkRober) | YouTube | Story-first engineering — complex ideas wrapped in a compelling narrative arc |
+
+#### Coding & Tech Education
+
+| Creator | Channel | What we learned |
+|---------|---------|----------------|
+| [Traversy Media](https://www.youtube.com/@TraversyMedia) | YouTube | Clear project-based learning structure, clean pacing for technical walkthroughs |
+| [Theo — t3.gg](https://www.youtube.com/@t3dotgg) | YouTube | Opinion-driven tech takes with strong thesis statements — the LinkedIn article format |
+| [TechLead](https://www.youtube.com/@TechLead) | YouTube | Storytelling through real engineering experience |
+| [NetworkChuck](https://www.youtube.com/@NetworkChuck) | YouTube | High-energy educational delivery — keeping viewers engaged on technical topics |
+
+#### Content Strategy & Creator Business
+
+| Creator | Channel | What we learned |
+|---------|---------|----------------|
+| [Ali Abdaal](https://www.youtube.com/@aliabdaal) | YouTube | Evidence-based content creation, repurposing one video across all platforms |
+| [Matt D'Avella](https://www.youtube.com/@mattdavella) | YouTube | Minimalist cinematic production — visual restraint as a brand identity choice |
+| [Colin and Samir](https://www.youtube.com/@ColinandSamir) | YouTube | Creator economy strategy — how to build an audience that returns, not just watches |
+| [MKBHD — Marques Brownlee](https://www.youtube.com/@mkbhd) | YouTube | Production quality benchmark — color grading, b-roll, thumbnail standards |
+
+#### Short-Form & Multi-Platform
+
+| Creator | Channel | What we learned |
+|---------|---------|----------------|
+| [Gary Vaynerchuk](https://www.youtube.com/@garyvee) | YouTube / TikTok / LinkedIn | Document-don't-create, document-first multi-platform distribution strategy |
+| [Hormozi — Alex Hormozi](https://www.youtube.com/@AlexHormozi) | YouTube | Value-dense content — no filler, every sentence earns its place |
+| [Lenny Rachitsky](https://www.youtube.com/@LennysPodcast) | YouTube | Long-form interview depth repurposed into short clips, articles, and newsletters |
+
+---
+
+> **Note on "Code Medin" and others:** If you know of a specific creator whose work shaped this project and is missing from this list, please [open an issue](https://github.com/sanamsitoula/BhrikutyFlimDirector/issues) or submit a PR to add them — full credit deserved.
+
+---
+
 ### Special Thanks
 
 - **[Chain Clarity](https://github.com/sanamsitoula/BhrikutyFlimDirector)** — the flagship brand built with this system, covering blockchain education across 7 platforms
 - **[Anthropic](https://www.anthropic.com)** — for Claude, the AI that generates every script, article, thread, and README in this pipeline
 - **The open-source community** — every free tool in this stack represents thousands of hours of contributed work
+- **Every educator on YouTube** who made technical knowledge free and accessible — this entire project exists to continue that tradition
