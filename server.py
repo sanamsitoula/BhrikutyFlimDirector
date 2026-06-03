@@ -714,6 +714,20 @@ class Handler(BaseHTTPRequestHandler):
                 except Exception:
                     pass
 
+        # Voiceover audio files
+        voiceover_files = []
+        vo_dir = phase_dir / "voiceover"
+        if vo_dir.exists():
+            for f in sorted(vo_dir.iterdir()):
+                if f.suffix.lower() in (".wav", ".mp3", ".ogg", ".m4a", ".flac"):
+                    voiceover_files.append({
+                        "name":    f.name,
+                        "url":     f"/media/{project}/{phase}/voiceover/{f.name}",
+                        "size":    f.stat().st_size,
+                        "size_mb": round(f.stat().st_size / 1024 / 1024, 2),
+                        "ext":     f.suffix.lower().lstrip("."),
+                    })
+
         output_dir = PROJECT_ROOT / project / "_output" / f"phase_{phase:02d}"
         output_files = []
         if output_dir.exists():
@@ -777,6 +791,7 @@ class Handler(BaseHTTPRequestHandler):
             "pipeline_steps": steps,
             "steps_done": done_count,
             "steps_total": len(steps),
+            "voiceover_files": voiceover_files,
             "video_type": video_type,
             "brand": brand_profile,
             "roadmap_phase": roadmap_phase,

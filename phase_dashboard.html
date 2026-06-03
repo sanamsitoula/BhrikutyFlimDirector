@@ -447,7 +447,7 @@ function render() {
         <div id="tab-short"        class="tab-panel">${renderFileTab('script_short.md')}</div>
         <div id="tab-infographics" class="tab-panel">${renderInfographics(d.cards, d.card_urls||{}, d.cards_manifest||{})}</div>
         <div id="tab-srt"          class="tab-panel">${renderFileTab('subtitles.srt')}</div>
-        <div id="tab-audio"        class="tab-panel">${renderAudio()}</div>
+        <div id="tab-audio"        class="tab-panel">${renderAudio(d)}</div>
         <div id="tab-video"        class="tab-panel">${renderVideo(d)}</div>
         <div id="tab-compliance"   class="tab-panel">${renderFileTab('compliance_report_auto.md')}</div>
         <div id="tab-files"        class="tab-panel">${renderFilesTab(d.files, d.cards)}</div>
@@ -1265,23 +1265,115 @@ function scaleIframes() {
 // ─────────────────────────────────────────────────
 // AUDIO TAB
 // ─────────────────────────────────────────────────
-function renderAudio() {
-  // Check via voiceover_brief.md existence as proxy — real audio would be in voiceover/
-  return `<div class="media-section" id="audio-section">
-    <div class="media-placeholder">
-      <div class="icon">🎧</div>
-      <strong style="color:var(--text2);">Voiceover Audio</strong><br>
-      <p style="margin-top:8px;">No voiceover audio found for Phase ${PHASE}.</p>
-      <p style="font-size:12px;color:var(--muted);margin-top:6px;">
-        Generate with: <code style="background:var(--bg);padding:2px 6px;border-radius:3px;color:var(--teal);">python tools/tts/kokoro_voiceover.py --phase ${PHASE}</code>
-      </p>
-      <button class="btn btn-gold" style="margin-top:14px;" onclick="runVoiceover()">▶ Generate Voiceover</button>
-    </div>
-  </div>
-  <div style="margin-top:16px;">
-    <div class="section-title" style="margin-bottom:8px;">📄 Voiceover Brief</div>
-    ${renderFileTab('voiceover_brief.md')}
-  </div>`;
+function renderAudio(d) {
+  const files = (d && d.voiceover_files) ? d.voiceover_files : [];
+
+  // ── TTS command options ──────────────────────────────────────────────────
+  const ttsOptions = [
+    { label: 'Edge TTS (Microsoft)',   badge: '★ Free · No key', badgeCls: 'badge-teal',
+      cmd: `pip install edge-tts\npython tools/tts/edge_tts_voiceover.py --project ${PROJECT} --phase ${PHASE}`,
+      note: 'Free · Microsoft neural voices · no API key · Python 3.14 ✓ · pip install edge-tts' },
+    { label: 'DashScope (Qwen-TTS)',   badge: '✓ Configured', badgeCls: 'badge-teal',
+      cmd: `python tools/tts/dashscope_voiceover.py --project ${PROJECT} --phase ${PHASE}`,
+      note: 'Freemium · uses DASHSCOPE_API_KEY · requires TTS model on workspace' },
+    { label: 'ElevenLabs',             badge: 'Needs key', badgeCls: 'badge-gold',
+      cmd: `python tools/tts/elevenlabs_voiceover.py --project ${PROJECT} --phase ${PHASE}`,
+      note: 'Best quality · paid · set ELEVENLABS_API_KEY in .env' },
+    { label: 'Chatterbox (free GPU)',  badge: 'Needs GPU', badgeCls: 'badge-blue',
+      cmd: `python tools/tts/chatterbox_voiceover.py --project ${PROJECT} --phase ${PHASE}`,
+      note: 'Free · MIT · needs CUDA GPU · pip install chatterbox-tts' },
+    { label: 'Manual recording',       badge: 'No API', badgeCls: 'badge-teal',
+      cmd: `# Record with Audacity at 44.1kHz\n# Save to: youtube_scripts/setup/projects/${PROJECT}/phase_${PHASE}/voiceover/phase_${PHASE}.wav`,
+      note: 'Record your own voice — no API key, no install needed' },
+  ];
+
+  const ttsGrid = ttsOptions.map(t => `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:12px;font-weight:600;color:var(--text);">${t.label}</span>
+        <span class="badge ${t.badgeCls}" style="font-size:9px;">${t.badge}</span>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;">${t.note}</div>
+      <div style="background:#06090F;border:1px solid var(--border);border-radius:5px;padding:8px 10px;display:flex;align-items:flex-start;gap:8px;">
+        <code style="font-size:10px;color:var(--teal);flex:1;white-space:pre-wrap;">${esc(t.cmd)}</code>
+        <button class="step-action-btn view" style="font-size:10px;padding:2px 7px;flex-shrink:0;"
+                onclick="navigator.clipboard.writeText(${JSON.stringify(t.cmd)}).then(()=>showToast('Command copied!'))">📋</button>
+      </div>
+    </div>`).join('');
+
+  // ── No audio yet ──────────────────────────────────────────────────────────
+  if (!files.length) {
+    return `
+      <!-- Browser TTS preview bar -->
+      <div style="background:var(--bg2);border:1px solid var(--teal);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);">🔊 Preview script in browser</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Uses your browser's built-in TTS — no install, no API key. Instant preview of the script.</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button class="btn btn-teal" onclick="browserPreviewStart()" id="btn-preview-play">▶ Play Script</button>
+          <button class="btn btn-ghost" onclick="browserPreviewStop()" id="btn-preview-stop" style="display:none;">⏹ Stop</button>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+        <div style="text-align:center;padding:16px 0 12px;">
+          <div style="font-size:36px;margin-bottom:10px;">🎧</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;">No voiceover file yet</div>
+          <div style="font-size:12px;color:var(--muted);">Generate with an option below, or save a recording to
+            <code style="color:var(--teal);">phase_${PHASE}/voiceover/phase_${PHASE}.mp3</code></div>
+        </div>
+        <div style="margin-top:8px;">${ttsGrid}</div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="section-title" style="margin-bottom:8px;">📄 Voiceover Brief</div>
+        ${renderFileTab('voiceover_brief.md')}
+      </div>`;
+  }
+
+  // ── Audio files found — show players ────────────────────────────────────
+  const players = files.map((f, i) => {
+    const mimeMap = { wav:'audio/wav', mp3:'audio/mpeg', ogg:'audio/ogg', m4a:'audio/mp4', flac:'audio/flac' };
+    const mime = mimeMap[f.ext] || 'audio/wav';
+    const isActive = i === 0;
+    return `
+      <div style="background:var(--card);border:1px solid ${isActive?'var(--teal)':'var(--border)'};border-radius:10px;padding:14px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <span style="font-size:18px;">🎧</span>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:var(--text);">${esc(f.name)}</div>
+            <div style="font-size:11px;color:var(--muted);">${f.size_mb} MB · ${f.ext.toUpperCase()}</div>
+          </div>
+          <a href="${f.url}" download="${f.name}"
+             style="font-size:11px;padding:4px 10px;background:var(--teal-dim);border:1px solid rgba(0,212,170,.3);border-radius:6px;color:var(--teal);text-decoration:none;">
+            ⬇ Download
+          </a>
+          <button class="step-action-btn view" style="font-size:10px;"
+                  onclick="navigator.clipboard.writeText(window.location.origin+'${f.url}').then(()=>showToast('URL copied!'))">
+            📋 URL
+          </button>
+        </div>
+        <audio controls preload="metadata"
+               style="width:100%;height:40px;border-radius:6px;accent-color:var(--teal);">
+          <source src="${f.url}" type="${mime}">
+          Your browser does not support audio playback.
+        </audio>
+      </div>`;
+  }).join('');
+
+  return `
+    <div style="margin-bottom:16px;">${players}</div>
+
+    <details style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
+      <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);list-style:none;display:flex;align-items:center;gap:6px;">
+        <span>🎙️</span> Generate another voiceover (replace or add)
+      </summary>
+      <div style="margin-top:12px;">${ttsGrid}</div>
+    </details>
+
+    <div style="margin-top:16px;">
+      <div class="section-title" style="margin-bottom:8px;">📄 Voiceover Brief</div>
+      ${renderFileTab('voiceover_brief.md')}
+    </div>`;
 }
 
 // ─────────────────────────────────────────────────
@@ -1599,7 +1691,79 @@ async function runPhase() {
 }
 
 async function runVoiceover() {
-  showToast('Install TTS engine first — see README Step 3');
+  showToast('See Audio tab for TTS options (Edge TTS recommended — free, no API key)');
+}
+
+// ── Browser Web Speech API preview ──────────────────────────────────────────
+let _speechUtterance = null;
+
+async function browserPreviewStart() {
+  if (!('speechSynthesis' in window)) {
+    showToast('Browser TTS not supported in this browser — try Chrome or Edge');
+    return;
+  }
+  window.speechSynthesis.cancel();
+
+  // Load script.md content
+  let text = '';
+  try {
+    const r = await fetch(`/api/file?project=${PROJECT}&phase=${PHASE}&file=script.md`);
+    if (!r.ok) throw new Error('script.md not found');
+    const data = await r.json();
+    // Extract NARRATION: / SPOKEN: sections
+    const lines = data.content.split('\n');
+    const spoken = [];
+    let inSpoken = false;
+    for (const line of lines) {
+      const s = line.trim();
+      if (/^(NARRATION|SPOKEN)\s*:/i.test(s)) {
+        inSpoken = true;
+        const remainder = s.replace(/^(NARRATION|SPOKEN)\s*:\s*/i, '');
+        if (remainder) spoken.push(remainder);
+        continue;
+      }
+      if (/^#{1,4}\s/.test(s) || s.startsWith('[') || s.startsWith('ON-SCREEN') ||
+          (s.startsWith('**') && s.includes(':'))) {
+        inSpoken = false;
+        continue;
+      }
+      if (inSpoken && s) spoken.push(s);
+    }
+    text = spoken.join(' ') || data.content.replace(/[#*`\[\]]/g, '').slice(0, 3000);
+  } catch(e) {
+    showToast(`Could not load script: ${e.message}`);
+    return;
+  }
+
+  _speechUtterance = new SpeechSynthesisUtterance(text);
+  _speechUtterance.rate  = 0.95;
+  _speechUtterance.pitch = 1.0;
+  _speechUtterance.lang  = 'en-US';
+  // Pick a good voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v => v.name.includes('Google US English') ||
+                                      v.name.includes('Microsoft Zira') ||
+                                      v.name.includes('Samantha') ||
+                                      (v.lang === 'en-US' && !v.localService));
+  if (preferred) _speechUtterance.voice = preferred;
+
+  _speechUtterance.onend   = () => { _updatePreviewBtns(false); };
+  _speechUtterance.onerror = () => { _updatePreviewBtns(false); };
+  window.speechSynthesis.speak(_speechUtterance);
+  _updatePreviewBtns(true);
+  showToast('Playing script via browser TTS…');
+}
+
+function browserPreviewStop() {
+  window.speechSynthesis.cancel();
+  _updatePreviewBtns(false);
+}
+
+function _updatePreviewBtns(playing) {
+  const play = document.getElementById('btn-preview-play');
+  const stop = document.getElementById('btn-preview-stop');
+  if (play) play.style.display = playing ? 'none' : '';
+  if (stop) stop.style.display = playing ? '' : 'none';
 }
 
 function streamJob(job_id) {
