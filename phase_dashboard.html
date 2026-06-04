@@ -978,7 +978,26 @@ function renderOverview(d) {
       <h4>Video Production Type <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:6px;">choose how you will produce the video</span></h4>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;">${vtRadios}</div>
       <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;">
-        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Steps for ${vtInfo.icon} ${vtInfo.label}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">
+            Steps for ${vtInfo.icon} ${vtInfo.label}
+          </div>
+          ${vtype === 'anim' ? `
+            <button class="btn btn-teal" style="font-size:12px;padding:7px 16px;"
+                    onclick="runToolCmd({project:'${(d.project||PROJECT).replace(/'/g,"\\'").replace(/"/g,'\\"')}',phase:${d.phase||PHASE},cmd_type:'create_video'});switchTab('video',document.querySelectorAll('.tab-btn')[6])">
+              ✨ Run Animation Pipeline
+            </button>` : ''}
+          ${vtype === 'screen' ? `
+            <button class="btn btn-ghost" style="font-size:12px;padding:7px 16px;"
+                    onclick="switchTab('video',document.querySelectorAll('.tab-btn')[6])">
+              📁 Upload Screen Recording
+            </button>` : ''}
+          ${vtype === 'manual' ? `
+            <button class="btn btn-ghost" style="font-size:12px;padding:7px 16px;"
+                    onclick="switchTab('video',document.querySelectorAll('.tab-btn')[6])">
+              📁 Upload Your Video
+            </button>` : ''}
+        </div>
         ${vtSteps}
       </div>
     </div>
@@ -1913,8 +1932,10 @@ function renderVideo(d) {
       desc: 'Renders each HTML infographic card as a full-quality 1920×1080 PNG — gives production-quality slides with animations, gradients, and custom fonts.',
       how: 'Launches a headless Chromium browser, opens each card_NN.html, waits for animations, then screenshots at full resolution.',
       outputs: ['Slide PNGs (temp — assembled into video)'],
-      cmd: 'pip install playwright && playwright install chromium',
-      requires: ['Playwright + Chromium (pip install playwright && playwright install chromium)'],
+      cmd: 'pip install playwright\nplaywright install chromium',
+      requires: ['Playwright + Chromium — run TWO commands (PowerShell does not support &&):',
+                 '  pip install playwright',
+                 '  playwright install chromium'],
       runData: null,
     },
   ];
@@ -1966,7 +1987,41 @@ function renderVideo(d) {
       ${toolCards}
     </div>`;
 
-  return playerSection + shortsSection + clipsSection + `
+  // ── Sources panel — full paths of every input + output ──────────────────
+  const voFiles = d.voiceover_files || [];
+  const voPath  = voFiles.length ? voFiles[0].url : null;
+  const BASE_PATH = `youtube_scripts/setup/projects/${esc(proj)}`;
+
+  const sourceRows = [
+    { label: 'Phase folder',     icon: '📁', path: `${BASE_PATH}/phase_${ph}/`,                        note: 'all source files' },
+    { label: 'Script',           icon: '📄', path: `${BASE_PATH}/phase_${ph}/script.md`,               note: d.files?.find(f=>f.name==='script.md') ? `${((d.files.find(f=>f.name==='script.md').size||0)/1024).toFixed(0)} KB` : '⬜ missing' },
+    { label: 'Infographic cards',icon: '🃏', path: `${BASE_PATH}/phase_${ph}/infographic_assets/`,      note: `${(d.cards||[]).length} HTML cards` },
+    { label: 'Voiceover audio',  icon: '🎧', path: voPath ? `${BASE_PATH}/phase_${ph}/voiceover/${voFiles[0].name}` : `${BASE_PATH}/phase_${ph}/voiceover/`, note: voPath ? `${voFiles[0].size_mb} MB` : '⬜ missing' },
+    { label: 'Subtitles (SRT)',  icon: '💬', path: `${BASE_PATH}/phase_${ph}/subtitles.srt`,            note: d.files?.find(f=>f.name==='subtitles.srt') ? 'exists' : '⬜ missing' },
+    { label: 'Content spec',     icon: '⚙️', path: `${BASE_PATH}/phase_${ph}/content_spec.json`,        note: 'chapters + cut timings' },
+    { label: '▶ YouTube output', icon: '🎬', path: `${BASE_PATH}/_output/phase_${String(ph).padStart(2,'0')}/youtube/final_1080p.mp4`, note: (d.platform_outputs?.youtube?.files||[]).length ? `${(d.platform_outputs.youtube.files[0].size_mb||0)} MB ✅` : '⬜ not yet generated' },
+    { label: '📱 Shorts output', icon: '📱', path: `${BASE_PATH}/_output/phase_${String(ph).padStart(2,'0')}/youtube_shorts/short_1080x1920.mp4`, note: (d.platform_outputs?.youtube_shorts?.files||[]).length ? '✅' : '⬜ not yet generated' },
+  ];
+
+  const sourcesPanel = `
+    <div style="margin-top:16px;margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:8px;">📍 Source &amp; Output Paths</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+        ${sourceRows.map((r,i) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;
+                      border-bottom:${i<sourceRows.length-1?'1px solid rgba(30,42,66,.5)':'none'};">
+            <span style="font-size:14px;flex-shrink:0;">${r.icon}</span>
+            <span style="font-size:11px;color:var(--text2);width:140px;flex-shrink:0;">${r.label}</span>
+            <code style="font-size:10px;color:var(--teal);flex:1;word-break:break-all;
+                         font-family:'Courier New',monospace;">${esc(r.path)}</code>
+            <span style="font-size:10px;color:var(--muted);flex-shrink:0;margin-left:8px;">${r.note}</span>
+            <button class="copy-content-btn" style="font-size:9px;padding:2px 6px;flex-shrink:0;"
+                    onclick="navigator.clipboard.writeText('${esc(r.path)}').then(()=>showToast('Path copied!'))">📋</button>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  return sourcesPanel + playerSection + shortsSection + clipsSection + `
     <div style="margin-top:8px;">
       <div class="section-title" style="margin-bottom:8px;">🎬 Clip Brief</div>
       ${renderFileTab('clip_brief.md')}

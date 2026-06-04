@@ -46,7 +46,8 @@ if _env.exists():
 PROJECT_ROOT = Path(__file__).parent.parent.parent / "youtube_scripts" / "setup" / "projects"
 TOOLS_DIR    = Path(__file__).parent.parent.parent / "tools"
 
-# Check FFmpeg
+# ── FFmpeg / Playwright availability ─────────────────────────────────────────
+
 def _check_ffmpeg():
     try:
         r = subprocess.run(["ffmpeg", "-version"], capture_output=True, timeout=5)
@@ -54,13 +55,41 @@ def _check_ffmpeg():
     except Exception:
         return False
 
-# Check Playwright
 def _check_playwright():
     try:
         from playwright.sync_api import sync_playwright
         return True
     except ImportError:
         return False
+
+
+# ── Safe FFmpeg runner with detailed stderr on failure ────────────────────────
+
+def _ffmpeg(cmd: list, step_label: str, timeout: int = 600):
+    """Run an FFmpeg command; print the last 20 lines of stderr on failure."""
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    if result.returncode != 0:
+        stderr_lines = [l for l in result.stderr.splitlines() if l.strip()]
+        # Filter out progress/banner lines to show only real errors
+        error_lines = [
+            l for l in stderr_lines
+            if not l.startswith("frame=") and not l.startswith("fps=")
+            and not l.startswith("size=") and "Press [q]" not in l
+        ]
+        last_errors = "\n    ".join(error_lines[-20:]) if error_lines else result.stderr[-600:]
+        print(f"\n{'='*60}")
+        print(f"[FFMPEG ERROR] Step: {step_label}")
+        print(f"  Exit code : {result.returncode}")
+        print(f"  Command   : {' '.join(cmd[:4])} … {cmd[-1]}")
+        print(f"  FFmpeg log:")
+        print(f"    {last_errors}")
+        print(f"{'='*60}\n")
+        raise subprocess.CalledProcessError(
+            result.returncode, cmd,
+            output=result.stdout.encode() if isinstance(result.stdout, str) else result.stdout,
+            stderr=result.stderr.encode() if isinstance(result.stderr, str) else result.stderr,
+        )
+    return result
 
 
 # ── Audio helpers ─────────────────────────────────────────────────────────────
@@ -197,11 +226,8 @@ def image_to_clip(img: Path, duration: float, out_mp4: Path,
                   width: int = 1920, height: int = 1080, fps: int = 30):
     """Convert a static image to a video clip with ken-burns zoom + fade in/out."""
     fade_dur = min(0.4, duration / 4)
-    # Ken-Burns: slow zoom 1.0 → 1.06 over the clip duration
-    # zoompan filter: zoom increases by 0.0008 per frame (≈ 2% over 25 frames/sec for 3s)
-    zoom_speed = 0.001   # zoom increment per frame
+    zoom_speed = 0.001
     total_frames = int(duration * fps)
-    # Use scale2ref + zoompan for smooth animated zoom
     vf = (
         f"scale={width*2}:{height*2}:force_original_aspect_ratio=decrease,"
         f"pad={width*2}:{height*2}:(ow-iw)/2:(oh-ih)/2,"
@@ -210,27 +236,27 @@ def image_to_clip(img: Path, duration: float, out_mp4: Path,
         f"fade=t=in:st=0:d={fade_dur:.2f},"
         f"fade=t=out:st={duration - fade_dur:.2f}:d={fade_dur:.2f}"
     )
-    subprocess.run([
+    _ffmpeg([
         "ffmpeg", "-y",
         "-loop", "1", "-i", str(img),
         "-t", str(duration),
         "-vf", vf,
         "-c:v", "libx264", "-pix_fmt", "yuv420p",
         "-r", str(fps), str(out_mp4),
-    ], check=True, capture_output=True)
+    ], f"image→clip  {img.name} ({duration:.0f}s → {out_mp4.name})")
 
 
 # ── Concatenate clips ─────────────────────────────────────────────────────────
 
-def concat_clips(clips: list[Path], concat_txt: Path, out_mp4: Path):
+def concat_clips(clips: list, concat_txt: Path, out_mp4: Path):
     """Concatenate video clips using FFmpeg concat demuxer."""
     lines = [f"file '{c.as_posix()}'\n" for c in clips]
     concat_txt.write_text("".join(lines), encoding="utf-8")
-    subprocess.run([
+    _ffmpeg([
         "ffmpeg", "-y",
         "-f", "concat", "-safe", "0", "-i", str(concat_txt),
         "-c", "copy", str(out_mp4),
-    ], check=True, capture_output=True)
+    ], f"concat  {len(clips)} clips → {out_mp4.name}")
 
 
 # ── Mix audio ────────────────────────────────────────────────────────────────
@@ -239,7 +265,11 @@ def mix_audio(video: Path, audio: Path, out_mp4: Path, burn_srt: Path = None):
     """Mix voiceover into video. Optionally burn subtitles."""
     vf_filter = ""
     if burn_srt and burn_srt.exists():
-        safe_srt = str(burn_srt).replace("\\", "/").replace(":", "\\:")
+        # On Windows paths need forward-slashes; colon in drive letter must be escaped
+        safe_srt = str(burn_srt).replace("\\", "/")
+        # Escape the colon in Windows drive letter e.g. C:/... → C\:/...
+        if len(safe_srt) > 1 and safe_srt[1] == ":":
+            safe_srt = safe_srt[0] + "\\:" + safe_srt[2:]
         vf_filter = f"subtitles='{safe_srt}':force_style='FontSize=28,PrimaryColour=&Hffffff&'"
 
     cmd = ["ffmpeg", "-y", "-i", str(video), "-i", str(audio)]
@@ -247,30 +277,40 @@ def mix_audio(video: Path, audio: Path, out_mp4: Path, burn_srt: Path = None):
         cmd += ["-vf", vf_filter]
     cmd += [
         "-c:v", "libx264", "-c:a", "aac",
-        "-shortest",  # trim to shortest stream
+        "-shortest",
         "-map", "0:v:0", "-map", "1:a:0",
         str(out_mp4),
     ]
-    subprocess.run(cmd, check=True, capture_output=True)
+    label = "mix audio" + (" + burn subtitles" if vf_filter else "")
+    _ffmpeg(cmd, f"{label}  → {out_mp4.name}")
 
 
 # ── Shorts crop ───────────────────────────────────────────────────────────────
 
 def make_shorts(src: Path, out: Path):
-    """Crop 1920x1080 to 1080x1920 (centre crop for Shorts / Reels)."""
-    subprocess.run([
+    """Convert 1920×1080 (16:9) → 1080×1920 (9:16) for YouTube Shorts / Reels.
+
+    Approach: take the centre 9:16 crop from the 16:9 source (608×1080),
+    then scale up to the target 1080×1920.
+      crop_w = round_even(1080 * 9/16) = 608
+      x_off  = (1920 - 608) / 2       = 656
+    """
+    crop_w = 608   # even number closest to 1080 * 9/16 = 607.5
+    x_off  = (1920 - crop_w) // 2     # = 656
+    vf = f"crop={crop_w}:1080:{x_off}:0,scale=1080:1920:flags=lanczos"
+    _ffmpeg([
         "ffmpeg", "-y", "-i", str(src),
-        "-vf", "crop=1080:1920:420:0",
+        "-vf", vf,
         "-c:v", "libx264", "-c:a", "aac",
         str(out),
-    ], check=True, capture_output=True)
+    ], f"shorts crop+scale  {src.name} → {out.name}")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(description="Create seamless video from phase assets")
-    parser.add_argument("--project",        default="chain_clarity")
+    parser.add_argument("--project",        required=True)
     parser.add_argument("--phase",          type=int, required=True)
     parser.add_argument("--no-screenshots", action="store_true",
                         help="Skip Playwright; use FFmpeg color slides instead")
@@ -291,33 +331,39 @@ def main():
     out_base.mkdir(parents=True, exist_ok=True)
 
     print(f"\n{'='*58}")
-    print(f"  Video Assembly — {args.project} Phase {args.phase}")
-    print(f"{'='*58}\n")
+    print(f"  Video Assembly — {args.project}  Phase {args.phase}")
+    print(f"{'='*58}")
+    print(f"  Phase dir : {phase_dir}")
+    print(f"  Output    : {out_base}\n")
 
-    # ── Load brand colors ────────────────────────────────────────────────────
+    # ── Load brand ───────────────────────────────────────────────────────────
     brand = {}
     bp = PROJECT_ROOT / args.project / "brand_profile.json"
     if bp.exists():
         brand = json.loads(bp.read_text(encoding="utf-8"))
+    else:
+        print(f"[WARN] brand_profile.json not found at {bp}")
 
     # ── Find assets ──────────────────────────────────────────────────────────
     cards = sorted(assets_dir.glob("card_*.html")) if assets_dir.exists() else []
     if not cards:
-        print("[ERROR] No infographic cards found (card_*.html in infographic_assets/)")
-        print("  Generate with: python tools/generate_phase.py --only card_01.html ...")
+        print(f"[ERROR] No infographic cards found")
+        print(f"  Expected: {assets_dir}/card_*.html")
+        print(f"  Generate: python tools/generate_phase.py --project {args.project} --phase {args.phase} --only card_01.html")
         sys.exit(1)
 
     vo_dir = phase_dir / "voiceover"
-    audio_files = sorted([f for f in vo_dir.iterdir()
-                           if f.suffix.lower() in (".wav", ".mp3", ".ogg")])  if vo_dir.exists() else []
+    audio_files = sorted(
+        [f for f in vo_dir.iterdir() if f.suffix.lower() in (".wav", ".mp3", ".ogg")]
+    ) if vo_dir.exists() else []
     if not audio_files:
-        print("[WARN] No voiceover audio found. Video will be silent.")
-        print("  Generate with: python tools/tts/edge_tts_voiceover.py --project "
-              f"{args.project} --phase {args.phase}")
+        print("[WARN] No voiceover audio found — video will be silent.")
+        print(f"  Expected: {vo_dir}/phase_{args.phase}.mp3")
+        print(f"  Generate: python tools/tts/edge_tts_voiceover.py --project {args.project} --phase {args.phase}")
     audio_path = audio_files[0] if audio_files else None
 
-    srt_path   = phase_dir / "subtitles.srt"
-    spec_path  = phase_dir / "content_spec.json"
+    srt_path  = phase_dir / "subtitles.srt"
+    spec_path = phase_dir / "content_spec.json"
     topic = f"Phase {args.phase}"
     if spec_path.exists():
         try:
@@ -325,10 +371,11 @@ def main():
         except Exception:
             pass
 
-    print(f"  Cards:    {len(cards)} HTML cards")
-    print(f"  Audio:    {audio_path.name if audio_path else 'none (silent)'}")
-    print(f"  Subtitles:{' yes' if srt_path.exists() and args.burn_subs else ' no'}")
-    print(f"  Topic:    {topic}\n")
+    print(f"  Project   : {args.project}")
+    print(f"  Cards     : {len(cards)} HTML cards  ({assets_dir})")
+    print(f"  Audio     : {audio_path.name if audio_path else 'NONE — will be silent'}  ({audio_path or 'N/A'})")
+    print(f"  Subtitles : {'YES — will be burned in' if srt_path.exists() and args.burn_subs else 'no'}")
+    print(f"  Topic     : {topic}\n")
 
     # ── Audio duration ───────────────────────────────────────────────────────
     if audio_path:
