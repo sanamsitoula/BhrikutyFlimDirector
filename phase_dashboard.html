@@ -1367,8 +1367,10 @@ function selectVoice(voiceId) {
 async function generateVoiceover(voiceId) {
   const voice  = voiceId || _selectedVoice || 'en-IN-PrabhatNeural';
   // Use subtitles.srt as source if available (auto detects at server side)
-  const hasSrt = (phaseData?.srt_segments?.length || 0) > 0;
-  const source = hasSrt ? 'srt' : 'script';
+  // Use selected source toggle; auto-detect if srt segments available
+  const hasSrt = (phaseData?.srt_segments?.length || 0) > 0
+              || !!(phaseData?.files||[]).find(f => f.name === 'subtitles.srt');
+  const source = _audioSource === 'script' ? 'script' : (hasSrt ? 'srt' : 'auto');
   showToast(`Generating voiceover (${source}): ${voice}…`);
   await runToolCmd({
     project:  PROJECT,
@@ -2131,81 +2133,183 @@ function scaleIframes() {
 // ─────────────────────────────────────────────────
 // SRT SEGMENTS PANEL  (shows what will be spoken)
 // ─────────────────────────────────────────────────
-function renderSrtSegments(d) {
-  const segs = d.srt_segments || [];
-  const hasSrt = segs.length > 0;
-  const srtPath = `youtube_scripts/setup/projects/${esc(d.project||PROJECT)}/phase_${d.phase||PHASE}/subtitles.srt`;
+// Source preference: 'srt' or 'script' — persisted per project/phase
+let _audioSource = localStorage.getItem(`audio_src_${PROJECT}_${PHASE}`) || 'srt';
+function setAudioSource(src) {
+  _audioSource = src;
+  localStorage.setItem(`audio_src_${PROJECT}_${PHASE}`, src);
+  const panel = document.getElementById('tab-audio');
+  if (panel && phaseData) panel.innerHTML = renderAudio(phaseData);
+}
 
-  if (!hasSrt) {
-    return `
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;
-                  padding:12px 14px;margin-bottom:14px;">
-        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px;">
-          📋 Input Segments — <code style="color:var(--teal);font-size:11px;">subtitles.srt</code>
-          <span class="badge badge-blue" style="font-size:9px;margin-left:6px;">Not found</span>
+function renderSrtSegments(d) {
+  const segs      = d.srt_segments  || [];
+  const proj      = d.project || PROJECT;
+  const ph        = d.phase   || PHASE;
+
+  // Check existence from d.files (reliable even without server restart)
+  const srtFileInfo  = (d.files || []).find(f => f.name === 'subtitles.srt');
+  const srtExists    = !!srtFileInfo || segs.length > 0;
+  const scriptExists = !!(d.files || []).find(f => f.name === 'script.md');
+
+  // ── Source selector (SRT vs Script) ────────────────────────────────────────
+  const sourceSelector = `
+    <div style="display:flex;gap:8px;align-items:center;padding:8px 14px;
+                background:var(--bg);border-bottom:1px solid var(--border);">
+      <span style="font-size:11px;font-weight:600;color:var(--text2);">TTS source:</span>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer;
+                    padding:4px 10px;border-radius:6px;border:1px solid;
+                    border-color:${_audioSource==='srt'?'var(--teal)':'var(--border)'};
+                    background:${_audioSource==='srt'?'var(--teal-dim)':'var(--bg)'};
+                    transition:all .15s;">
+        <input type="radio" name="audio_src_${ph}" value="srt"
+               ${_audioSource==='srt'?'checked':''}
+               onchange="setAudioSource('srt')"
+               style="accent-color:var(--teal);">
+        <span style="font-size:12px;font-weight:600;color:${_audioSource==='srt'?'var(--teal)':'var(--text2)'};">
+          💬 subtitles.srt
+        </span>
+        ${srtExists
+          ? `<span class="badge badge-teal" style="font-size:8px;">✓ exists</span>`
+          : `<span class="badge badge-red" style="font-size:8px;">missing</span>`}
+        <span style="font-size:10px;color:var(--muted);">synced to video timing</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer;
+                    padding:4px 10px;border-radius:6px;border:1px solid;
+                    border-color:${_audioSource==='script'?'var(--gold)':'var(--border)'};
+                    background:${_audioSource==='script'?'var(--gold-dim)':'var(--bg)'};
+                    transition:all .15s;">
+        <input type="radio" name="audio_src_${ph}" value="script"
+               ${_audioSource==='script'?'checked':''}
+               onchange="setAudioSource('script')"
+               style="accent-color:var(--gold);">
+        <span style="font-size:12px;font-weight:600;color:${_audioSource==='script'?'var(--gold)':'var(--text2)'};">
+          📄 script.md
+        </span>
+        ${scriptExists
+          ? `<span class="badge badge-teal" style="font-size:8px;">✓ exists</span>`
+          : `<span class="badge badge-red" style="font-size:8px;">missing</span>`}
+        <span style="font-size:10px;color:var(--muted);">NARRATION: blocks</span>
+      </label>
+    </div>`;
+
+  // ── Segments preview ───────────────────────────────────────────────────────
+  let segContent = '';
+
+  if (_audioSource === 'srt') {
+    if (segs.length > 0) {
+      // We have the parsed segments from server
+      const lastTs     = segs[segs.length - 1]?.ts || '';
+      const totalWords = segs.reduce((s, g) => s + g.text.split(' ').length, 0);
+      const visible    = segs.slice(0, 8);
+      const hidden     = segs.slice(8);
+
+      const segRows = rows => rows.map(s => `
+        <div style="display:flex;gap:10px;align-items:baseline;padding:4px 0;
+                    border-bottom:1px solid rgba(30,42,66,.3);">
+          <span style="font-size:10px;font-weight:700;color:var(--teal);
+                       flex-shrink:0;width:24px;text-align:right;">${s.index}</span>
+          <span style="font-size:10px;color:var(--muted);flex-shrink:0;
+                       font-family:'Courier New',monospace;white-space:nowrap;
+                       min-width:90px;">${s.ts.split('-->')[0].trim()}</span>
+          <span style="font-size:12px;color:var(--text2);flex:1;">${esc(s.text)}</span>
+        </div>`).join('');
+
+      segContent = `
+        <div style="padding:0 14px 4px;background:var(--bg2);
+                    border-bottom:1px solid var(--border);
+                    display:flex;align-items:center;gap:8px;padding:6px 14px;">
+          <span style="font-size:11px;color:var(--text2);">
+            <strong>${segs.length}</strong> segments
+            · <strong>~${totalWords}</strong> words
+            · ends at ${lastTs.split('-->')[1]?.trim() || ''}
+          </span>
+          <button onclick="openContentModal('view:subtitles.srt','Subtitles')"
+                  style="margin-left:auto;background:none;border:none;color:var(--teal);
+                         cursor:pointer;font-size:11px;padding:0;font-family:inherit;">
+            📋 View full SRT ↗
+          </button>
         </div>
-        <div style="font-size:11px;color:var(--muted);">
-          No subtitles.srt found. TTS will fall back to NARRATION blocks in script.md.<br>
-          Generate subtitles first: <code style="color:var(--teal);">python tools/generate_phase.py --project ${esc(d.project||PROJECT)} --phase ${d.phase||PHASE} --only subtitles.srt</code>
-        </div>
-      </div>`;
+        <div style="padding:8px 14px;max-height:200px;overflow-y:auto;">
+          ${segRows(visible)}
+          ${hidden.length ? `
+            <details style="margin-top:4px;">
+              <summary style="cursor:pointer;font-size:11px;color:var(--teal);
+                              padding:4px 0;list-style:none;">
+                ▸ Show ${hidden.length} more segments…
+              </summary>
+              <div>${segRows(hidden)}</div>
+            </details>` : ''}
+        </div>`;
+    } else if (srtExists) {
+      // File exists on disk but srt_segments not loaded (server not restarted yet)
+      const srtSizeKb = srtFileInfo ? Math.round(srtFileInfo.size / 1024) : '?';
+      segContent = `
+        <div style="padding:12px 14px;display:flex;align-items:center;gap:10px;
+                    background:var(--gold-dim);border-bottom:1px solid rgba(245,166,35,.25);">
+          <span style="font-size:14px;">⚠️</span>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:600;color:var(--gold);">
+              subtitles.srt found (${srtSizeKb} KB) — restart server to preview segments
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+              The file exists and will be used for TTS. Restart server.py to load the segment preview.
+            </div>
+          </div>
+          <button onclick="openContentModal('view:subtitles.srt','Subtitles')"
+                  class="step-action-btn view" style="font-size:11px;flex-shrink:0;">
+            👁 Preview file
+          </button>
+        </div>`;
+    } else {
+      segContent = `
+        <div style="padding:12px 14px;">
+          <div style="font-size:11px;color:var(--muted);">
+            subtitles.srt not found — switching to script.md fallback automatically.<br>
+            To generate: <code style="color:var(--teal);">python tools/generate_phase.py --project ${esc(proj)} --phase ${ph} --only subtitles.srt</code>
+          </div>
+        </div>`;
+    }
+  } else {
+    // Script mode
+    const scriptFileInfo = (d.files || []).find(f => f.name === 'script.md');
+    if (scriptFileInfo) {
+      segContent = `
+        <div style="padding:10px 14px;display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;">
+            <div style="font-size:12px;color:var(--text2);">
+              Using <strong>NARRATION:</strong> blocks from script.md
+              (${Math.round(scriptFileInfo.size/1024)} KB).
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+              All "NARRATION:" / "SPOKEN:" sections are extracted and joined for TTS.
+            </div>
+          </div>
+          <button onclick="openContentModal('view:script.md','Script')"
+                  class="step-action-btn view" style="font-size:11px;flex-shrink:0;">
+            👁 View script
+          </button>
+        </div>`;
+    } else {
+      segContent = `
+        <div style="padding:10px 14px;font-size:11px;color:var(--muted);">
+          script.md not found. Generate script first (Step 1.1).
+        </div>`;
+    }
   }
 
-  // Estimate duration from last segment timestamp
-  const lastTs = segs[segs.length-1]?.ts || '';
-  const totalWords = segs.reduce((s, g) => s + g.text.split(' ').length, 0);
-
-  // Show first 8 + collapsed rest
-  const visible = segs.slice(0, 8);
-  const hidden  = segs.slice(8);
-
-  const segRows = (rows) => rows.map(s => `
-    <div style="display:flex;gap:10px;align-items:baseline;padding:4px 0;
-                border-bottom:1px solid rgba(30,42,66,.35);">
-      <span style="font-size:10px;font-weight:700;color:var(--teal);flex-shrink:0;
-                   width:18px;text-align:right;">${s.index}</span>
-      <span style="font-size:10px;color:var(--muted);flex-shrink:0;
-                   font-family:'Courier New',monospace;white-space:nowrap;">${s.ts.split(' --> ')[0]}</span>
-      <span style="font-size:12px;color:var(--text2);flex:1;">${esc(s.text)}</span>
-    </div>`).join('');
-
   return `
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;
-                overflow:hidden;margin-bottom:14px;">
-      <!-- Header -->
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;
+    <div style="background:var(--card);border:1px solid var(--border);
+                border-radius:10px;overflow:hidden;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;
                   background:var(--bg2);border-bottom:1px solid var(--border);">
         <span style="font-size:14px;">📋</span>
-        <div style="flex:1;">
-          <div style="font-size:12px;font-weight:700;color:var(--text);">
-            Input Segments — TTS will read these ${segs.length} subtitle lines
-          </div>
-          <div style="font-size:10px;color:var(--muted);margin-top:1px;display:flex;gap:8px;">
-            <span>${segs.length} segments</span>
-            <span>·</span><span>~${totalWords} words</span>
-            <span>·</span><span>ends ${lastTs.split(' --> ')[1] || ''}</span>
-            <span>·</span>
-            <button onclick="openContentModal('view:subtitles.srt','Subtitles')"
-                    style="background:none;border:none;color:var(--teal);cursor:pointer;
-                           font-size:10px;padding:0;font-family:inherit;">
-              📋 View full SRT
-            </button>
-          </div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);">
+          TTS Input — what will be spoken
         </div>
-        <span class="badge badge-teal" style="font-size:9px;">✓ Using subtitles.srt</span>
       </div>
-      <!-- Segment rows -->
-      <div style="padding:8px 14px;max-height:220px;overflow-y:auto;">
-        ${segRows(visible)}
-        ${hidden.length ? `
-          <details style="margin-top:4px;">
-            <summary style="cursor:pointer;font-size:11px;color:var(--teal);padding:4px 0;
-                            list-style:none;display:flex;align-items:center;gap:6px;">
-              ▸ Show ${hidden.length} more segments
-            </summary>
-            <div style="margin-top:4px;">${segRows(hidden)}</div>
-          </details>` : ''}
-      </div>
+      ${sourceSelector}
+      ${segContent}
     </div>`;
 }
 
@@ -2213,57 +2317,110 @@ function renderSrtSegments(d) {
 // VOICEOVER VERSION LIST
 // ─────────────────────────────────────────────────
 function renderVoiceoverVersions(d) {
-  const sv = d.step_versions || {};
-  const versions = sv.voiceover || [];
-  if (!versions.length) return '';
+  const sv           = d.step_versions   || {};
+  const backupVersions = sv.voiceover    || [];    // .versions/ backups
+  const currentFiles = d.voiceover_files || [];    // files in voiceover/ right now
 
-  const rows = versions.map(v => {
-    const date   = v.ts ? new Date(v.ts * 1000).toLocaleString() : '—';
-    const files  = v.files || [];
-    const mp3s   = files.filter(f => /\.(mp3|wav|ogg)$/i.test(f.name));
+  // Nothing at all
+  if (!backupVersions.length && !currentFiles.length) return '';
 
+  // ── Build a merged list ────────────────────────────────────────────────────
+  // current files always appear as "CURRENT (latest)"
+  // backup versions appear below as v1, v2, v3…
+  const currentRows = currentFiles.map((f, i) => {
+    const mime = { mp3:'audio/mpeg', wav:'audio/wav', ogg:'audio/ogg' }[f.ext] || 'audio/mpeg';
     return `
-      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;
-                  border-bottom:1px solid rgba(30,42,66,.4);
-                  background:${v.version === versions[0].version ? 'var(--teal-dim)' : 'transparent'};">
-        <span style="width:32px;height:32px;border-radius:8px;flex-shrink:0;
-                     background:${v.version===versions[0].version?'var(--teal)':'var(--border)'};
-                     color:${v.version===versions[0].version?'var(--bg)':'var(--muted)'};
-                     font-size:12px;font-weight:800;display:flex;align-items:center;
-                     justify-content:center;font-family:'Space Grotesk',sans-serif;">
-          v${v.version}
-        </span>
-        <div style="flex:1;min-width:0;">
-          ${mp3s.map(f => `
-            <div style="font-size:12px;color:var(--text);font-weight:600;">${esc(f.name)}</div>
-            <div style="font-size:10px;color:var(--muted);">${f.size_mb} MB</div>`).join('') ||
-            `<div style="font-size:11px;color:var(--muted);">${files.length} file${files.length!==1?'s':''}</div>`}
+      <div style="background:var(--teal-dim);border-bottom:1px solid rgba(0,212,170,.2);">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;">
+          <span style="width:52px;height:52px;border-radius:10px;flex-shrink:0;
+                       background:var(--teal);color:var(--bg);
+                       font-size:11px;font-weight:800;display:flex;flex-direction:column;
+                       align-items:center;justify-content:center;
+                       font-family:'Space Grotesk',sans-serif;gap:1px;">
+            <span>CURR</span>
+            <span style="font-size:9px;font-weight:400;">LATEST</span>
+          </span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">${esc(f.name)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+              ${f.size_mb} MB · ${f.ext.toUpperCase()}
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+            <a href="${f.url}" download="${esc(f.name)}"
+               class="step-action-btn view" style="font-size:10px;text-decoration:none;">⬇ Download</a>
+            <button class="step-action-btn view" style="font-size:10px;"
+                    onclick="navigator.clipboard.writeText(window.location.origin+'${f.url}').then(()=>showToast('URL copied!'))">
+              📋 URL
+            </button>
+          </div>
         </div>
-        <div style="font-size:10px;color:var(--muted);flex-shrink:0;text-align:right;">
-          ${v.version === versions[0].version ? '<span class="badge badge-teal" style="font-size:8px;margin-bottom:3px;display:block;">LATEST</span>' : ''}
-          🕐 ${date}
+        <div style="padding:0 14px 10px;">
+          <audio controls preload="metadata"
+                 style="width:100%;height:36px;border-radius:6px;accent-color:var(--teal);">
+            <source src="${f.url}" type="${mime}">
+          </audio>
         </div>
       </div>`;
   }).join('');
 
+  // Backup (older) version rows
+  const backupRows = backupVersions.map((v, vi) => {
+    const date  = v.ts ? new Date(v.ts * 1000).toLocaleString() : '—';
+    const files = (v.files || []).filter(f => /\.(mp3|wav|ogg)$/i.test(f.name));
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;
+                  border-bottom:1px solid rgba(30,42,66,.4);">
+        <span style="width:36px;height:36px;border-radius:8px;flex-shrink:0;
+                     background:var(--border);color:var(--muted);
+                     font-size:11px;font-weight:800;display:flex;align-items:center;
+                     justify-content:center;font-family:'Space Grotesk',sans-serif;">
+          v${v.version}
+        </span>
+        <div style="flex:1;min-width:0;">
+          ${files.map(f => `
+            <div style="font-size:12px;color:var(--text2);">${esc(f.name)}
+              <span style="color:var(--muted);font-size:10px;margin-left:6px;">${f.size_mb} MB</span>
+            </div>`).join('') ||
+            `<div style="font-size:11px;color:var(--muted);">${(v.files||[]).length} file(s)</div>`}
+        </div>
+        <span style="font-size:10px;color:var(--muted);flex-shrink:0;">🕐 ${date}</span>
+      </div>`;
+  }).join('');
+
+  const totalCount = backupVersions.length + (currentFiles.length > 0 ? 1 : 0);
+
   return `
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;
-                overflow:hidden;margin-bottom:14px;">
+    <div style="background:var(--card);border:1px solid var(--border);
+                border-radius:10px;overflow:hidden;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;
                   background:var(--bg2);border-bottom:1px solid var(--border);">
-        <span style="font-size:14px;">📁</span>
+        <span style="font-size:14px;">🎧</span>
         <div style="font-size:12px;font-weight:700;color:var(--text);">
-          Voiceover Versions
-          <span class="badge badge-blue" style="font-size:9px;margin-left:6px;">${versions.length} saved</span>
+          Audio Files
+          <span class="badge badge-teal" style="font-size:9px;margin-left:6px;">
+            ${currentFiles.length} current
+          </span>
+          ${backupVersions.length
+            ? `<span class="badge badge-blue" style="font-size:9px;margin-left:4px;">${backupVersions.length} backup${backupVersions.length>1?'s':''}</span>`
+            : ''}
         </div>
-        <button onclick="showVersionHistory('voiceover')"
-                style="margin-left:auto;background:none;border:1px solid var(--border);
-                       border-radius:6px;color:var(--text2);font-size:11px;
-                       padding:3px 9px;cursor:pointer;font-family:inherit;">
-          View all →
-        </button>
+        ${backupVersions.length
+          ? `<button onclick="showVersionHistory('voiceover')"
+                     style="margin-left:auto;background:none;border:1px solid var(--border);
+                            border-radius:6px;color:var(--text2);font-size:11px;
+                            padding:3px 9px;cursor:pointer;font-family:inherit;">
+               View backups →
+             </button>` : ''}
       </div>
-      <div>${rows}</div>
+      ${currentRows}
+      ${backupRows ? `
+        <div style="padding:6px 14px;font-size:10px;font-weight:600;color:var(--muted);
+                    text-transform:uppercase;letter-spacing:.06em;
+                    background:var(--bg2);border-top:1px solid var(--border);">
+          Older backups (saved before re-runs)
+        </div>
+        ${backupRows}` : ''}
     </div>`;
 }
 
@@ -2388,11 +2545,10 @@ function renderAudio(d) {
     <!-- Version History -->
     ${renderVoiceoverVersions(d)}
 
-    <!-- Existing audio players -->
+    <!-- Upload bar -->
     ${uploadBar}
-    <div style="margin-bottom:16px;">${players}</div>
 
-    <!-- Voice selector — always visible so voice can be changed -->
+    <!-- Voice selector — change voice & regenerate -->
     <div style="margin-bottom:4px;">
       <div class="section-title" style="margin-bottom:8px;">🎙️ Change Voice &amp; Regenerate</div>
       ${renderVoiceSelector()}
