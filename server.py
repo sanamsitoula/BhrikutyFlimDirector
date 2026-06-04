@@ -392,6 +392,11 @@ class Handler(BaseHTTPRequestHandler):
             body   = self.rfile.read(length)
             data   = json.loads(body) if body else {}
             self._api_create_phase(data)
+        elif path == "/api/publish":
+            length = int(self.headers.get("Content-Length", 0))
+            body   = self.rfile.read(length)
+            data   = json.loads(body) if body else {}
+            self._api_publish(data)
         elif path == "/api/log-view":
             length = int(self.headers.get("Content-Length", 0))
             body   = self.rfile.read(length)
@@ -1409,6 +1414,43 @@ class Handler(BaseHTTPRequestHandler):
             ],
         }
         self._send_json(status)
+
+    def _api_publish(self, data: dict):
+        """Kick off a social media publish job via publish_platform.py."""
+        project  = data.get("project", "").strip()
+        phase    = int(data.get("phase", 1))
+        platform = data.get("platform", "all").strip()
+        dry_run  = bool(data.get("dry_run", False))
+
+        if not project:
+            self._send_json({"error": "project required"}, 400)
+            return
+
+        job_id = uuid.uuid4().hex[:8]
+        cmd = [sys.executable, str(BASE_DIR / "tools" / "publish" / "publish_platform.py"),
+               "--project", project, "--phase", str(phase),
+               "--platform", platform]
+        if dry_run:
+            cmd.append("--dry-run")
+
+        q: queue.Queue = queue.Queue()
+        jobs[job_id] = {"status": "running", "output": [], "q": q, "cmd": cmd}
+        print(f"  [PUBLISH {job_id}] {platform} for {project}/phase_{phase}")
+
+        def worker():
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                    text=True, cwd=str(BASE_DIR), env=os.environ.copy())
+            for line in proc.stdout:
+                jobs[job_id]["output"].append(line)
+                q.put(line)
+            proc.wait()
+            final = "done" if proc.returncode == 0 else "failed"
+            jobs[job_id]["status"] = final
+            q.put(None)
+            print(f"  [PUBLISH {job_id}] {final}")
+
+        threading.Thread(target=worker, daemon=True).start()
+        self._send_json({"job_id": job_id, "cmd": " ".join(cmd)})
 
     def _get_view_counts(self, project: str, phase: int) -> dict:
         try:

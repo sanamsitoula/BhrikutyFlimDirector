@@ -3105,10 +3105,10 @@ function renderOutputGrid(project, phase) {
        </div>`
     ).join('');
 
-    const cmdId = `opcmd-${p.key}`;
-    const runJson = JSON.stringify({
-      project: proj, phase: ph, cmd_type: p.cmdType
-    }).replace(/'/g, "&#39;");
+    const cmdId    = `opcmd-${p.key}`;
+    const publishId = `pubcmd-${p.key}`;
+    const publishCmd = `python tools/publish/publish_platform.py --project ${proj} --phase ${ph} --platform ${p.key}`;
+    const researchCmd = `python tools/research/apify_trends.py --topic "YOUR_TOPIC" --platform ${p.key !== 'blog' && p.key !== 'github' ? p.key : 'all'}`;
 
     return `
       <div class="output-card" id="opcard-${p.key}">
@@ -3149,23 +3149,53 @@ function renderOutputGrid(project, phase) {
             </div>` : ''}
         </div>
 
-        <!-- Command -->
-        <div style="padding:10px 14px;margin-top:auto;">
+        <!-- Generate command -->
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
           <div style="font-size:9px;font-weight:700;text-transform:uppercase;
                       letter-spacing:.07em;color:var(--text-muted);margin-bottom:5px;">
-            ▶ Generate command
+            ▶ Generate
           </div>
           <div style="display:flex;gap:6px;align-items:flex-start;">
             <code class="op-cmd-block" id="${cmdId}">${cmd}</code>
-            <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
-              <button style="padding:4px 9px;background:var(--teal-dim);border:1px solid rgba(0,212,170,.3);
-                             border-radius:6px;color:var(--teal);font-size:10px;font-weight:600;
-                             cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;"
-                      onclick="navigator.clipboard.writeText(document.getElementById('${cmdId}').textContent).then(()=>alert('Copied!'))">
-                📋 Copy
-              </button>
-            </div>
+            <button style="padding:4px 9px;background:var(--teal-dim);border:1px solid rgba(0,212,170,.3);
+                           border-radius:6px;color:var(--teal);font-size:10px;font-weight:600;
+                           cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;flex-shrink:0;"
+                    onclick="navigator.clipboard.writeText(document.getElementById('${cmdId}').textContent).then(()=>alert('Copied!'))">
+              📋
+            </button>
           </div>
+        </div>
+
+        <!-- Publish command -->
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);
+                    background:rgba(0,100,180,.07);">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:.07em;color:#4D94FF;margin-bottom:5px;">
+            📤 Publish to ${p.label}
+          </div>
+          <div style="display:flex;gap:6px;align-items:flex-start;">
+            <code class="op-cmd-block" id="${publishId}"
+                  style="color:#4D94FF;">${publishCmd}</code>
+            <button style="padding:4px 9px;background:rgba(77,148,255,.1);border:1px solid rgba(77,148,255,.3);
+                           border-radius:6px;color:#4D94FF;font-size:10px;font-weight:600;
+                           cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;flex-shrink:0;"
+                    onclick="navigator.clipboard.writeText(document.getElementById('${publishId}').textContent).then(()=>alert('Copied!'))">
+              📋
+            </button>
+          </div>
+          <div style="font-size:9px;color:rgba(77,148,255,.6);margin-top:4px;">
+            Requires API keys in .env — see Setup section below
+          </div>
+        </div>
+
+        <!-- Research command -->
+        <div style="padding:8px 14px;background:rgba(168,85,247,.06);">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:.07em;color:#A855F7;margin-bottom:4px;">
+            🔍 Research trends (Apify)
+          </div>
+          <code style="font-size:9.5px;color:#A855F7;font-family:'Courier New',monospace;
+                       word-break:break-all;line-height:1.5;">${researchCmd}</code>
         </div>
 
       </div>`;
