@@ -57,6 +57,135 @@ except Exception:
 
 jobs: dict = {}  # job_id -> {status, output, q, cmd}
 
+# ── Asset versioning helpers ──────────────────────────────────────────────────
+
+# Maps cmd_type → list of (step_key, relative paths relative to phase_dir or output_dir)
+_STEP_OUTPUTS = {
+    "generate":     ("script",    ["script.md", "script_short.md", "subtitles.srt",
+                                    "voiceover_brief.md", "music_brief.md",
+                                    "infographics.md", "clip_brief.md", "content_spec.json"]),
+    "tts":          ("voiceover", ["voiceover"]),
+    "create_video": ("video",     ["youtube", "youtube_shorts"]),   # inside _output/phase_NN/
+    "platform_cut": ("platform",  ["tiktok", "instagram", "twitter", "linkedin"]),
+    "text_content": ("text",      ["blog", "github"]),
+    "compliance":   ("compliance", ["compliance_report_auto.md"]),
+}
+
+
+def _backup_step_files(phase_dir: Path, out_dir: Path, cmd_type: str) -> int:
+    """Copy existing output files to .versions/vN/ before a step re-runs.
+    Returns the new version number (1 if this is the first run, ≥2 on re-runs).
+    """
+    import shutil
+    step_key, rel_paths = _STEP_OUTPUTS.get(cmd_type, (cmd_type, []))
+    version_base = phase_dir / ".versions" / step_key
+    version_base.mkdir(parents=True, exist_ok=True)
+
+    # Next version number
+    existing = [int(d.name[1:]) for d in version_base.iterdir()
+                if d.is_dir() and d.name.startswith("v") and d.name[1:].isdigit()]
+    next_v = max(existing, default=0) + 1
+
+    backed_up = []
+    for rel in rel_paths:
+        # Files can live in phase_dir OR _output/phase_NN/
+        for base in (phase_dir, out_dir):
+            src = base / rel
+            if src.exists():
+                dst = version_base / f"v{next_v}" / rel
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                try:
+                    if src.is_dir():
+                        if dst.exists():
+                            shutil.rmtree(str(dst))
+                        shutil.copytree(str(src), str(dst))
+                    else:
+                        shutil.copy2(str(src), str(dst))
+                    backed_up.append(rel)
+                except Exception as e:
+                    print(f"  [VERSION] backup {src} → {dst} failed: {e}")
+
+    if backed_up:
+        print(f"  [VERSION] Backed up v{next_v}: {', '.join(backed_up)}")
+    return next_v
+
+
+def _scan_step_versions(phase_dir: Path, out_dir: Path) -> dict:
+    """Scan .versions/ and return a dict of step_key → list of version info dicts."""
+    version_base = phase_dir / ".versions"
+    if not version_base.exists():
+        return {}
+
+    result = {}
+    for step_dir in sorted(version_base.iterdir()):
+        if not step_dir.is_dir():
+            continue
+        step_key = step_dir.name
+        versions = []
+        for vdir in sorted(step_dir.iterdir()):
+            if not vdir.is_dir() or not vdir.name.startswith("v"):
+                continue
+            vnum_s = vdir.name[1:]
+            if not vnum_s.isdigit():
+                continue
+            vnum = int(vnum_s)
+            # Collect files in this version snapshot
+            vfiles = []
+            for f in sorted(vdir.rglob("*")):
+                if f.is_file():
+                    rel  = str(f.relative_to(vdir)).replace("\\", "/")
+                    size = f.stat().st_size
+                    mtime = int(f.stat().st_mtime)
+                    vfiles.append({"name": f.name, "path": rel,
+                                   "size_mb": round(size / 1024 / 1024, 2),
+                                   "ts": mtime})
+            if vfiles:
+                versions.append({
+                    "version": vnum,
+                    "label":   f"v{vnum}",
+                    "files":   vfiles,
+                    "ts":      max(f["ts"] for f in vfiles),
+                })
+        if versions:
+            result[step_key] = sorted(versions, key=lambda x: x["version"], reverse=True)
+
+    return result
+
+
+def _record_versions_to_db(brand_slug: str, phase_num: int,
+                            phase_dir: Path, out_dir: Path,
+                            step_key: str, version: int, run_id: str):
+    """Write asset version records to PostgreSQL (best-effort)."""
+    try:
+        from db.db import record_asset_version, is_available as _dbok
+        if not _dbok():
+            return
+        _, rel_paths = _STEP_OUTPUTS.get(step_key, (step_key, []))
+        for rel in rel_paths:
+            for base, url_base in ((phase_dir, f"phase_{phase_num}"),
+                                   (out_dir, f"_output/phase_{phase_num:02d}")):
+                src = base / rel
+                if not src.exists():
+                    continue
+                files = [src] if src.is_file() else list(src.rglob("*"))
+                for f in files:
+                    if not f.is_file():
+                        continue
+                    rel_f = str(f.relative_to(base)).replace("\\", "/")
+                    media_url = f"/media/{brand_slug}/{phase_num}/{url_base.split('/',1)[-1]}/{rel_f}"
+                    record_asset_version(
+                        brand_slug, phase_num, step_key,
+                        file_name=f.name,
+                        version=version,
+                        file_path=str(f).replace("\\", "/"),
+                        media_url=media_url,
+                        file_size=f.stat().st_size,
+                        extra={"rel_path": rel_f},
+                        run_id=run_id,
+                    )
+    except Exception as e:
+        print(f"  [VERSION DB] {e}")
+
 
 def build_pipeline_cmd(data: dict) -> list:
     cmd = [sys.executable, str(BASE_DIR / "pipeline.py")]
@@ -167,6 +296,13 @@ class Handler(BaseHTTPRequestHandler):
 
         elif path == "/api/db-status":
             self._send_json({"available": db_available()})
+
+        elif path == "/api/file-versions":
+            self._api_file_versions(
+                qs.get("project", ["chain_clarity"])[0],
+                int(qs.get("phase", ["1"])[0]),
+                qs.get("step", [""])[0],
+            )
 
         elif path == "/api/db-summary":
             self._api_db_summary()
@@ -1032,6 +1168,7 @@ class Handler(BaseHTTPRequestHandler):
             "video_type": video_type,
             "brand": brand_profile,
             "roadmap_phase": roadmap_phase,
+            "step_versions": _scan_step_versions(phase_dir, output_dir),
         })
 
     def _api_file(self, project: str, phase: int, filename: str):
@@ -1114,6 +1251,54 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             print(f"  [DB SYNC ERROR] {e}")
             self._send_json({"ok": False, "error": str(e)})
+
+    def _api_file_versions(self, project: str, phase: int, step_key: str = ""):
+        """Return all versioned snapshots for a project/phase (optionally one step)."""
+        phase_dir = PROJECT_ROOT / project / f"phase_{phase}"
+        out_dir   = PROJECT_ROOT / project / "_output" / f"phase_{phase:02d}"
+
+        # Filesystem versions (.versions/ dir)
+        fs_versions = _scan_step_versions(phase_dir, out_dir)
+
+        # DB versions (best-effort)
+        db_versions: dict = {}
+        try:
+            from db.db import list_asset_versions, is_available as _dbok
+            if _dbok():
+                rows = list_asset_versions(project, phase, step_key or None)
+                for row in rows:
+                    sk = row["step_key"]
+                    if sk not in db_versions:
+                        db_versions[sk] = {}
+                    vnum = row["version"]
+                    if vnum not in db_versions[sk]:
+                        db_versions[sk][vnum] = {
+                            "version": vnum,
+                            "label":   f"v{vnum}",
+                            "ts":      int(row["created_at"].timestamp()) if row.get("created_at") else 0,
+                            "files":   [],
+                        }
+                    db_versions[sk][vnum]["files"].append({
+                        "name":     row["file_name"],
+                        "path":     row["file_path"],
+                        "media_url": row["media_url"],
+                        "size_mb":  round((row.get("file_size") or 0) / 1024 / 1024, 2),
+                    })
+        except Exception as e:
+            print(f"  [VERSION] DB read: {e}")
+
+        # Merge fs + db (fs is source of truth; db adds media_url)
+        if step_key:
+            result = {step_key: fs_versions.get(step_key, [])}
+        else:
+            result = fs_versions
+
+        self._send_json({
+            "project": project, "phase": phase,
+            "versions": result,
+            "db_versions": {sk: list(v.values())
+                            for sk, v in db_versions.items()},
+        })
 
     def _api_output_text(self, project: str, phase: int, filepath: str):
         if ".." in filepath or filepath.startswith("/"):
@@ -1322,9 +1507,18 @@ class Handler(BaseHTTPRequestHandler):
             if outline: cmd += ["--outline", outline]
             if only:    cmd += ["--only",    only]
 
+        # ── Version backup: copy existing outputs before overwriting ─────────
+        phase_dir = PROJECT_ROOT / project / f"phase_{phase}"
+        out_dir   = PROJECT_ROOT / project / "_output" / f"phase_{phase:02d}"
+        new_version = _backup_step_files(phase_dir, out_dir, cmd_type)
+
         q: queue.Queue = queue.Queue()
-        jobs[job_id] = {"status": "running", "output": [], "q": q, "cmd": cmd}
-        print(f"  [STEP {job_id}] {' '.join(cmd)}")
+        jobs[job_id] = {
+            "status": "running", "output": [], "q": q, "cmd": cmd,
+            "version": new_version, "cmd_type": cmd_type,
+            "project": project, "phase": phase,
+        }
+        print(f"  [STEP {job_id}] v{new_version}  {' '.join(cmd)}")
 
         def worker():
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -1338,9 +1532,18 @@ class Handler(BaseHTTPRequestHandler):
             jobs[job_id]["returncode"] = proc.returncode
             q.put(None)
             print(f"  [STEP {job_id}] {final}")
+            # Record new output files to DB
+            if final == "done":
+                step_key = _STEP_OUTPUTS.get(cmd_type, (cmd_type, []))[0]
+                _record_versions_to_db(project, phase, phase_dir, out_dir,
+                                       step_key, new_version, job_id)
 
         threading.Thread(target=worker, daemon=True).start()
-        self._send_json({"job_id": job_id, "cmd": " ".join(cmd)})
+        self._send_json({
+            "job_id": job_id,
+            "cmd": " ".join(cmd),
+            "version": new_version,
+        })
 
     def _api_job_status(self, job_id: str):
         if job_id not in jobs:

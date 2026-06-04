@@ -147,6 +147,29 @@ MIGRATIONS = [
         )
     """),
 
+    # ── Asset versioning ──────────────────────────────────────────────────────────
+    ("create_asset_versions", """
+        CREATE TABLE IF NOT EXISTS asset_versions (
+            id          SERIAL PRIMARY KEY,
+            brand_slug  VARCHAR(100) NOT NULL,
+            phase_num   INTEGER      NOT NULL,
+            step_key    VARCHAR(100) NOT NULL,
+            file_name   VARCHAR(500) NOT NULL,
+            version     INTEGER      NOT NULL DEFAULT 1,
+            file_path   TEXT,
+            media_url   TEXT,
+            file_size   BIGINT       DEFAULT 0,
+            extra       JSONB        DEFAULT '{}',
+            run_id      VARCHAR(64),
+            created_at  TIMESTAMP    DEFAULT NOW(),
+            UNIQUE (brand_slug, phase_num, file_name, version)
+        )
+    """),
+    ("idx_asset_versions_lookup", """
+        CREATE INDEX IF NOT EXISTS idx_asset_versions_lookup
+        ON asset_versions (brand_slug, phase_num, step_key)
+    """),
+
     # ── Add missing unique constraints (safe - IF NOT EXISTS equiv via DO block) ─
     ("unique_pipeline_steps", """
         DO $$ BEGIN

@@ -362,6 +362,18 @@ View in browser: `http://localhost:8080/phase/ecoWorld/1` → **✅ Compliance**
 
 Choose one option:
 
+### Voice Selector (from browser — easiest)
+
+Open the phase dashboard → **Audio tab** → pick a voice from the voice grid → click **▶ Generate**.
+
+| Group | Voices |
+|-------|--------|
+| 🇳🇵 South Asian / Nepali Male ⭐ | `en-IN-PrabhatNeural` (default), `ne-NP-SagarNeural` (native Nepali), `hi-IN-MadhurNeural` (Hindi) |
+| 🌍 Other Male | `en-US-GuyNeural`, `en-GB-RyanNeural`, `en-SG-WayneNeural` |
+| 🎤 Female | `en-US-JennyNeural`, `en-GB-SoniaNeural`, `en-AU-NatashaNeural`, `en-IN-NeerjaNeural` |
+
+Selected voice is saved in browser localStorage per project+phase.
+
 ### Option A — Edge TTS (Free, recommended, works on Python 3.14)
 
 ```bash
@@ -615,6 +627,68 @@ python tools/text_content_generator.py --project ecoWorld --phase 2
 # 8. Cut for all platforms
 python tools/platform_cutter.py --project ecoWorld --phase 2 \
   --video _output/phase_02/youtube/final_1080p.mp4
+```
+
+---
+
+## Step Versioning — Re-run Without Losing Old Files
+
+Every time you re-run a pipeline step from the dashboard (voiceover, video, platform cuts, etc.), the **old output is backed up automatically** before the new run starts. No data is ever deleted.
+
+### How it works
+
+```
+phase_1/
+├── voiceover/
+│   └── phase_1.mp3          ← always the latest run
+└── .versions/
+    └── voiceover/
+        ├── v1/              ← first run (backed up before v2 overwrote it)
+        │   └── voiceover/
+        │       └── phase_1.mp3
+        └── v2/              ← second run (backed up before v3 overwrote it)
+            └── voiceover/
+                └── phase_1.mp3
+```
+
+### In the Dashboard
+
+Each step row shows a **📁 N versions** badge when older versions exist. Click it to open the **Version History** panel showing every version with:
+- Version number (v1, v2, v3…)
+- Timestamp of when it was created
+- File list with sizes
+- Path for manual access
+
+### Steps that are versioned
+
+| Step | Step key | What is backed up |
+|------|----------|-------------------|
+| TTS / Voiceover | `voiceover` | `voiceover/` directory |
+| Video Assembly | `video` | `_output/youtube/`, `_output/youtube_shorts/` |
+| Platform Cuts | `platform` | `_output/tiktok/`, `instagram/`, `twitter/`, `linkedin/` |
+| Text Content | `text` | `_output/blog/`, `_output/github/` |
+| Script Generation | `script` | `script.md`, `subtitles.srt`, cards, etc. |
+| Compliance | `compliance` | `compliance_report_auto.md` |
+
+### API
+
+```bash
+# List all versions for a phase
+GET /api/file-versions?project=ecoWorld&phase=1
+
+# List versions for a specific step
+GET /api/file-versions?project=ecoWorld&phase=1&step=voiceover
+```
+
+### PostgreSQL
+
+Every version is also recorded in the `asset_versions` table:
+
+```sql
+SELECT version, file_name, media_url, file_size, created_at
+FROM asset_versions
+WHERE brand_slug = 'ecoWorld' AND phase_num = 1 AND step_key = 'voiceover'
+ORDER BY version DESC;
 ```
 
 ---

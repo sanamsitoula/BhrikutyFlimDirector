@@ -350,6 +350,84 @@ def list_files(brand_slug: str, phase_num: int | None = None) -> list:
         return []
 
 
+# ── Asset versioning ─────────────────────────────────────────────────────────
+
+def record_asset_version(brand_slug: str, phase_num: int, step_key: str,
+                         file_name: str, version: int, file_path: str,
+                         media_url: str, file_size: int = 0,
+                         extra: dict = None, run_id: str = None) -> bool:
+    """Insert a versioned asset record (upsert on conflict)."""
+    try:
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO asset_versions
+                    (brand_slug, phase_num, step_key, file_name, version,
+                     file_path, media_url, file_size, extra, run_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (brand_slug, phase_num, file_name, version)
+                DO UPDATE SET
+                    file_path  = EXCLUDED.file_path,
+                    media_url  = EXCLUDED.media_url,
+                    file_size  = EXCLUDED.file_size,
+                    extra      = EXCLUDED.extra,
+                    run_id     = EXCLUDED.run_id,
+                    created_at = NOW()
+            """, (brand_slug, phase_num, step_key, file_name, version,
+                  file_path, media_url, file_size,
+                  json.dumps(extra or {}), run_id))
+        return True
+    except Exception as e:
+        log.warning("record_asset_version failed: %s", e)
+        return False
+
+
+def list_asset_versions(brand_slug: str, phase_num: int,
+                        step_key: str = None) -> list:
+    """Return all asset versions for a brand+phase, optionally filtered by step."""
+    try:
+        with get_conn() as conn:
+            cur = conn.cursor()
+            if step_key:
+                cur.execute("""
+                    SELECT step_key, file_name, version, file_path, media_url,
+                           file_size, extra, run_id, created_at
+                    FROM asset_versions
+                    WHERE brand_slug = %s AND phase_num = %s AND step_key = %s
+                    ORDER BY file_name, version DESC
+                """, (brand_slug, phase_num, step_key))
+            else:
+                cur.execute("""
+                    SELECT step_key, file_name, version, file_path, media_url,
+                           file_size, extra, run_id, created_at
+                    FROM asset_versions
+                    WHERE brand_slug = %s AND phase_num = %s
+                    ORDER BY step_key, file_name, version DESC
+                """, (brand_slug, phase_num))
+            return [dict(r) for r in cur.fetchall()]
+    except Exception as e:
+        log.warning("list_asset_versions failed: %s", e)
+        return []
+
+
+def get_next_version(brand_slug: str, phase_num: int,
+                     file_name: str) -> int:
+    """Return the next version number for a given file (1 if no versions exist)."""
+    try:
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT COALESCE(MAX(version), 0) + 1
+                FROM asset_versions
+                WHERE brand_slug = %s AND phase_num = %s AND file_name = %s
+            """, (brand_slug, phase_num, file_name))
+            row = cur.fetchone()
+            return row[0] if row else 1
+    except Exception as e:
+        log.warning("get_next_version failed: %s", e)
+        return 1
+
+
 # ── Pipeline step tracking ────────────────────────────────────────────────────
 
 def upsert_pipeline_step(run_id: str, step_num: int, step_name: str,

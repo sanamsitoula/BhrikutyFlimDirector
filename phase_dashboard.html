@@ -333,6 +333,10 @@ video{max-height:480px;background:#000;}
 .file-editor-textarea:focus{border-color:var(--teal);}
 .file-editor-bar{margin-top:8px;display:flex;gap:8px;justify-content:flex-end;align-items:center;}
 .file-editor-status{font-size:11px;}
+
+/* ── VERSION HISTORY OVERLAY ── */
+#version-overlay{animation:fadeInOverlay .15s ease;}
+@keyframes fadeInOverlay{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
@@ -574,6 +578,105 @@ function toggleSubsteps(stepNum) {
   if (arrow) arrow.textContent = anyVisible ? '▶' : '▼';
 }
 
+// ─────────────────────────────────────────────────
+// VERSION BADGE + HISTORY helpers
+// ─────────────────────────────────────────────────
+
+// Map pipeline step number → step_key used in .versions/
+const _STEP_KEY_MAP = {
+  3: 'voiceover', 4: 'script', 5: 'video',
+  7: 'platform',  8: 'text',   2: 'compliance',
+};
+
+function renderVersionBadges(stepNum) {
+  const sv = phaseData?.step_versions || {};
+  const key = _STEP_KEY_MAP[stepNum];
+  if (!key || !sv[key] || !sv[key].length) return '';
+  const versions = sv[key];  // already sorted newest-first
+  const latest = versions[0];
+  const count  = versions.length;
+  return `
+    <span onclick="showVersionHistory('${key}')"
+          style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;
+                 padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;
+                 background:var(--teal-dim);border:1px solid rgba(0,212,170,.35);
+                 color:var(--teal);margin-left:6px;" title="Click to see version history">
+      📁 ${count} version${count > 1 ? 's' : ''}
+      <span style="background:var(--teal);color:var(--bg);border-radius:3px;
+                   padding:1px 4px;font-size:9px;">latest: v${latest.version}</span>
+    </span>`;
+}
+
+async function showVersionHistory(stepKey) {
+  // Build modal content from phaseData.step_versions
+  const sv = phaseData?.step_versions || {};
+  const versions = sv[stepKey] || [];
+
+  const rows = versions.map(v => {
+    const date = v.ts ? new Date(v.ts * 1000).toLocaleString() : '—';
+    const fileList = (v.files || []).map(f => `
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 0;
+                  border-bottom:1px solid rgba(30,42,66,.4);">
+        <span style="font-size:11px;color:var(--teal);font-family:'Courier New',monospace;flex:1;">${esc(f.name)}</span>
+        <span style="font-size:10px;color:var(--muted);">${f.size_mb} MB</span>
+      </div>`).join('');
+
+    return `
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+                  margin-bottom:10px;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;
+                    background:${v.version === versions[0].version ? 'var(--teal-dim)' : 'var(--bg)'};
+                    border-bottom:1px solid var(--border);">
+          <span style="font-size:13px;font-weight:800;color:var(--teal);
+                       font-family:'Space Grotesk',sans-serif;">v${v.version}</span>
+          ${v.version === versions[0].version
+            ? '<span class="badge badge-teal" style="font-size:9px;">LATEST</span>'
+            : ''}
+          <span style="font-size:11px;color:var(--muted);margin-left:auto;">🕐 ${date}</span>
+        </div>
+        <div style="padding:8px 12px;">${fileList || '<span style="font-size:11px;color:var(--muted);">No files recorded</span>'}</div>
+      </div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:12px;padding:12px;">No versions yet. Run this step to create v1.</div>';
+
+  // Show in a floating overlay
+  let overlay = document.getElementById('version-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'version-overlay';
+    overlay.style.cssText = `
+      position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);
+      z-index:9000;display:flex;align-items:center;justify-content:center;
+    `;
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
+  }
+
+  const stepLabel = stepKey.charAt(0).toUpperCase() + stepKey.slice(1);
+  overlay.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;
+                width:min(580px,90vw);max-height:80vh;overflow:hidden;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;
+                  background:var(--bg2);border-bottom:1px solid var(--border);">
+        <span style="font-size:15px;">📁</span>
+        <span style="font-size:14px;font-weight:700;color:var(--text);">
+          Version History — ${stepLabel}
+        </span>
+        <span class="badge badge-teal" style="font-size:10px;">${versions.length} version${versions.length!==1?'s':''}</span>
+        <button onclick="document.getElementById('version-overlay').remove()"
+                style="margin-left:auto;background:none;border:none;color:var(--text2);
+                       cursor:pointer;font-size:18px;line-height:1;">✕</button>
+      </div>
+      <div style="padding:16px 18px;overflow-y:auto;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">
+          Older versions are saved in
+          <code style="color:var(--teal);">phase_${PHASE}/.versions/${stepKey}/</code>
+          — new versions are created on each re-run.
+        </div>
+        ${rows}
+      </div>
+    </div>`;
+}
+
 function renderPipelineTable(steps) {
   const rows = steps.map(s => {
     const isDone = s.done;
@@ -604,9 +707,10 @@ function renderPipelineTable(steps) {
         <div class="step-num-cell"${hasSubs ? ` style="cursor:pointer;" onclick="toggleSubsteps(${s.num})" title="Toggle sub-steps"` : ''}>${s.num}${hasSubs ? `<span style="font-size:8px;display:block;color:var(--teal);margin-top:1px;">▼</span>` : ''}</div>
       </td>
       <td>
-        <div style="display:flex;align-items:center;gap:6px;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span class="step-name">${s.name}</span>
           ${hasSubs ? `<span style="font-size:9px;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:1px 6px;">${subs.length} sub-steps</span>` : ''}
+          ${renderVersionBadges(s.num)}
         </div>
         ${hint ? `<div style="font-size:10px;color:var(--muted);margin-top:2px;line-height:1.5;">${esc(hint)}</div>` : ''}
         <div class="step-files" style="margin-top:4px;">${chips}</div>
