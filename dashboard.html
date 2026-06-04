@@ -892,32 +892,70 @@
   /* ---- OUTPUT PREVIEW ---- */
   .output-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
   }
 
   .output-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
-    transition: all 0.2s;
-    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
   }
 
   .output-card:hover {
     border-color: var(--border-active);
-    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0,0,0,.3);
   }
 
+  .output-card.has-output { border-color: rgba(0,212,170,.4); }
+
   .output-preview-area {
-    height: 110px;
+    height: 76px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 36px;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 0 16px;
+    font-size: 28px;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  /* detail rows */
+  .op-detail-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    padding: 3px 0;
+    line-height: 1.5;
+  }
+  .op-detail-row .chk { color: var(--teal); flex-shrink: 0; margin-top: 1px; }
+  .op-files-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    border-top: 1px solid rgba(30,42,66,.5);
+  }
+  .op-files-row:first-child { border-top: none; }
+  .op-cmd-block {
+    background: #06090F;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 11px;
+    font-family: 'Courier New', monospace;
+    font-size: 10.5px;
+    color: var(--teal);
+    word-break: break-all;
+    white-space: pre-wrap;
+    flex: 1;
   }
 
   .output-preview-area.yt { background: linear-gradient(135deg, #1a0000 0%, #2a0a0a 100%); }
@@ -1580,7 +1618,7 @@
     .tools-grid { grid-template-columns: 1fr; }
     .tts-grid { grid-template-columns: 1fr; }
     .phase-grid { grid-template-columns: 1fr 1fr; }
-    .output-grid { grid-template-columns: repeat(3, 1fr); }
+    .output-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
   /* ---- WAVEFORM ANIMATION ---- */
@@ -2230,68 +2268,11 @@
       <div class="section-header">
         <h2>Platform Output Preview</h2>
         <span class="badge badge-purple">7 Formats</span>
+        <span style="font-size:11px;color:var(--text-muted);margin-left:8px;">
+          All outputs for project: <strong id="op-project-label" style="color:var(--teal);">—</strong>
+        </span>
       </div>
-
-      <div class="output-grid">
-        <div class="output-card" onclick="showOutputModal('youtube')">
-          <div class="output-preview-area yt">
-            ▶️
-            <div class="output-status-dot"></div>
-          </div>
-          <div class="output-card-info">
-            <div class="output-platform">YouTube</div>
-            <div class="output-specs">1920×1080 · MP4 · SRT captions · Thumbnail 1280×720</div>
-          </div>
-        </div>
-
-        <div class="output-card" onclick="showOutputModal('tiktok')">
-          <div class="output-preview-area tt">🎵</div>
-          <div class="output-card-info">
-            <div class="output-platform">TikTok</div>
-            <div class="output-specs">1080×1920 · 60s clip · Vertical · Auto-captions</div>
-          </div>
-        </div>
-
-        <div class="output-card" onclick="showOutputModal('instagram')">
-          <div class="output-preview-area ig">📸</div>
-          <div class="output-card-info">
-            <div class="output-platform">Instagram</div>
-            <div class="output-specs">1080×1080 Reel · Story 1080×1920 · Carousel</div>
-          </div>
-        </div>
-
-        <div class="output-card" onclick="showOutputModal('twitter')">
-          <div class="output-preview-area tw">🐦</div>
-          <div class="output-card-info">
-            <div class="output-platform">Twitter/X</div>
-            <div class="output-specs">1280×720 · 2:20 clip · Thread text · Thumbnail</div>
-          </div>
-        </div>
-
-        <div class="output-card" onclick="showOutputModal('linkedin')">
-          <div class="output-preview-area li">💼</div>
-          <div class="output-card-info">
-            <div class="output-platform">LinkedIn</div>
-            <div class="output-specs">1920×1080 · Native video · Article version</div>
-          </div>
-        </div>
-
-        <div class="output-card" onclick="showOutputModal('blog')">
-          <div class="output-preview-area bl">✍️</div>
-          <div class="output-card-info">
-            <div class="output-platform">Blog</div>
-            <div class="output-specs">Markdown · Transcript · Infographic images</div>
-          </div>
-        </div>
-
-        <div class="output-card" onclick="showOutputModal('github')">
-          <div class="output-preview-area gh">⚙️</div>
-          <div class="output-card-info">
-            <div class="output-platform">GitHub</div>
-            <div class="output-specs">README · Code samples · Notebook · Resources</div>
-          </div>
-        </div>
-      </div>
+      <div class="output-grid" id="output-grid-container"></div>
     </div>
 
     <!-- ======== TTS COMPARISON ======== -->
@@ -2806,6 +2787,8 @@ function goStep(n) {
 function updateCommand() {
   const project  = (document.getElementById('inp-project')?.value  || 'chain_clarity').trim();
   const phase    = document.getElementById('inp-phase')?.value    || '6';
+  // Keep platform output grid in sync with the form inputs
+  if (project) updateOutputGrid(project, parseInt(phase)||1);
   const topic    = (document.getElementById('inp-topic')?.value   || '').trim();
   const outline  = (document.getElementById('inp-outline')?.value || '').trim();
   const duration = parseInt(document.getElementById('inp-duration')?.value) || 12;
@@ -2903,23 +2886,311 @@ function showInstallModal(tool) {
   document.getElementById('modal-overlay').classList.add('open');
 }
 
-const outputInfo = {
-  youtube: { title: 'YouTube Output', icon: '▶️', details: ['1920×1080 MP4 (H.264, AAC)', 'Duration: up to 15 min (verified) or longer', 'Thumbnail: 1280×720 JPEG (generated by FLUX)', 'SRT captions uploaded via Data API v3', 'Description auto-generated from script summary', 'Tags: blockchain, bitcoin, defi, crypto education', 'Category: Education (ID: 27)', 'scheduledPublishTime: next Thu 2pm EST'] },
-  tiktok: { title: 'TikTok Output', icon: '🎵', details: ['1080×1920 vertical MP4', 'Duration: 15–60 seconds (highlight clip)', 'Auto-generated captions burned in', 'Hook in first 3 seconds', 'Trending audio layer (optional)', 'Description: 150 chars + hashtags'] },
-  instagram: { title: 'Instagram Output', icon: '📸', details: ['Reel: 1080×1920, 15–90 sec vertical', 'Story: 1080×1920, 15 sec clips', 'Post: 1080×1080 square thumbnail', 'Carousel: 10-frame infographic version', 'Caption: 2,200 chars max with hashtags', 'Alt text for accessibility'] },
-  twitter: { title: 'Twitter/X Output', icon: '🐦', details: ['1280×720 MP4, max 2:20', 'Video compressed for platform limits', 'Thread: 10-tweet breakdown with timestamps', 'Thumbnail attached to first tweet', 'Character count: 280 per tweet'] },
-  linkedin: { title: 'LinkedIn Output', icon: '💼', details: ['1920×1080 native video', 'Duration: up to 10 min', 'Article version: full transcript as long-form post', 'Professional hashtags (#blockchain #web3 #crypto)', 'Auto-subtitles enabled', 'Custom thumbnail 1200×627'] },
-  blog: { title: 'Blog / Website Output', icon: '✍️', details: ['Markdown file (.md) with full transcript', 'Embedded YouTube video', 'Infographic images (FLUX-generated)', 'SEO metadata: title, description, keywords', 'Code snippets for technical sections', 'Internal linking suggestions'] },
-  github: { title: 'GitHub Output', icon: '⚙️', details: ['README.md with video embed', 'Code samples from script examples', 'Jupyter notebook version', 'Resources/links section', 'Blockchain glossary', 'MIT license file'] }
-};
+// ─────────────────────────────────────────────────────────────────────────────
+// PLATFORM OUTPUT CATALOG — all 7 formats with full inline details
+// ─────────────────────────────────────────────────────────────────────────────
+const OUTPUT_CATALOG = [
+  {
+    key:       'youtube',
+    icon:      '▶️',
+    label:     'YouTube',
+    colorCls:  'yt',
+    accent:    '#FF0000',
+    specs:     '1920×1080 · MP4 · H.264 · AAC · SRT captions',
+    details: [
+      { icon:'🎬', text:'Video: 1920×1080 px, H.264 (libx264), AAC 128 kbps, 30 fps' },
+      { icon:'⏱',  text:'Duration: up to 15 min — set via --duration flag' },
+      { icon:'🖼',  text:'Thumbnail: 1280×720 JPEG (FLUX-generated or Pillow slide)' },
+      { icon:'💬', text:'SRT captions burned in — synced from subtitles.srt' },
+      { icon:'📄', text:'Description: chapters, brand tagline, tags, subscribe link' },
+      { icon:'🏷',  text:'Tags & category auto-filled from content_spec.json' },
+      { icon:'📱', text:'Shorts 9:16 version: 1080×1920 (centre-crop + scale)' },
+      { icon:'📦', text:'Codec preset: fast · CRF 20 (high quality)' },
+    ],
+    outputPath: '_output/phase_NN/youtube/',
+    files: [
+      { name:'final_1080p.mp4',  desc:'Full YouTube video (H.264)' },
+      { name:'description.txt',  desc:'SEO description + chapters + tags' },
+    ],
+    shortsPath: '_output/phase_NN/youtube_shorts/',
+    shortsFiles: [
+      { name:'short_1080x1920.mp4', desc:'9:16 Shorts / Reels version' },
+    ],
+    generate: (proj, ph) =>
+      `python tools/video/create_video.py --project ${proj} --phase ${ph} --burn-subs --shorts`,
+    cmdType: 'create_video',
+  },
+  {
+    key:       'tiktok',
+    icon:      '🎵',
+    label:     'TikTok',
+    colorCls:  'tt',
+    accent:    '#69C9D0',
+    specs:     '1080×1920 · 60s clip · Vertical · Burned captions',
+    details: [
+      { icon:'📐', text:'Format: 1080×1920 px vertical (9:16) MP4' },
+      { icon:'⏱',  text:'Hook clip: 0–15 sec  ·  Main clip: up to 60 sec' },
+      { icon:'💬', text:'Captions burned directly into video frames' },
+      { icon:'🎣', text:'Hook first 3 seconds pulled from script hook section' },
+      { icon:'🏷',  text:'Caption file: 150 chars + 5 hashtags' },
+      { icon:'🎨', text:'Brand watermark overlay top-left (brand name from profile)' },
+      { icon:'⚡', text:'Auto-cropped from 16:9 master: crop=608:1080 → scale=1080:1920' },
+    ],
+    outputPath: '_output/phase_NN/tiktok/',
+    files: [
+      { name:'clip_01_hook.mp4',  desc:'Hook clip (0–15 sec)' },
+      { name:'clip_02_main.mp4',  desc:'Main clip (up to 60 sec)' },
+      { name:'caption_hook.txt',  desc:'Hook caption + hashtags' },
+      { name:'caption_main.txt',  desc:'Main caption + hashtags' },
+    ],
+    generate: (proj, ph) =>
+      `python tools/platform_cutter.py --project ${proj} --phase ${ph}\n# Requires: final_1080p.mp4 from YouTube step`,
+    cmdType: 'platform_cut',
+  },
+  {
+    key:       'instagram',
+    icon:      '📸',
+    label:     'Instagram',
+    colorCls:  'ig',
+    accent:    '#E1306C',
+    specs:     '1080×1920 Reel · 1080×1080 Post · Carousel',
+    details: [
+      { icon:'🎬', text:'Reel: 1080×1920 vertical, 15–90 sec' },
+      { icon:'🖼',  text:'Story: 1080×1920, 15 sec clips (same crop)' },
+      { icon:'⬛', text:'Post thumbnail: 1080×1080 square (first frame)' },
+      { icon:'🃏', text:'Carousel: infographic HTML cards (3 slides)' },
+      { icon:'📝', text:'Caption: up to 2,200 chars + 15 hashtags' },
+      { icon:'♿', text:'Alt text generated from infographics.md' },
+      { icon:'🏷',  text:'Brand hashtag always appended (from brand profile)' },
+    ],
+    outputPath: '_output/phase_NN/instagram/',
+    files: [
+      { name:'reel_60s.mp4',       desc:'Vertical Reel (9:16)' },
+      { name:'caption_reel.txt',   desc:'Reel caption + hashtags' },
+    ],
+    generate: (proj, ph) =>
+      `python tools/platform_cutter.py --project ${proj} --phase ${ph}`,
+    cmdType: 'platform_cut',
+  },
+  {
+    key:       'twitter',
+    icon:      '🐦',
+    label:     'Twitter / X',
+    colorCls:  'tw',
+    accent:    '#1DA1F2',
+    specs:     '1280×720 · Max 2:20 · 7-tweet thread',
+    details: [
+      { icon:'📐', text:'Video: 1280×720 px (16:9), max 2 min 20 sec' },
+      { icon:'💾', text:'Compressed for Twitter file-size limit (<512 MB)' },
+      { icon:'🧵', text:'Thread: 7-tweet breakdown with timestamps and hooks' },
+      { icon:'🖼',  text:'Thumbnail card attached to first tweet' },
+      { icon:'✏️', text:'Each tweet: max 280 chars including link' },
+      { icon:'🏷',  text:'4 hashtags per tweet (from content_spec.json tags)' },
+    ],
+    outputPath: '_output/phase_NN/twitter/',
+    files: [
+      { name:'card_clip.mp4',     desc:'Twitter video clip (2:20 max)' },
+      { name:'caption_clip.txt',  desc:'Tweet text + hashtags' },
+    ],
+    textFiles: [
+      { name:'thread.txt',    desc:'7-tweet thread (from text generator)' },
+    ],
+    generate: (proj, ph) =>
+      `python tools/platform_cutter.py --project ${proj} --phase ${ph}\n# + python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
+    cmdType: 'platform_cut',
+  },
+  {
+    key:       'linkedin',
+    icon:      '💼',
+    label:     'LinkedIn',
+    colorCls:  'li',
+    accent:    '#0A66C2',
+    specs:     '1920×1080 · Native video · 800-word article',
+    details: [
+      { icon:'🎬', text:'Native video: 1920×1080 (16:9), up to 10 min' },
+      { icon:'🖼',  text:'Custom thumbnail: 1200×627 px' },
+      { icon:'📰', text:'Article version: full 800-word transcript as long-form post' },
+      { icon:'🏷',  text:'Professional hashtags: #education #microeconomics #elearning' },
+      { icon:'💬', text:'Auto-subtitles enabled via LinkedIn upload settings' },
+      { icon:'📎', text:'PDF infographic carousel (cards exported as PNG)' },
+    ],
+    outputPath: '_output/phase_NN/linkedin/',
+    files: [
+      { name:'clip.mp4',          desc:'LinkedIn native video (16:9)' },
+      { name:'caption_clip.txt',  desc:'Post caption + hashtags' },
+    ],
+    textFiles: [
+      { name:'article.md',   desc:'800-word professional article (from text generator)' },
+    ],
+    generate: (proj, ph) =>
+      `python tools/platform_cutter.py --project ${proj} --phase ${ph}\n# + python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
+    cmdType: 'platform_cut',
+  },
+  {
+    key:       'blog',
+    icon:      '✍️',
+    label:     'Blog',
+    colorCls:  'bl',
+    accent:    '#F5A623',
+    specs:     'Markdown · 1,500-word post · SEO metadata',
+    details: [
+      { icon:'📝', text:'Full 1,500-word blog post in Markdown (.md)' },
+      { icon:'📺', text:'Embedded YouTube video (iframe + link fallback)' },
+      { icon:'🖼',  text:'Infographic images referenced inline' },
+      { icon:'🔍', text:'SEO: title tag, meta description, keywords, slug' },
+      { icon:'💻', text:'Code snippets for technical concepts (fenced blocks)' },
+      { icon:'🔗', text:'Internal linking suggestions based on content pillars' },
+      { icon:'📊', text:'Schema.org Article markup for Google rich results' },
+    ],
+    outputPath: '_output/phase_NN/blog/',
+    files: [
+      { name:'post.md',   desc:'Full SEO blog post in Markdown' },
+    ],
+    generate: (proj, ph) =>
+      `python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
+    cmdType: 'text_content',
+  },
+  {
+    key:       'github',
+    icon:      '⚙️',
+    label:     'GitHub',
+    colorCls:  'gh',
+    accent:    '#8B9BB4',
+    specs:     'README · Code samples · Notebook · Resources',
+    details: [
+      { icon:'📄', text:'README.md with embedded video + badges' },
+      { icon:'💻', text:'Code samples extracted from script examples' },
+      { icon:'📒', text:'Jupyter notebook version (.ipynb) of key concepts' },
+      { icon:'🔗', text:'Resources section: links, papers, tools referenced' },
+      { icon:'📖', text:'Glossary auto-built from bold terms in script.md' },
+      { icon:'⚖️', text:'MIT license file included' },
+    ],
+    outputPath: '_output/phase_NN/github/',
+    files: [
+      { name:'README.md',   desc:'GitHub README with video embed + code' },
+    ],
+    generate: (proj, ph) =>
+      `python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
+    cmdType: 'text_content',
+  },
+];
 
+// ── Render all output cards inline ────────────────────────────────────────────
+function renderOutputGrid(project, phase) {
+  const proj = project || _currentProject || 'PROJECT';
+  const ph   = phase   || 1;
+  const padPh = String(ph).padStart(2, '0');
+
+  const label = document.getElementById('op-project-label');
+  if (label) label.textContent = `${proj} / Phase ${ph}`;
+
+  const cards = OUTPUT_CATALOG.map(p => {
+    const cmd      = p.generate(proj, ph);
+    const outPath  = p.outputPath.replace('NN', padPh);
+    const allFiles = [...(p.files || []), ...(p.shortsFiles || []), ...(p.textFiles || [])];
+
+    const detailRows = p.details.map(d =>
+      `<div class="op-detail-row">
+         <span class="chk">✓</span>
+         <span><strong style="color:var(--text-primary);margin-right:4px;">${d.icon}</strong>${d.text}</span>
+       </div>`
+    ).join('');
+
+    const fileRows = allFiles.map(f =>
+      `<div class="op-files-row">
+         <span style="font-size:11px;color:var(--teal);font-family:'Courier New',monospace;flex:1;">
+           ${f.name}
+         </span>
+         <span style="font-size:10px;color:var(--text-muted);">${f.desc}</span>
+       </div>`
+    ).join('');
+
+    const cmdId = `opcmd-${p.key}`;
+    const runJson = JSON.stringify({
+      project: proj, phase: ph, cmd_type: p.cmdType
+    }).replace(/'/g, "&#39;");
+
+    return `
+      <div class="output-card" id="opcard-${p.key}">
+
+        <!-- Header bar -->
+        <div class="output-preview-area ${p.colorCls}">
+          <span style="font-size:30px;">${p.icon}</span>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:#fff;
+                        font-family:'Space Grotesk',sans-serif;">${p.label}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:1px;">${p.specs}</div>
+          </div>
+          <div id="opstatus-${p.key}" style="margin-left:auto;font-size:10px;
+               color:rgba(255,255,255,.45);">—</div>
+        </div>
+
+        <!-- Details -->
+        <div style="padding:12px 14px;border-bottom:1px solid var(--border);">
+          ${detailRows}
+        </div>
+
+        <!-- Output files -->
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.18);">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:.07em;color:var(--text-muted);margin-bottom:6px;">
+            📁 Output path
+          </div>
+          <div style="font-size:10px;font-family:'Courier New',monospace;
+                      color:var(--teal);margin-bottom:7px;">${outPath}</div>
+          ${fileRows}
+          ${p.shortsFiles?.length ? `
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;
+                        letter-spacing:.07em;color:var(--text-muted);margin-top:8px;margin-bottom:4px;">
+              📱 Shorts / Reels path
+            </div>
+            <div style="font-size:10px;font-family:'Courier New',monospace;color:var(--teal);">
+              ${p.shortsPath?.replace('NN', padPh)}
+            </div>` : ''}
+        </div>
+
+        <!-- Command -->
+        <div style="padding:10px 14px;margin-top:auto;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:.07em;color:var(--text-muted);margin-bottom:5px;">
+            ▶ Generate command
+          </div>
+          <div style="display:flex;gap:6px;align-items:flex-start;">
+            <code class="op-cmd-block" id="${cmdId}">${cmd}</code>
+            <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+              <button style="padding:4px 9px;background:var(--teal-dim);border:1px solid rgba(0,212,170,.3);
+                             border-radius:6px;color:var(--teal);font-size:10px;font-weight:600;
+                             cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;"
+                      onclick="navigator.clipboard.writeText(document.getElementById('${cmdId}').textContent).then(()=>alert('Copied!'))">
+                📋 Copy
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>`;
+  }).join('');
+
+  const grid = document.getElementById('output-grid-container');
+  if (grid) grid.innerHTML = cards;
+}
+
+// Update output grid when project/phase changes
+function updateOutputGrid(project, phase) {
+  renderOutputGrid(project, phase);
+}
+
+// Legacy click handler (kept for backward compatibility)
 function showOutputModal(platform) {
-  const info = outputInfo[platform];
+  const info = OUTPUT_CATALOG.find(p => p.key === platform);
   if (!info) return;
   document.getElementById('modal-body').innerHTML = `
-    <h2 class="modal-title">${info.icon} ${info.title}</h2>
+    <h2 class="modal-title">${info.icon} ${info.label} Output</h2>
     <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
-      ${info.details.map(d => `<li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text-secondary);"><span style="color:var(--teal);margin-top:1px;flex-shrink:0;">✓</span>${d}</li>`).join('')}
+      ${info.details.map(d =>
+        `<li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text-secondary);">
+           <span style="color:var(--teal);margin-top:1px;flex-shrink:0;">✓</span>${d.icon} ${d.text}
+         </li>`).join('')}
     </ul>`;
   document.getElementById('modal-overlay').classList.add('open');
 }
@@ -2968,7 +3239,14 @@ function selectProject(name) {
     b.classList.toggle('active', b.textContent.trim() === name);
   });
   const proj = _explorerProjects.find(p => p.name === name);
-  if (proj) renderProjectPhases(proj);
+  if (proj) {
+    renderProjectPhases(proj);
+    // Update platform output grid with selected project's latest phase
+    const latestPhase = proj.phases?.length
+      ? Math.max(...proj.phases.map(ph => parseInt(ph.replace('phase_',''))||1))
+      : 1;
+    updateOutputGrid(name, latestPhase);
+  }
 }
 
 async function renderProjectPhases(project) {
@@ -3462,6 +3740,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMatrix();
   renderTTS();
   renderStepStars();
+  renderOutputGrid(_currentProject, 1);   // render immediately with defaults
 
   // ── Pre-fill from URL params: /?project=ecoWorld&phase=7 ──────────────
   const _urlP = new URLSearchParams(window.location.search);
