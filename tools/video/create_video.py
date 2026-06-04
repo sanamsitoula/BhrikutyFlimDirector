@@ -93,40 +93,102 @@ def screenshot_card(html_path: Path, out_png: Path, width: int = 1080, height: i
     print(f"    [screenshot] {html_path.name} -> {out_png.name}")
 
 
-# ── FFmpeg colored-slide fallback ─────────────────────────────────────────────
+# ── Pillow slide generator (cross-platform, no font-path issues) ──────────────
+
+def _hex_to_rgb(h: str) -> tuple:
+    h = h.strip().lstrip("#")
+    if len(h) == 3:
+        h = h[0]*2 + h[1]*2 + h[2]*2
+    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+
+def _find_font(size: int):
+    """Return a PIL ImageFont — tries common system paths, falls back to built-in."""
+    from PIL import ImageFont
+    candidates = [
+        # Windows
+        r"C:\Windows\Fonts\Arial.ttf",
+        r"C:\Windows\Fonts\arial.ttf",
+        r"C:\Windows\Fonts\calibri.ttf",
+        r"C:\Windows\Fonts\segoeui.ttf",
+        # Linux
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        # macOS
+        "/System/Library/Fonts/Helvetica.ttc",
+        "/Library/Fonts/Arial.ttf",
+    ]
+    for path in candidates:
+        try:
+            return ImageFont.truetype(path, size)
+        except Exception:
+            pass
+    # PIL built-in (always works, small but readable)
+    try:
+        return ImageFont.load_default(size=size)
+    except TypeError:
+        return ImageFont.load_default()
+
+
+def _draw_centered(draw, y: int, text: str, font, fill: str, width: int):
+    """Draw text horizontally centred at y."""
+    try:
+        bbox = draw.textbbox((0, 0), text, font=font)
+        tw = bbox[2] - bbox[0]
+    except AttributeError:
+        tw = len(text) * (font.size if hasattr(font, 'size') else 10)
+    x = max(0, (width - tw) // 2)
+    draw.text((x, y), text, fill=fill, font=font)
+
 
 def make_color_slide(index: int, title: str, brand: dict, out_png: Path,
                      width: int = 1920, height: int = 1080):
-    """Generate a colored slide image with FFmpeg lavfi when Playwright is not available."""
+    """Generate a branded slide image using Pillow (reliable on all platforms)."""
+    from PIL import Image, ImageDraw
+
     colors = brand.get("colors", {})
-    bg   = colors.get("background", {}).get("hex", "#0F1A14")
-    fg   = colors.get("secondary",  {}).get("hex", "#F5A623")
-    acc  = colors.get("primary",    {}).get("hex", "#2D7D46")
-    bname = brand.get("brand_name", "Brand")
+    bg_hex  = colors.get("background", {}).get("hex", "#0F1A14")
+    fg_hex  = colors.get("secondary",  {}).get("hex", "#F5A623")
+    acc_hex = colors.get("primary",    {}).get("hex", "#00D4AA")
+    bname   = brand.get("brand_name", "Brand")[:40]
 
-    # Sanitise text for ffmpeg drawtext (escape special chars)
-    def _esc(s): return s.replace("'", "\\'").replace(":", "\\:").replace("\\", "\\\\")
+    img  = Image.new("RGB", (width, height), _hex_to_rgb(bg_hex))
+    draw = ImageDraw.Draw(img)
 
-    safe_title = _esc(title[:50])
-    safe_brand = _esc(bname)
-    card_label = _esc(f"Card {index}")
+    # ── Accent bar at top ──────────────────────────────────────────────────────
+    bar_h = max(6, height // 180)
+    draw.rectangle([(0, 0), (width, bar_h)], fill=_hex_to_rgb(acc_hex))
 
-    subprocess.run([
-        "ffmpeg", "-y",
-        "-f", "lavfi",
-        "-i", f"color=c={bg}:s={width}x{height}:r=1",
-        "-frames:v", "1",
-        "-vf", (
-            f"drawtext=text='{safe_brand}':fontsize=48:fontcolor={acc}:"
-            f"x=(w-text_w)/2:y=80:fontfile=C\\:/Windows/Fonts/arial.ttf,"
-            f"drawtext=text='{safe_title}':fontsize=72:fontcolor={fg}:"
-            f"x=(w-text_w)/2:y=(h-text_h)/2-40:fontfile=C\\:/Windows/Fonts/arial.ttf,"
-            f"drawtext=text='{card_label}':fontsize=36:fontcolor=#888888:"
-            f"x=(w-text_w)/2:y=h-80:fontfile=C\\:/Windows/Fonts/arial.ttf"
-        ),
-        str(out_png),
-    ], capture_output=True, check=True)
-    print(f"    [slide] {out_png.name} (colored FFmpeg slide)")
+    # ── Card index badge (top-left) ────────────────────────────────────────────
+    badge_font = _find_font(32)
+    draw.text((48, 48), f"CARD {index:02d}", fill=_hex_to_rgb(acc_hex), font=badge_font)
+
+    # ── Brand name ────────────────────────────────────────────────────────────
+    brand_font = _find_font(52)
+    _draw_centered(draw, 80, bname, brand_font, _hex_to_rgb(acc_hex), width)
+
+    # ── Horizontal rule ───────────────────────────────────────────────────────
+    rule_y = 160
+    draw.line([(width//4, rule_y), (3*width//4, rule_y)],
+              fill=(*_hex_to_rgb(acc_hex), 80), width=2)
+
+    # ── Main title (word-wrapped at ~40 chars per line) ────────────────────────
+    import textwrap
+    title_lines = textwrap.wrap(title[:120], width=38)
+    title_font  = _find_font(82)
+    line_h      = 100
+    start_y     = height // 2 - (len(title_lines) * line_h) // 2 - 40
+    for i, line in enumerate(title_lines[:3]):
+        _draw_centered(draw, start_y + i * line_h, line, title_font,
+                       _hex_to_rgb(fg_hex), width)
+
+    # ── Bottom caption ────────────────────────────────────────────────────────
+    cap_font = _find_font(36)
+    _draw_centered(draw, height - 90, f"Phase {index} of Content", cap_font,
+                   "#666688", width)
+
+    img.save(str(out_png), "PNG")
+    print(f"    [slide] {out_png.name} (Pillow)")
 
 
 # ── Build per-card video clips ────────────────────────────────────────────────

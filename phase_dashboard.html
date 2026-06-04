@@ -1871,11 +1871,106 @@ function renderVideo(d) {
           </div>`}
     </div>`;
 
+  // ── Video tools panel ───────────────────────────────────────────────────
+  const VIDEO_TOOLS = [
+    {
+      id: 'create_video',
+      icon: '🎬',
+      name: 'create_video.py',
+      desc: 'Builds a full video from infographic cards + voiceover. No raw footage needed.',
+      how: 'Screenshots each HTML card (Playwright) or draws branded slides (Pillow), animates with ken-burns zoom, mixes in the voiceover MP3, and burns subtitles.',
+      outputs: ['_output/youtube/final_1080p.mp4', '_output/youtube_shorts/short_1080x1920.mp4'],
+      cmd: `python tools/video/create_video.py --project ${esc(proj)} --phase ${ph} --burn-subs --shorts`,
+      requires: ['FFmpeg', 'Pillow', 'Playwright (optional — HTML screenshots)'],
+      runData: JSON.stringify({project: proj, phase: ph, cmd_type: 'create_video'}).replace(/'/g,"&#39;"),
+    },
+    {
+      id: 'platform_cutter',
+      icon: '✂️',
+      name: 'platform_cutter.py',
+      desc: 'Cuts the master 1080p video into platform-specific clips.',
+      how: 'Reads cut timings from content_spec.json, crops/scales for each platform, adds brand watermark, and exports TikTok 9:16, Instagram 1:1, Twitter 16:9, LinkedIn 16:9.',
+      outputs: ['_output/tiktok/', '_output/instagram/', '_output/twitter/', '_output/linkedin/'],
+      cmd: `python tools/platform_cutter.py --project ${esc(proj)} --phase ${ph} --video _output/phase_${String(ph).padStart(2,'0')}/youtube/final_1080p.mp4`,
+      requires: ['FFmpeg'],
+      runData: JSON.stringify({project: proj, phase: ph, cmd_type: 'platform_cut'}).replace(/'/g,"&#39;"),
+    },
+    {
+      id: 'text_video',
+      icon: '📝',
+      name: 'Text-Overlay Video (Pillow + FFmpeg)',
+      desc: 'Generates a video where script sections appear as animated text over the brand background — combine with voiceover for a fully text-driven video.',
+      how: 'Uses Pillow to render each script section as a frame, then FFmpeg assembles them into a clip. No infographic cards required.',
+      outputs: ['_output/youtube/text_video_1080p.mp4'],
+      cmd: `python tools/video/create_video.py --project ${esc(proj)} --phase ${ph} --no-screenshots --burn-subs`,
+      requires: ['FFmpeg', 'Pillow'],
+      runData: JSON.stringify({project: proj, phase: ph, cmd_type: 'create_video'}).replace(/'/g,"&#39;"),
+    },
+    {
+      id: 'playwright',
+      icon: '🌐',
+      name: 'Playwright HTML Screenshots',
+      desc: 'Renders each HTML infographic card as a full-quality 1920×1080 PNG — gives production-quality slides with animations, gradients, and custom fonts.',
+      how: 'Launches a headless Chromium browser, opens each card_NN.html, waits for animations, then screenshots at full resolution.',
+      outputs: ['Slide PNGs (temp — assembled into video)'],
+      cmd: 'pip install playwright && playwright install chromium',
+      requires: ['Playwright + Chromium (pip install playwright && playwright install chromium)'],
+      runData: null,
+    },
+  ];
+
+  const toolCards = VIDEO_TOOLS.map(t => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;
+                overflow:hidden;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;
+                  background:var(--bg2);border-bottom:1px solid var(--border);">
+        <span style="font-size:20px;flex-shrink:0;">${t.icon}</span>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);font-family:'Courier New',monospace;">${esc(t.name)}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:1px;">${esc(t.desc)}</div>
+        </div>
+        ${t.runData
+          ? `<button class="step-action-btn run" style="font-size:10px;padding:3px 10px;flex-shrink:0;"
+                    onclick='runToolCmd(${t.runData})'>▶ Run</button>`
+          : `<span class="badge badge-blue" style="font-size:10px;flex-shrink:0;">Setup required</span>`}
+      </div>
+      <div style="padding:10px 14px;">
+        <div style="font-size:11px;color:var(--text2);line-height:1.65;margin-bottom:8px;">${esc(t.how)}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;">
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;">Output files</div>
+            ${t.outputs.map(o => `<div style="font-size:10px;font-family:'Courier New',monospace;color:var(--teal);">→ ${esc(o)}</div>`).join('')}
+          </div>
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;">Requires</div>
+            ${t.requires.map(r => `<div style="font-size:10px;color:var(--text2);">• ${esc(r)}</div>`).join('')}
+          </div>
+        </div>
+        <div style="background:#06090F;border:1px solid var(--border);border-radius:6px;
+                    padding:6px 10px;margin-top:8px;display:flex;align-items:center;gap:8px;">
+          <code style="font-size:10px;color:var(--teal);word-break:break-all;flex:1;">${esc(t.cmd)}</code>
+          <button class="copy-content-btn" style="flex-shrink:0;font-size:10px;"
+                  onclick="navigator.clipboard.writeText('${esc(t.cmd)}').then(()=>showToast('Copied!'))">📋</button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  const toolsPanel = `
+    <div style="margin-top:20px;">
+      <div class="section-title" style="margin-bottom:10px;">
+        🛠️ Video Generation Tools
+        <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:8px;text-transform:none;letter-spacing:0;">
+          available tools for this phase
+        </span>
+      </div>
+      ${toolCards}
+    </div>`;
+
   return playerSection + shortsSection + clipsSection + `
     <div style="margin-top:8px;">
       <div class="section-title" style="margin-bottom:8px;">🎬 Clip Brief</div>
       ${renderFileTab('clip_brief.md')}
-    </div>`;
+    </div>` + toolsPanel;
 }
 
 // ─────────────────────────────────────────────────
