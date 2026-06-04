@@ -1365,14 +1365,18 @@ function selectVoice(voiceId) {
 }
 
 async function generateVoiceover(voiceId) {
-  const voice = voiceId || _selectedVoice || 'en-IN-PrabhatNeural';
-  showToast(`Generating voiceover: ${voice}…`);
+  const voice  = voiceId || _selectedVoice || 'en-IN-PrabhatNeural';
+  // Use subtitles.srt as source if available (auto detects at server side)
+  const hasSrt = (phaseData?.srt_segments?.length || 0) > 0;
+  const source = hasSrt ? 'srt' : 'script';
+  showToast(`Generating voiceover (${source}): ${voice}…`);
   await runToolCmd({
     project:  PROJECT,
     phase:    PHASE,
     cmd_type: 'tts',
     engine:   'edge',
     voice,
+    source,
   });
   // Refresh audio tab after generation
   setTimeout(async () => {
@@ -2124,6 +2128,145 @@ function scaleIframes() {
 // ─────────────────────────────────────────────────
 // AUDIO TAB
 // ─────────────────────────────────────────────────
+// ─────────────────────────────────────────────────
+// SRT SEGMENTS PANEL  (shows what will be spoken)
+// ─────────────────────────────────────────────────
+function renderSrtSegments(d) {
+  const segs = d.srt_segments || [];
+  const hasSrt = segs.length > 0;
+  const srtPath = `youtube_scripts/setup/projects/${esc(d.project||PROJECT)}/phase_${d.phase||PHASE}/subtitles.srt`;
+
+  if (!hasSrt) {
+    return `
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+                  padding:12px 14px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px;">
+          📋 Input Segments — <code style="color:var(--teal);font-size:11px;">subtitles.srt</code>
+          <span class="badge badge-blue" style="font-size:9px;margin-left:6px;">Not found</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);">
+          No subtitles.srt found. TTS will fall back to NARRATION blocks in script.md.<br>
+          Generate subtitles first: <code style="color:var(--teal);">python tools/generate_phase.py --project ${esc(d.project||PROJECT)} --phase ${d.phase||PHASE} --only subtitles.srt</code>
+        </div>
+      </div>`;
+  }
+
+  // Estimate duration from last segment timestamp
+  const lastTs = segs[segs.length-1]?.ts || '';
+  const totalWords = segs.reduce((s, g) => s + g.text.split(' ').length, 0);
+
+  // Show first 8 + collapsed rest
+  const visible = segs.slice(0, 8);
+  const hidden  = segs.slice(8);
+
+  const segRows = (rows) => rows.map(s => `
+    <div style="display:flex;gap:10px;align-items:baseline;padding:4px 0;
+                border-bottom:1px solid rgba(30,42,66,.35);">
+      <span style="font-size:10px;font-weight:700;color:var(--teal);flex-shrink:0;
+                   width:18px;text-align:right;">${s.index}</span>
+      <span style="font-size:10px;color:var(--muted);flex-shrink:0;
+                   font-family:'Courier New',monospace;white-space:nowrap;">${s.ts.split(' --> ')[0]}</span>
+      <span style="font-size:12px;color:var(--text2);flex:1;">${esc(s.text)}</span>
+    </div>`).join('');
+
+  return `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;
+                overflow:hidden;margin-bottom:14px;">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;
+                  background:var(--bg2);border-bottom:1px solid var(--border);">
+        <span style="font-size:14px;">📋</span>
+        <div style="flex:1;">
+          <div style="font-size:12px;font-weight:700;color:var(--text);">
+            Input Segments — TTS will read these ${segs.length} subtitle lines
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:1px;display:flex;gap:8px;">
+            <span>${segs.length} segments</span>
+            <span>·</span><span>~${totalWords} words</span>
+            <span>·</span><span>ends ${lastTs.split(' --> ')[1] || ''}</span>
+            <span>·</span>
+            <button onclick="openContentModal('view:subtitles.srt','Subtitles')"
+                    style="background:none;border:none;color:var(--teal);cursor:pointer;
+                           font-size:10px;padding:0;font-family:inherit;">
+              📋 View full SRT
+            </button>
+          </div>
+        </div>
+        <span class="badge badge-teal" style="font-size:9px;">✓ Using subtitles.srt</span>
+      </div>
+      <!-- Segment rows -->
+      <div style="padding:8px 14px;max-height:220px;overflow-y:auto;">
+        ${segRows(visible)}
+        ${hidden.length ? `
+          <details style="margin-top:4px;">
+            <summary style="cursor:pointer;font-size:11px;color:var(--teal);padding:4px 0;
+                            list-style:none;display:flex;align-items:center;gap:6px;">
+              ▸ Show ${hidden.length} more segments
+            </summary>
+            <div style="margin-top:4px;">${segRows(hidden)}</div>
+          </details>` : ''}
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────
+// VOICEOVER VERSION LIST
+// ─────────────────────────────────────────────────
+function renderVoiceoverVersions(d) {
+  const sv = d.step_versions || {};
+  const versions = sv.voiceover || [];
+  if (!versions.length) return '';
+
+  const rows = versions.map(v => {
+    const date   = v.ts ? new Date(v.ts * 1000).toLocaleString() : '—';
+    const files  = v.files || [];
+    const mp3s   = files.filter(f => /\.(mp3|wav|ogg)$/i.test(f.name));
+
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;
+                  border-bottom:1px solid rgba(30,42,66,.4);
+                  background:${v.version === versions[0].version ? 'var(--teal-dim)' : 'transparent'};">
+        <span style="width:32px;height:32px;border-radius:8px;flex-shrink:0;
+                     background:${v.version===versions[0].version?'var(--teal)':'var(--border)'};
+                     color:${v.version===versions[0].version?'var(--bg)':'var(--muted)'};
+                     font-size:12px;font-weight:800;display:flex;align-items:center;
+                     justify-content:center;font-family:'Space Grotesk',sans-serif;">
+          v${v.version}
+        </span>
+        <div style="flex:1;min-width:0;">
+          ${mp3s.map(f => `
+            <div style="font-size:12px;color:var(--text);font-weight:600;">${esc(f.name)}</div>
+            <div style="font-size:10px;color:var(--muted);">${f.size_mb} MB</div>`).join('') ||
+            `<div style="font-size:11px;color:var(--muted);">${files.length} file${files.length!==1?'s':''}</div>`}
+        </div>
+        <div style="font-size:10px;color:var(--muted);flex-shrink:0;text-align:right;">
+          ${v.version === versions[0].version ? '<span class="badge badge-teal" style="font-size:8px;margin-bottom:3px;display:block;">LATEST</span>' : ''}
+          🕐 ${date}
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;
+                overflow:hidden;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;
+                  background:var(--bg2);border-bottom:1px solid var(--border);">
+        <span style="font-size:14px;">📁</span>
+        <div style="font-size:12px;font-weight:700;color:var(--text);">
+          Voiceover Versions
+          <span class="badge badge-blue" style="font-size:9px;margin-left:6px;">${versions.length} saved</span>
+        </div>
+        <button onclick="showVersionHistory('voiceover')"
+                style="margin-left:auto;background:none;border:1px solid var(--border);
+                       border-radius:6px;color:var(--text2);font-size:11px;
+                       padding:3px 9px;cursor:pointer;font-family:inherit;">
+          View all →
+        </button>
+      </div>
+      <div>${rows}</div>
+    </div>`;
+}
+
 function renderAudio(d) {
   const files = (d && d.voiceover_files) ? d.voiceover_files : [];
 
@@ -2163,6 +2306,9 @@ function renderAudio(d) {
   // ── No audio yet ──────────────────────────────────────────────────────────
   if (!files.length) {
     return `
+      <!-- Input Segments -->
+      ${renderSrtSegments(d)}
+
       <!-- Voice Selector -->
       ${renderVoiceSelector()}
 
@@ -2236,6 +2382,12 @@ function renderAudio(d) {
   }).join('');
 
   return `
+    <!-- Input Segments (what was/will be spoken) -->
+    ${renderSrtSegments(d)}
+
+    <!-- Version History -->
+    ${renderVoiceoverVersions(d)}
+
     <!-- Existing audio players -->
     ${uploadBar}
     <div style="margin-bottom:16px;">${players}</div>

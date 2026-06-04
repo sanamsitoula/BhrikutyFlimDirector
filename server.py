@@ -955,6 +955,28 @@ class Handler(BaseHTTPRequestHandler):
         }
 
     @staticmethod
+    def _parse_srt_segments(srt_path: Path) -> list:
+        """Parse subtitles.srt → list of {index, ts, text} for the Audio tab preview."""
+        if not srt_path.exists():
+            return []
+        try:
+            raw    = srt_path.read_text(encoding="utf-8", errors="replace")
+            blocks = re.split(r'\n{2,}', raw.strip())
+            segs   = []
+            for block in blocks:
+                lines = [l.strip() for l in block.strip().split("\n") if l.strip()]
+                if len(lines) < 3 or not lines[0].isdigit() or "-->" not in lines[1]:
+                    continue
+                segs.append({
+                    "index": int(lines[0]),
+                    "ts":    lines[1],
+                    "text":  " ".join(lines[2:]),
+                })
+            return segs[:200]          # cap to avoid large payloads
+        except Exception:
+            return []
+
+    @staticmethod
     def _analyze_voiceover(vo_dir: Path) -> dict:
         if not vo_dir.exists():
             return {"exists": False}
@@ -1166,6 +1188,7 @@ class Handler(BaseHTTPRequestHandler):
             "voiceover_files": voiceover_files,
             "clips": clips,
             "voiceover_analysis": self._analyze_voiceover(vo_dir),
+            "srt_segments":       self._parse_srt_segments(phase_dir / "subtitles.srt"),
             "script_analysis":    script_analysis,
             "infographics_analysis": infographics_analysis,
             "music_analysis":     music_analysis,
@@ -1513,6 +1536,7 @@ class Handler(BaseHTTPRequestHandler):
         elif cmd_type == "tts":
             engine = data.get("engine", "edge")   # edge | kokoro | elevenlabs
             voice  = data.get("voice",  "").strip()
+            source = data.get("source", "auto").strip()  # auto | srt | script
             tts_script = BASE_DIR / "tools" / "tts" / f"{engine}_voiceover.py"
             if not tts_script.exists():
                 self._send_json({"error": f"TTS script not found: {tts_script}"}, 400)
@@ -1521,6 +1545,8 @@ class Handler(BaseHTTPRequestHandler):
                    "--project", project, "--phase", str(phase)]
             if voice:
                 cmd += ["--voice", voice]
+            if source and source != "auto":
+                cmd += ["--source", source]
 
         elif cmd_type == "compliance":
             cmd = [sys.executable, str(BASE_DIR / "tools" / "compliance_checker.py"),
