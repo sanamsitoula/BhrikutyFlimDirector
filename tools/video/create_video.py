@@ -220,6 +220,195 @@ def make_color_slide(index: int, title: str, brand: dict, out_png: Path,
     print(f"    [slide] {out_png.name} (Pillow)")
 
 
+# ── Script section slide generator ───────────────────────────────────────────
+
+def parse_script_sections(script_path: Path) -> list:
+    """Parse script.md into sections — handles multiple heading styles:
+      ## Markdown Heading
+      **(0:00-1:30) SECTION 1: Title**
+      **TITLE CARD 1: Title**
+      **(0:00-0:12) HOOK**
+
+    Returns list of {'title': str, 'bullets': [str, …]}.
+    """
+    if not script_path.exists():
+        return []
+
+    text     = script_path.read_text(encoding="utf-8", errors="replace")
+    sections, current = [], None
+
+    # Patterns that start a new section
+    _sec_patterns = [
+        # ## Heading or ### Heading
+        re.compile(r'^#{2,3}\s+(?!.*Script:)(.+)$'),
+        # **(timestamp) SECTION N: Title**  or  **(timestamp) HOOK**
+        re.compile(r'^\*\*\([\d:]+\s*[-–]\s*[\d:]+\)\s+(?:SECTION\s+\d+:\s*|CHAPTER\s+\d+:\s*)?(.+?)\*\*$'),
+        # **TITLE CARD N: Title** or **SEGMENT N: Title**
+        re.compile(r'^\*\*(?:TITLE\s+CARD|SEGMENT|PART|SECTION)\s+\d+:\s*(.+?)\*\*$'),
+    ]
+
+    def _flush():
+        if current and (current["bullets"] or current.get("_has_narration")):
+            sections.append(current)
+
+    for raw in text.split("\n"):
+        line = raw.strip()
+
+        # Try each section-start pattern
+        matched = False
+        for pat in _sec_patterns:
+            m = pat.match(line)
+            if m:
+                _flush()
+                title = m.group(1).strip().rstrip("**").strip()
+                # Skip the file-title line (e.g. "Eco World YouTube Video Script: …")
+                if "script:" in title.lower() or len(title) > 80:
+                    current = None
+                else:
+                    current = {"title": title, "bullets": [], "_has_narration": False}
+                matched = True
+                break
+        if matched:
+            continue
+
+        if current is None:
+            continue
+
+        # Skip stage directions, blank lines, HTML, tables
+        if (not line or line.startswith("[") or line.startswith("(SOUND")
+                or line.startswith("ON-SCREEN") or line.startswith("SUBTITLES")
+                or line.startswith("```") or line.startswith("|")
+                or line.startswith("---") or line.startswith("<")):
+            continue
+
+        # Narration header: **NARRATION:** / NARRATION: / **NARRATION**:
+        if re.match(r'^\*{0,2}(NARRATION|SPOKEN|VOICEOVER|VO)[*\s]*:', line, re.IGNORECASE):
+            current["_has_narration"] = True
+            # Inline text that follows the colon on the same line
+            narr = re.sub(r'^\*{0,2}[A-Z]+[*\s]*:\s*', '', line, flags=re.IGNORECASE)
+            narr = narr.strip(" *")  # strip trailing ** from **NARRATION:**
+            if narr and not narr.startswith("[") and len(narr) > 10 \
+                    and len(current["bullets"]) < 5:
+                current["bullets"].append(narr[:115])
+            continue
+
+        # Narration continuation — plain lines after the NARRATION: header
+        # Reset on stage directions, bold headers, dividers
+        if current.get("_has_narration"):
+            if (line.startswith("[") or line.startswith("ON-SCREEN")
+                    or line.startswith("---") or line.startswith("**")
+                    or line.startswith("(") or re.match(r'^[A-Z ]{6,}:', line)):
+                current["_has_narration"] = False
+            elif len(line) > 15 and len(current["bullets"]) < 5:
+                current["bullets"].append(line[:115])
+
+    _flush()
+    return sections[:16]   # cap at 16; ~16 × 27s ≈ 7-min video
+
+
+def make_section_slide(title: str, bullets: list, section_num: int,
+                       brand: dict, out_png: Path,
+                       width: int = 1920, height: int = 1080):
+    """Branded section slide: large title + up to 4 key-point bullets."""
+    from PIL import Image, ImageDraw
+    import textwrap
+
+    colors   = brand.get("colors", {})
+    bg_hex   = colors.get("background", {}).get("hex", "#0A0E1A")
+    acc_hex  = colors.get("primary",    {}).get("hex", "#00D4AA")
+    fg_hex   = colors.get("secondary",  {}).get("hex", "#F5A623")
+    bname    = brand.get("brand_name",  "Brand")[:38]
+
+    img  = Image.new("RGB", (width, height), _hex_to_rgb(bg_hex))
+    draw = ImageDraw.Draw(img)
+
+    # ── Top accent bar ──────────────────────────────────────────────────────
+    draw.rectangle([(0, 0), (width, 8)], fill=_hex_to_rgb(acc_hex))
+
+    # ── Section counter badge ───────────────────────────────────────────────
+    badge_font = _find_font(30)
+    badge_txt  = f"§ {section_num:02d}"
+    draw.text((52, 40), badge_txt, fill=_hex_to_rgb(acc_hex), font=badge_font)
+
+    # ── Brand name (right side) ─────────────────────────────────────────────
+    brand_font = _find_font(30)
+    try:
+        bb = draw.textbbox((0, 0), bname, font=brand_font)
+        draw.text((width - bb[2] - bb[0] - 52, 40), bname,
+                  fill=_hex_to_rgb(acc_hex), font=brand_font)
+    except Exception:
+        draw.text((width - 260, 40), bname, fill=_hex_to_rgb(acc_hex), font=brand_font)
+
+    # ── Thin divider ────────────────────────────────────────────────────────
+    draw.line([(80, 115), (width - 80, 115)],
+              fill=(*_hex_to_rgb(acc_hex), 90), width=2)
+
+    # ── Section title (word-wrapped, two lines max) ─────────────────────────
+    title_font  = _find_font(78)
+    title_lines = textwrap.wrap(title, width=38)
+    ty = 148
+    for tl in title_lines[:2]:
+        _draw_centered(draw, ty, tl, title_font, _hex_to_rgb(fg_hex), width)
+        ty += 92
+
+    # ── Horizontal rule below title ─────────────────────────────────────────
+    rule_y = ty + 14
+    draw.line([(width // 4, rule_y), (3 * width // 4, rule_y)],
+              fill=(*_hex_to_rgb(acc_hex), 60), width=1)
+
+    # ── Bullet points ───────────────────────────────────────────────────────
+    bullet_font = _find_font(38)
+    by = max(rule_y + 40, height // 2 - 30)
+    for bullet in bullets[:4]:
+        for bl in textwrap.wrap(bullet, width=72)[:2]:
+            if by > height - 120:
+                break
+            draw.text((90, by), f"▸  {bl}", fill=(175, 195, 220), font=bullet_font)
+            by += 52
+
+    # ── Bottom brand strip ──────────────────────────────────────────────────
+    strip_font = _find_font(26)
+    draw.rectangle([(0, height - 44), (width, height)],
+                   fill=tuple(max(0, c - 18) for c in _hex_to_rgb(bg_hex)))
+    draw.text((52, height - 36), bname, fill=_hex_to_rgb(acc_hex), font=strip_font)
+
+    img.save(str(out_png), "PNG")
+    print(f"    [section] {out_png.name} — {title[:48]}")
+
+
+def _build_slide_order(cards: list, sections: list) -> list:
+    """Return ordered list of (type, data) interleaving cards into sections.
+
+    types: 'card' → Path to HTML file
+           'section' → {'title': str, 'bullets': [...]}
+
+    Cards are placed at evenly-spaced positions inside the section list
+    so the infographic cards appear at visually logical break-points.
+    """
+    if not sections:
+        return [("card", c) for c in cards]
+    if not cards:
+        return [("section", s) for s in sections]
+
+    result   = []
+    interval = max(1, len(sections) // len(cards))
+    card_idx = 0
+
+    for i, sec in enumerate(sections):
+        result.append(("section", sec))
+        # Insert a card after every `interval` sections
+        if card_idx < len(cards) and (i + 1) % interval == 0:
+            result.append(("card", cards[card_idx]))
+            card_idx += 1
+
+    # Append any remaining cards at the very end
+    while card_idx < len(cards):
+        result.append(("card", cards[card_idx]))
+        card_idx += 1
+
+    return result
+
+
 # ── Build per-card video clips ────────────────────────────────────────────────
 
 def image_to_clip(img: Path, duration: float, out_mp4: Path,
@@ -265,12 +454,16 @@ def mix_audio(video: Path, audio: Path, out_mp4: Path, burn_srt: Path = None):
     """Mix voiceover into video. Optionally burn subtitles."""
     vf_filter = ""
     if burn_srt and burn_srt.exists():
-        # On Windows paths need forward-slashes; colon in drive letter must be escaped
         safe_srt = str(burn_srt).replace("\\", "/")
-        # Escape the colon in Windows drive letter e.g. C:/... → C\:/...
         if len(safe_srt) > 1 and safe_srt[1] == ":":
             safe_srt = safe_srt[0] + "\\:" + safe_srt[2:]
-        vf_filter = f"subtitles='{safe_srt}':force_style='FontSize=28,PrimaryColour=&Hffffff&'"
+        # FontSize=14 (half of 28), bottom margin, thin outline, no bold
+        vf_filter = (
+            f"subtitles='{safe_srt}':force_style='"
+            f"FontSize=14,PrimaryColour=&Hffffff&,"
+            f"Outline=2,Shadow=1,Bold=0,MarginV=30,"
+            f"BorderStyle=3,BackColour=&H80000000&'"
+        )
 
     cmd = ["ffmpeg", "-y", "-i", str(video), "-i", str(audio)]
     if vf_filter:
@@ -385,78 +578,102 @@ def main():
         total_sec = len(cards) * 8.0  # 8 seconds per card fallback
         print(f"[1/5] No audio — using {total_sec:.0f}s ({len(cards)} cards × 8s)")
 
-    duration_per_card = total_sec / len(cards)
-    print(f"       Duration per card: {duration_per_card:.1f}s\n")
+    # ── Parse script sections → more slides ─────────────────────────────────
+    script_path = phase_dir / "script.md"
+    sections    = parse_script_sections(script_path)
 
-    # ── Screenshots / slides ────────────────────────────────────────────────
+    # Build ordered slide list: section slides interleaved with HTML card images
+    slide_order = _build_slide_order(cards, sections)
+    n_slides    = len(slide_order)
+
+    duration_per_slide = total_sec / n_slides
+    print(f"       {len(cards)} infographic cards  +  {len(sections)} script sections  "
+          f"=  {n_slides} total slides")
+    print(f"       Duration per slide: {duration_per_slide:.1f}s\n")
+
+    # ── Screenshot / slide generation ────────────────────────────────────────
     use_playwright = not args.no_screenshots and _check_playwright()
-    print(f"[2/5] Generating card images "
-          f"({'Playwright screenshots' if use_playwright else 'FFmpeg color slides'})...")
+    renderer = "Playwright screenshots" if use_playwright else "Pillow branded slides"
+    print(f"[2/5] Generating {n_slides} slide images  ({renderer})...")
 
     with tempfile.TemporaryDirectory() as tmp:
-        tmp = Path(tmp)
-        slide_imgs, card_clips = [], []
+        tmp       = Path(tmp)
+        all_clips = []
 
-        for i, card_html in enumerate(cards):
-            img_path  = tmp / f"slide_{i:02d}.png"
-            clip_path = tmp / f"clip_{i:02d}.mp4"
+        for i, (slide_type, slide_data) in enumerate(slide_order):
+            img_path  = tmp / f"slide_{i:03d}.png"
+            clip_path = tmp / f"clip_{i:03d}.mp4"
 
-            # ── Image ──────────────────────────────────────────────────────
-            if use_playwright:
-                try:
-                    screenshot_card(card_html, img_path, 1920, 1080)
-                except Exception as e:
-                    print(f"    [WARN] Playwright failed: {e} — using color slide")
+            # ── Render image ────────────────────────────────────────────────
+            if slide_type == "card":
+                card_html = slide_data
+                if use_playwright:
+                    try:
+                        screenshot_card(card_html, img_path, 1920, 1080)
+                    except Exception as e:
+                        print(f"    [WARN] Playwright failed ({card_html.name}): {e} — Pillow fallback")
+                        make_color_slide(i + 1, topic, brand, img_path, 1920, 1080)
+                else:
                     make_color_slide(i + 1, topic, brand, img_path, 1920, 1080)
-            else:
-                make_color_slide(i + 1, topic, brand, img_path, 1920, 1080)
 
-            slide_imgs.append(img_path)
+            else:  # 'section'
+                sec = slide_data
+                make_section_slide(
+                    sec["title"], sec["bullets"],
+                    section_num=i + 1,
+                    brand=brand,
+                    out_png=img_path,
+                    width=1920, height=1080,
+                )
 
-            # ── Clip ──────────────────────────────────────────────────────
-            print(f"    clip {i+1}/{len(cards)} ({duration_per_card:.1f}s)...")
-            image_to_clip(img_path, duration_per_card, clip_path, 1920, 1080, args.fps)
-            card_clips.append(clip_path)
+            # ── Image → clip ─────────────────────────────────────────────────
+            print(f"    [{slide_type:7s}] clip {i+1:02d}/{n_slides}  ({duration_per_slide:.0f}s)  {img_path.name}")
+            image_to_clip(img_path, duration_per_slide, clip_path, 1920, 1080, args.fps)
+            all_clips.append(clip_path)
 
-        # ── Concatenate ────────────────────────────────────────────────────
-        print(f"\n[3/5] Concatenating {len(card_clips)} clips...")
+        # ── Concatenate all clips ─────────────────────────────────────────────
+        print(f"\n[3/5] Concatenating {len(all_clips)} clips...")
         concat_vid = tmp / "concat.mp4"
         concat_txt = tmp / "concat.txt"
-        concat_clips(card_clips, concat_txt, concat_vid)
+        concat_clips(all_clips, concat_txt, concat_vid)
 
-        # ── Mix audio ──────────────────────────────────────────────────────
+        # ── Mix audio (+ optional subtitles) ─────────────────────────────────
         final_out = out_base / "youtube" / "final_1080p.mp4"
         final_out.parent.mkdir(parents=True, exist_ok=True)
-
-        print(f"[4/5] Mixing audio{' + burning subtitles' if srt_path.exists() and args.burn_subs else ''}...")
+        burn = srt_path.exists() and args.burn_subs
+        print(f"[4/5] Mixing audio{' + burning subtitles (FontSize=14)' if burn else ''}...")
         if audio_path:
             mix_audio(concat_vid, audio_path, final_out,
                       srt_path if args.burn_subs else None)
         else:
-            import shutil
-            shutil.copy(str(concat_vid), str(final_out))
+            import shutil as _sh
+            _sh.copy(str(concat_vid), str(final_out))
 
         size_mb = round(final_out.stat().st_size / 1024 / 1024, 2)
         print(f"  -> {final_out}  ({size_mb} MB)")
 
-        # ── Shorts ─────────────────────────────────────────────────────────
+        # ── Shorts ───────────────────────────────────────────────────────────
         if args.shorts:
-            print(f"\n[5/5] Creating YouTube Shorts (1080x1920)...")
+            print(f"\n[5/5] Creating YouTube Shorts 9:16 (1080×1920)...")
             shorts_out = out_base / "youtube_shorts" / "short_1080x1920.mp4"
             shorts_out.parent.mkdir(parents=True, exist_ok=True)
             make_shorts(final_out, shorts_out)
-            print(f"  -> {shorts_out}")
+            size_s = round(shorts_out.stat().st_size / 1024 / 1024, 2)
+            print(f"  -> {shorts_out}  ({size_s} MB)")
         else:
-            print(f"[5/5] Skipped Shorts (use --shorts to generate)")
+            print("[5/5] Shorts skipped (pass --shorts to enable)")
 
     print(f"\n{'='*58}")
-    print(f"  DONE — Video ready!")
-    print(f"  YouTube:  _output/phase_{args.phase:02d}/youtube/final_1080p.mp4")
+    print(f"  DONE  —  {n_slides} slides  ·  {total_sec/60:.1f} min")
+    print(f"  YouTube : _output/phase_{args.phase:02d}/youtube/final_1080p.mp4")
     if args.shorts:
-        print(f"  Shorts:   _output/phase_{args.phase:02d}/youtube_shorts/short_1080x1920.mp4")
-    print(f"\n  Improve card rendering:")
-    print(f"  pip install playwright && playwright install chromium")
-    print(f"  (then re-run — cards will be screenshotted with full CSS animations)")
+        print(f"  Shorts  : _output/phase_{args.phase:02d}/youtube_shorts/short_1080x1920.mp4")
+    print(f"\n  Slides breakdown:")
+    print(f"    • {len(cards)} infographic cards   (HTML → screenshot or Pillow)")
+    print(f"    • {len(sections)} script sections  (title + key points from script.md)")
+    print(f"\n  To get full HTML card quality:")
+    print(f"    pip install playwright")
+    print(f"    playwright install chromium")
     print(f"{'='*58}\n")
 
 

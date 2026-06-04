@@ -34,16 +34,28 @@ except ImportError:
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent / "youtube_scripts" / "setup" / "projects"
 
-# High-quality English voices — pick your preference
-RECOMMENDED_VOICES = [
-    ("en-US-JennyNeural",   "US Female   — warm, clear, great for education"),
-    ("en-US-GuyNeural",     "US Male     — professional, calm narrator"),
-    ("en-US-AriaNeural",    "US Female   — expressive, natural"),
-    ("en-GB-SoniaNeural",   "UK Female   — polished, authoritative"),
-    ("en-GB-RyanNeural",    "UK Male     — deep, documentary-style"),
-    ("en-AU-NatashaNeural", "AUS Female  — friendly, conversational"),
+# ── Recommended voices ───────────────────────────────────────────────────────
+# South Asian / Nepali male  (best match for bold Asian male narrator)
+SOUTH_ASIAN_MALE = [
+    ("en-IN-PrabhatNeural",  "en-IN Male  — Indian English, bold professional narrator ⭐"),
+    ("ne-NP-SagarNeural",    "ne-NP Male  — Native Nepali male voice (for Nepali scripts)"),
+    ("hi-IN-MadhurNeural",   "hi-IN Male  — Hindi male narrator (for Hindi scripts)"),
 ]
-DEFAULT_VOICE = "en-US-JennyNeural"
+
+# All recommended voices
+RECOMMENDED_VOICES = [
+    ("en-IN-PrabhatNeural",  "IN Male  ⭐ — Indian English, bold male narrator (default)"),
+    ("ne-NP-SagarNeural",    "NP Male     — Native Nepali male (for Nepali scripts)"),
+    ("hi-IN-MadhurNeural",   "IN Male     — Hindi male narrator (for Hindi scripts)"),
+    ("en-US-GuyNeural",      "US Male     — professional American narrator"),
+    ("en-GB-RyanNeural",     "UK Male     — deep documentary-style male"),
+    ("en-US-JennyNeural",    "US Female   — warm, clear, education-style"),
+    ("en-GB-SoniaNeural",    "UK Female   — polished, authoritative"),
+    ("en-AU-NatashaNeural",  "AUS Female  — friendly, conversational"),
+]
+
+# Default: Indian English male — bold, professional, 30-35 age range
+DEFAULT_VOICE = "en-IN-PrabhatNeural"
 
 
 def extract_spoken_text(script_path: Path) -> str:
@@ -85,21 +97,32 @@ def synthesize(text: str, voice: str, out_path: Path):
 
 async def _list_voices():
     voices = await edge_tts.list_voices()
-    en_voices = [v for v in voices if v["Locale"].startswith("en-")]
+    # Show South Asian + all English voices
+    sa_locales = {"en-IN", "ne-NP", "hi-IN", "en-SG", "en-PH"}
+    sa_voices  = [v for v in voices if v["Locale"] in sa_locales]
+    en_voices  = [v for v in voices if v["Locale"].startswith("en-")]
+
     print(f"\n{'='*65}")
-    print("  English voices available (edge-tts)")
+    print("  ⭐ South Asian / Nepali / Hindi Male Voices (recommended)")
+    print(f"{'='*65}")
+    for v in sorted(sa_voices, key=lambda x: x["Locale"]):
+        marker = " ← DEFAULT" if v["ShortName"] == DEFAULT_VOICE else ""
+        print(f"  {v['ShortName']:<40} {v['Gender']:<8} {v['Locale']}{marker}")
+
+    print(f"\n{'='*65}")
+    print("  All English voices available (edge-tts)")
     print(f"{'='*65}")
     for v in sorted(en_voices, key=lambda x: x["Locale"]):
-        print(f"  {v['ShortName']:<35} {v['Gender']:<7} {v['Locale']}")
+        print(f"  {v['ShortName']:<40} {v['Gender']:<8} {v['Locale']}")
     print(f"\nTotal English voices: {len(en_voices)}")
-    print("\nUsage: --voice en-US-JennyNeural")
+    print(f"\nUsage: --voice en-IN-PrabhatNeural")
 
 
 def main():
     parser = argparse.ArgumentParser(
         description="Generate voiceover with Microsoft Edge TTS (free, no API key)"
     )
-    parser.add_argument("--project",     default="chain_clarity")
+    parser.add_argument("--project",     required=True)
     parser.add_argument("--phase",       type=int, default=0)
     parser.add_argument("--voice",       default=DEFAULT_VOICE,
                         help=f"Voice name (default: {DEFAULT_VOICE}). Use --list-voices to see all.")
@@ -153,12 +176,13 @@ def main():
     print(f"\n[DONE] Listen in dashboard:")
     print(f"  http://localhost:8080/phase/{args.project}/{args.phase}  -> Audio tab")
     print()
-    print("Other voices to try:")
-    for name, note in RECOMMENDED_VOICES[:4]:
+    print("\n━━ South Asian / male voices to try ━━━━━━━━━━━━━━━━━━━")
+    for name, note in SOUTH_ASIAN_MALE:
         if name != args.voice:
             print(f"  python tools/tts/edge_tts_voiceover.py "
                   f"--project {args.project} --phase {args.phase} --voice {name}")
             print(f"    # {note}")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
 
 if __name__ == "__main__":
