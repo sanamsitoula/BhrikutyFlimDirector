@@ -392,6 +392,11 @@ class Handler(BaseHTTPRequestHandler):
             body   = self.rfile.read(length)
             data   = json.loads(body) if body else {}
             self._api_create_phase(data)
+        elif path == "/api/log-view":
+            length = int(self.headers.get("Content-Length", 0))
+            body   = self.rfile.read(length)
+            data   = json.loads(body) if body else {}
+            self._api_log_view(data)
         elif path == "/api/upload-clip":
             length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(length)
@@ -1169,6 +1174,7 @@ class Handler(BaseHTTPRequestHandler):
             "brand": brand_profile,
             "roadmap_phase": roadmap_phase,
             "step_versions": _scan_step_versions(phase_dir, output_dir),
+            "view_counts":   self._get_view_counts(project, phase),
         })
 
     def _api_file(self, project: str, phase: int, filename: str):
@@ -1380,6 +1386,30 @@ class Handler(BaseHTTPRequestHandler):
             ],
         }
         self._send_json(status)
+
+    def _get_view_counts(self, project: str, phase: int) -> dict:
+        try:
+            from db.db import get_view_counts, is_available as _dbok
+            if _dbok():
+                return get_view_counts(project, phase)
+        except Exception:
+            pass
+        return {}
+
+    def _api_log_view(self, data: dict):
+        """Record a content-view event in PostgreSQL (best-effort)."""
+        project   = data.get("project", "").strip()
+        phase     = int(data.get("phase", 1))
+        action    = data.get("action", "").strip()
+        step_name = data.get("step_name", "").strip()
+        file_name = action.split(":")[-1] if ":" in action else action
+        try:
+            from db.db import log_content_view, is_available as _dbok
+            if _dbok():
+                log_content_view(project, phase, step_name, file_name, action)
+        except Exception as e:
+            print(f"  [VIEW LOG] {e}")
+        self._send_json({"ok": True})
 
     def _api_create_phase(self, data: dict):
         """Scaffold a new phase directory and register it in the DB.

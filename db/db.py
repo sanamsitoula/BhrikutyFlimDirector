@@ -350,6 +350,41 @@ def list_files(brand_slug: str, phase_num: int | None = None) -> list:
         return []
 
 
+# ── Content view tracker ─────────────────────────────────────────────────────
+
+def log_content_view(brand_slug: str, phase_num: int,
+                     step_key: str, file_name: str, action: str) -> bool:
+    """Record that a user opened a content viewer for this step/file."""
+    try:
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO content_views (brand_slug, phase_num, step_key, file_name, action)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (brand_slug, phase_num, step_key, file_name, action))
+        return True
+    except Exception as e:
+        log.warning("log_content_view failed: %s", e)
+        return False
+
+
+def get_view_counts(brand_slug: str, phase_num: int) -> dict:
+    """Return view count per file_name for a phase."""
+    try:
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT file_name, COUNT(*) as views
+                FROM content_views
+                WHERE brand_slug = %s AND phase_num = %s
+                GROUP BY file_name ORDER BY views DESC
+            """, (brand_slug, phase_num))
+            return {row["file_name"]: row["views"] for row in cur.fetchall()}
+    except Exception as e:
+        log.warning("get_view_counts failed: %s", e)
+        return {}
+
+
 # ── Asset versioning ─────────────────────────────────────────────────────────
 
 def record_asset_version(brand_slug: str, phase_num: int, step_key: str,

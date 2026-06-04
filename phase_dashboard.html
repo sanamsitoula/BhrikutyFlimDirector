@@ -687,8 +687,12 @@ function renderPipelineTable(steps) {
     const chips = (s.key_files || []).slice(0, 3).map(f => {
       const viewable = (f.endsWith('.md') || f.endsWith('.srt') || f.endsWith('.json'))
                        && !f.startsWith('_output');
+      const vc = phaseData?.view_counts?.[f];
+      const vcTip = vc ? ` · ${vc} view${vc>1?'s':''}` : '';
       return viewable
-        ? `<span class="step-file-chip" style="cursor:pointer;border-color:rgba(0,212,170,.25);" onclick="handleStepAction('view:${f}','${f}')" title="Open ${f}">${f}</span>`
+        ? `<span class="step-file-chip" style="cursor:pointer;border-color:rgba(0,212,170,.25);"
+                onclick="openContentModal('view:${f}','${f}')"
+                title="Click to preview ${f}${vcTip}">${f}${vc?`<span style='opacity:.6;font-size:9px;margin-left:3px;'>👁${vc}</span>`:''}</span>`
         : `<span class="step-file-chip">${f}</span>`;
     }).join('');
 
@@ -758,8 +762,8 @@ function renderPipelineTable(steps) {
             <div style="display:flex;gap:4px;justify-content:flex-end;">
               <button class="step-action-btn view" style="font-size:10px;padding:3px 8px;" onclick="toggleCmd('${cmdId}')">$ CMD</button>
               ${ss.id === '1_8' && ssDone
-                ? `<button class="step-action-btn preview" style="font-size:10px;padding:3px 8px;" onclick="switchTab('infographics',document.querySelectorAll('.tab-btn')[3])">🃏 View</button>`
-                : ssViewable ? `<button class="step-action-btn view" style="font-size:10px;padding:3px 8px;" onclick="handleStepAction('view:${ss.file}','${ss.name}')">👁</button>` : ''}
+                ? `<button class="step-action-btn preview" style="font-size:10px;padding:3px 8px;" onclick="openContentModal('tab:infographics','Infographic Cards')">🃏 View</button>`
+                : ssViewable ? `<button class="step-action-btn view" style="font-size:10px;padding:3px 8px;" onclick="openContentModal('view:${ss.file}','${ss.name}')">👁</button>` : ''}
             </div>
           </td>
         </tr>
@@ -790,22 +794,235 @@ const _FILE_TAB_MAP = {
   'clip_brief.md':               ['video',      6],
 };
 
-function handleStepAction(action, stepName) {
-  if (action.startsWith('view:')) {
-    const file = action.split(':')[1];
-    const entry = _FILE_TAB_MAP[file];
-    if (entry) {
-      const [tabId, tabIdx] = entry;
-      const btn = document.querySelectorAll('.tab-btn')[tabIdx];
-      switchTab(tabId, btn);
+// ─────────────────────────────────────────────────
+// CONTENT MODAL — universal pop-up viewer for any step output
+// ─────────────────────────────────────────────────
+
+function _fileIcon(ext) {
+  return {md:'📄',srt:'💬',json:'⚙️',html:'🃏',mp3:'🎧',wav:'🎧',mp4:'🎬',png:'🖼️',jpg:'🖼️'}[ext] || '📁';
+}
+
+function _closeContentModal() {
+  const el = document.getElementById('cm-backdrop');
+  if (el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 150); }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') _closeContentModal(); });
+
+function _ensureBackdrop() {
+  let el = document.getElementById('cm-backdrop');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'cm-backdrop';
+    el.style.cssText = `
+      position:fixed;top:0;left:0;right:0;bottom:0;
+      background:rgba(0,0,0,.78);backdrop-filter:blur(4px);
+      z-index:8000;display:flex;align-items:center;justify-content:center;
+      transition:opacity .15s;`;
+    el.onclick = ev => { if (ev.target === el) _closeContentModal(); };
+    document.body.appendChild(el);
+  }
+  el.style.opacity = '1';
+  return el;
+}
+
+function _cmShell(headerHtml, bodyHtml, width = '900px') {
+  return `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;
+                width:min(${width},95vw);max-height:90vh;overflow:hidden;
+                display:flex;flex-direction:column;
+                box-shadow:0 24px 80px rgba(0,0,0,.6);animation:fadeInOverlay .15s ease;">
+      <div style="flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);">
+        ${headerHtml}
+      </div>
+      <div style="flex:1;overflow-y:auto;">${bodyHtml}</div>
+    </div>`;
+}
+
+async function openContentModal(action, stepName) {
+  const bd = _ensureBackdrop();
+  // Spinner while loading
+  bd.innerHTML = _cmShell(
+    `<div style="padding:14px 18px;font-size:13px;font-weight:700;color:var(--text);">Loading…</div>`,
+    `<div style="display:flex;justify-content:center;padding:40px;">
+       <div style="width:28px;height:28px;border:3px solid var(--border);
+                   border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;"></div>
+     </div>`
+  );
+
+  try {
+    if (action === 'tab:infographics') {
+      await _cmRenderCards(bd, stepName);
+    } else if (action.startsWith('view:')) {
+      await _cmRenderFile(bd, action.split(':')[1], stepName);
     } else {
-      // Fallback: show in All Files inline viewer
-      switchTab('files', document.querySelectorAll('.tab-btn')[8]);
-      setTimeout(() => viewFile(file), 120);
+      _closeContentModal();
+      return;
     }
-  } else if (action === 'tab:infographics') {
-    switchTab('infographics', document.querySelectorAll('.tab-btn')[3]);
-  } else if (action === 'run:video') {
+    // Log view to DB (best-effort, no await)
+    fetch('/api/log-view', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({project:PROJECT, phase:PHASE, action, step_name:stepName})
+    }).catch(() => {});
+  } catch(e) {
+    bd.innerHTML = _cmShell(
+      `<div style="padding:14px 18px;display:flex;align-items:center;gap:10px;">
+         <span style="font-size:13px;font-weight:700;color:var(--red);">Error</span>
+         <button onclick="_closeContentModal()" style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text2);padding:4px 10px;cursor:pointer;">✕</button>
+       </div>`,
+      `<div style="padding:20px;color:var(--red);font-size:12px;">${esc(e.message)}</div>`
+    );
+  }
+}
+
+async function _cmRenderFile(bd, filename, stepName) {
+  const r = await fetch(`/api/file?project=${PROJECT}&phase=${PHASE}&file=${encodeURIComponent(filename)}`);
+  if (!r.ok) throw new Error(`File not found: ${filename}`);
+  const data = await r.json();
+  const content  = data.content || '';
+  const ext      = filename.split('.').pop().toLowerCase();
+  const sizeKb   = (content.length / 1024).toFixed(1);
+  const isHtml   = ext === 'html';
+  const mediaUrl = `/media/${PROJECT}/${PHASE}/infographic_assets/${filename}`;
+  const dlUrl    = `/media/${PROJECT}/${PHASE}/${filename}`;
+  const tabId    = 'cm-body-' + Math.random().toString(36).slice(2);
+
+  // View count badge from phaseData
+  const vc = phaseData?.view_counts?.[filename];
+  const viewBadge = vc ? `<span class="badge badge-blue" style="font-size:9px;">👁 ${vc} view${vc>1?'s':''}</span>` : '';
+
+  const header = `
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;flex-wrap:wrap;">
+      <span style="font-size:18px;">${_fileIcon(ext)}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;color:var(--text);
+                    font-family:'Courier New',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          ${esc(filename)}
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span>${esc(stepName)}</span>
+          <span>·</span><span>${sizeKb} KB</span>
+          <span>·</span><span>${esc(PROJECT)}/phase_${PHASE}</span>
+          ${viewBadge}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
+        <button class="step-action-btn view" style="font-size:11px;"
+                onclick="navigator.clipboard.writeText(document.getElementById('${tabId}')?.textContent||'').then(()=>showToast('Copied!'))">
+          📋 Copy
+        </button>
+        <a href="${dlUrl}" download="${esc(filename)}"
+           class="step-action-btn view" style="font-size:11px;text-decoration:none;">⬇ Download</a>
+        ${isHtml
+          ? `<a href="${mediaUrl}" target="_blank" class="step-action-btn preview" style="font-size:11px;text-decoration:none;">🔗 New Tab</a>`
+          : `<a href="${dlUrl}" target="_blank" class="step-action-btn preview" style="font-size:11px;text-decoration:none;">🔗 New Tab</a>`
+        }
+        <button onclick="_closeContentModal()" style="background:none;border:1px solid var(--border);
+                border-radius:6px;color:var(--text2);padding:4px 10px;cursor:pointer;font-size:16px;line-height:1;">✕</button>
+      </div>
+    </div>`;
+
+  const body = isHtml
+    ? `<div style="position:relative;width:100%;padding-top:56.25%;background:#0A0E1A;">
+         <iframe src="${mediaUrl}"
+                 style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"></iframe>
+       </div>`
+    : `<div id="${tabId}" class="file-content ${data.type==='json'?'json':''}"
+             style="padding:20px 24px;min-height:200px;font-family:'Courier New',monospace;
+                    font-size:12.5px;line-height:1.75;color:#8A97B0;
+                    white-space:pre-wrap;word-break:break-word;tab-size:2;">
+         ${colorize(content, data.type, filename)}
+       </div>`;
+
+  bd.innerHTML = _cmShell(header, body, '900px');
+}
+
+async function _cmRenderCards(bd, stepName) {
+  const cards     = phaseData?.cards    || [];
+  const cardUrls  = phaseData?.card_urls|| {};
+  if (!cards.length) throw new Error('No infographic cards found for this phase.');
+
+  const tabButtons = cards.map((c, i) => `
+    <button id="cm-tab-${i}" onclick="_cmSwitchCard(${i})"
+            style="padding:8px 16px;background:${i===0?'var(--teal)':'var(--bg)'};
+                   color:${i===0?'var(--bg)':'var(--text2)'};
+                   border:1px solid ${i===0?'var(--teal)':'var(--border)'};
+                   border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;
+                   font-family:'Courier New',monospace;transition:all .15s;">
+      ${esc(c)}
+    </button>`).join('');
+
+  const cardPanels = cards.map((c, i) => {
+    const info = cardUrls[c] || {};
+    const url  = info.url || `/media/${PROJECT}/${PHASE}/infographic_assets/${c}`;
+    const siz  = info.size ? `${(info.size/1024).toFixed(0)} KB` : '';
+    return `
+      <div id="cm-card-${i}" style="display:${i===0?'block':'none'};">
+        <div style="position:relative;width:100%;padding-top:56.25%;background:#0A0E1A;overflow:hidden;">
+          <iframe src="${url}"
+                  style="position:absolute;top:0;left:0;width:1080px;height:1080px;
+                         transform-origin:top left;border:none;
+                         transform:scale(calc(100vw * 0.85 / 1080));"
+                  id="cm-iframe-${i}"></iframe>
+        </div>
+        <div style="padding:10px 16px;background:var(--bg2);border-top:1px solid var(--border);
+                    display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted);">
+          <span>${esc(c)}</span><span>·</span><span>${siz}</span>
+          <a href="${url}" target="_blank" class="step-action-btn view"
+             style="margin-left:auto;font-size:10px;text-decoration:none;">Open full size ↗</a>
+        </div>
+      </div>`;
+  }).join('');
+
+  const header = `
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;flex-wrap:wrap;">
+      <span style="font-size:18px;">🃏</span>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:700;color:var(--text);">Infographic Cards</div>
+        <div style="font-size:11px;color:var(--muted);">${cards.length} cards · ${esc(PROJECT)}/phase_${PHASE}</div>
+      </div>
+      <button onclick="_closeContentModal()" style="background:none;border:1px solid var(--border);
+              border-radius:6px;color:var(--text2);padding:4px 10px;cursor:pointer;font-size:16px;line-height:1;">✕</button>
+    </div>
+    <div style="display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap;">${tabButtons}</div>`;
+
+  bd.innerHTML = _cmShell(header,
+    `<div style="background:#0A0E1A;">${cardPanels}</div>`,
+    '1000px');
+
+  // Scale iframes to fit
+  requestAnimationFrame(() => {
+    cards.forEach((_, i) => {
+      const iframe = document.getElementById(`cm-iframe-${i}`);
+      if (!iframe) return;
+      const container = iframe.parentElement;
+      const scale = container.offsetWidth / 1080;
+      iframe.style.transform = `scale(${scale})`;
+      iframe.style.height = `${1080 * scale}px`;
+      container.style.paddingTop = `${1080 * scale}px`;
+    });
+  });
+}
+
+function _cmSwitchCard(idx) {
+  // Hide all panels, show selected
+  document.querySelectorAll('[id^="cm-card-"]').forEach((el, i) => {
+    el.style.display = i === idx ? 'block' : 'none';
+  });
+  document.querySelectorAll('[id^="cm-tab-"]').forEach((btn, i) => {
+    btn.style.background   = i === idx ? 'var(--teal)' : 'var(--bg)';
+    btn.style.color        = i === idx ? 'var(--bg)'   : 'var(--text2)';
+    btn.style.borderColor  = i === idx ? 'var(--teal)' : 'var(--border)';
+  });
+}
+
+function handleStepAction(action, stepName) {
+  // All "view" and "tab:infographics" actions → content modal
+  if (action.startsWith('view:') || action === 'tab:infographics') {
+    openContentModal(action, stepName);
+    return;
+  }
+  if (action === 'run:video') {
     switchTab('video', document.querySelectorAll('.tab-btn')[6]);
     runToolCmd({project: PROJECT, phase: PHASE, cmd_type: 'create_video'});
   } else if (action === 'run:cuts') {

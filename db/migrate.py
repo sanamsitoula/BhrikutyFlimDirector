@@ -148,6 +148,22 @@ MIGRATIONS = [
     """),
 
     # ── Asset versioning ──────────────────────────────────────────────────────────
+    ("create_content_views", """
+        CREATE TABLE IF NOT EXISTS content_views (
+            id         SERIAL PRIMARY KEY,
+            brand_slug VARCHAR(100) NOT NULL,
+            phase_num  INTEGER      NOT NULL,
+            step_key   VARCHAR(200),
+            file_name  VARCHAR(500),
+            action     VARCHAR(500),
+            viewed_at  TIMESTAMP    DEFAULT NOW()
+        )
+    """),
+    ("idx_content_views", """
+        CREATE INDEX IF NOT EXISTS idx_content_views_brand
+        ON content_views (brand_slug, phase_num)
+    """),
+
     ("create_asset_versions", """
         CREATE TABLE IF NOT EXISTS asset_versions (
             id          SERIAL PRIMARY KEY,
