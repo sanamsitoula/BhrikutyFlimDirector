@@ -1110,28 +1110,28 @@ class Handler(BaseHTTPRequestHandler):
         ]
         platform_outputs = {}
         for pd_slug, pd_label, pd_icon in _PLATFORMS:
-            pd_dir = output_dir / pd_slug
-            files = []
+            pd_dir  = output_dir / pd_slug
+            pfiles  = []                           # renamed: was 'files', shadowed outer files
             if pd_dir.exists():
                 for f in sorted(pd_dir.rglob("*")):
                     if f.is_file():
                         rel  = str(f.relative_to(output_dir)).replace("\\", "/")
                         ext  = f.suffix.lower()
-                        size = f.stat().st_size
-                        files.append({
-                            "name":    f.name,
-                            "path":    rel,
-                            "size_mb": round(size / 1024 / 1024, 2),
-                            "ext":     ext.lstrip("."),
-                            "is_video": ext in (".mp4", ".webm", ".mov"),
-                            "is_text":  ext in (".txt", ".md", ".html"),
+                        fsz  = f.stat().st_size
+                        pfiles.append({
+                            "name":      f.name,
+                            "path":      rel,
+                            "size_mb":   round(fsz / 1024 / 1024, 2),
+                            "ext":       ext.lstrip("."),
+                            "is_video":  ext in (".mp4", ".webm", ".mov"),
+                            "is_text":   ext in (".txt", ".md", ".html"),
                             "media_url": f"/media/{project}/{phase}/{rel}",
                         })
             platform_outputs[pd_slug] = {
                 "label":       pd_label,
                 "icon":        pd_icon,
-                "files":       files,
-                "has_content": len(files) > 0,
+                "files":       pfiles,
+                "has_content": len(pfiles) > 0,
             }
 
         # Brand profile + roadmap (loaded before pipeline steps — needed for CMD strings)
