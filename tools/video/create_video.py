@@ -247,6 +247,16 @@ def parse_script_sections(script_path: Path) -> list:
         re.compile(r'^\*\*(?:TITLE\s+CARD|SEGMENT|PART|SECTION)\s+\d+:\s*(.+?)\*\*$'),
     ]
 
+    def _clean_title(raw_title: str) -> str:
+        """Strip timestamps, SECTION N —, CHAPTER N: prefixes, trailing ** from titles."""
+        t = raw_title.strip().strip("*").strip()
+        # Strip trailing (timestamp) like "(0:12–2:30)" or "(0:00-0:12)"
+        t = re.sub(r'\s*\([\d:]+\s*[-–—]+\s*[\d:]+\)\s*$', '', t).strip()
+        # Strip "SECTION N — " or "SECTION N: " prefix for cleaner display
+        t = re.sub(r'^(?:SECTION|CHAPTER|PART|SEGMENT)\s+\d+\s*[-–—:]+\s*', '', t,
+                   flags=re.IGNORECASE).strip()
+        return t
+
     def _flush():
         if current and (current["bullets"] or current.get("_has_narration")):
             sections.append(current)
@@ -260,9 +270,9 @@ def parse_script_sections(script_path: Path) -> list:
             m = pat.match(line)
             if m:
                 _flush()
-                title = m.group(1).strip().rstrip("**").strip()
-                # Skip the file-title line (e.g. "Eco World YouTube Video Script: …")
-                if "script:" in title.lower() or len(title) > 80:
+                title = _clean_title(m.group(1))
+                # Skip file-title lines and very long lines
+                if "script:" in title.lower() or len(title) > 100 or not title:
                     current = None
                 else:
                     current = {"title": title, "bullets": [], "_has_narration": False}

@@ -1297,12 +1297,15 @@ class Handler(BaseHTTPRequestHandler):
 
         elif cmd_type == "tts":
             engine = data.get("engine", "edge")   # edge | kokoro | elevenlabs
+            voice  = data.get("voice",  "").strip()
             tts_script = BASE_DIR / "tools" / "tts" / f"{engine}_voiceover.py"
             if not tts_script.exists():
                 self._send_json({"error": f"TTS script not found: {tts_script}"}, 400)
                 return
             cmd = [sys.executable, str(tts_script),
                    "--project", project, "--phase", str(phase)]
+            if voice:
+                cmd += ["--voice", voice]
 
         elif cmd_type == "compliance":
             cmd = [sys.executable, str(BASE_DIR / "tools" / "compliance_checker.py"),
