@@ -526,7 +526,8 @@ function renderAllProjects() {
 function renderProjectAccordion(p) {
   const isFav  = favourites.has(p.name);
   const pct    = p.completion_pct || 0;
-  const phases = p.phases || [];
+  // Show phases newest-first (descending by phase number)
+  const phases = (p.phases || []).slice().sort((a, b) => b.phase - a.phase);
 
   const compCounts = {PASS:0, PASS_WITH_WARNINGS:0, FAIL:0, unknown:0};
   phases.forEach(ph => { compCounts[ph.compliance_status] = (compCounts[ph.compliance_status]||0)+1; });
@@ -587,10 +588,18 @@ function renderProjectAccordion(p) {
         </tr></thead>
         <tbody>${phaseRows || '<tr><td colspan="5" style="padding:20px;color:var(--muted);text-align:center;">No phases found</td></tr>'}</tbody>
       </table>
-      <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;">
+      <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
         <span style="font-size:11px;color:var(--muted);">Run full pipeline:</span>
-        <code style="font-size:11px;color:var(--teal);background:var(--bg);padding:2px 8px;border-radius:4px;">python pipeline.py --project ${p.name} --phase N --skip-generate</code>
-        <button class="sort-btn" style="margin-left:auto;" onclick="copyCmd('python pipeline.py --project ${p.name} --phase 1')">📋 Copy</button>
+        <code style="font-size:11px;color:var(--teal);background:var(--bg);padding:2px 8px;border-radius:4px;">
+          python pipeline.py --project ${p.name} --phase N --skip-generate
+        </code>
+        <div style="display:flex;gap:6px;margin-left:auto;">
+          <button class="sort-btn" onclick="copyCmd('python pipeline.py --project ${p.name} --phase 1')">📋 Copy</button>
+          <button class="sort-btn" style="color:var(--teal);border-color:rgba(0,212,170,.3);font-weight:600;"
+                  onclick="createNewPhase('${p.name}', ${p.phase_count + 1})">
+            ➕ New Phase
+          </button>
+        </div>
       </div>
     </div>
   </div>`;
@@ -622,6 +631,27 @@ function shortTitle(title) {
 function goNew() {
   window.location.href = '/#new-project';
   return false;
+}
+
+// ─────────────────────────────────────────────────
+// NEW PHASE — scaffold dir + register in DB, then open dashboard
+// ─────────────────────────────────────────────────
+async function createNewPhase(project, nextPhase) {
+  showToast(`Creating Phase ${nextPhase} for ${project}…`);
+  try {
+    const r = await fetch('/api/create-phase', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ project, phase: nextPhase })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || r.status);
+    // Redirect to dashboard pre-filled with project + phase
+    window.location.href = `/?project=${encodeURIComponent(project)}&phase=${nextPhase}`;
+  } catch(e) {
+    // If server doesn't support endpoint yet, fall back to redirect
+    window.location.href = `/?project=${encodeURIComponent(project)}&phase=${nextPhase}`;
+  }
 }
 
 function copyCmd(cmd) {

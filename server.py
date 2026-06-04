@@ -251,6 +251,36 @@ class Handler(BaseHTTPRequestHandler):
             print(f"  [AUDIO] Uploaded: {project}/phase_{phase}/voiceover/{filename} ({size_mb} MB)")
             self._send_json({"ok": True, "path": str(out_path), "size_mb": size_mb,
                              "url": f"/media/{project}/{phase}/voiceover/{filename}"})
+        elif path == "/api/create-phase":
+            length = int(self.headers.get("Content-Length", 0))
+            body   = self.rfile.read(length)
+            data   = json.loads(body) if body else {}
+            self._api_create_phase(data)
+        elif path == "/api/upload-clip":
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length)
+            import cgi as _cgi
+            ctype = self.headers.get("Content-Type", "")
+            env = {"REQUEST_METHOD": "POST", "CONTENT_TYPE": ctype, "CONTENT_LENGTH": str(length)}
+            fs = _cgi.FieldStorage(fp=__import__('io').BytesIO(body), environ=env, keep_blank_values=True)
+            project  = fs.getvalue("project", "")
+            phase    = int(fs.getvalue("phase", "1"))
+            filename = fs.getvalue("filename", "") or "clip.mp4"
+            if not project:
+                self._send_json({"error": "project required"}, 400); return
+            if any(c in filename for c in ("../", "..\\", "/", "\\")):
+                self._send_json({"error": "invalid filename"}, 400); return
+            video_item = fs["video"] if "video" in fs else None
+            if video_item is None:
+                self._send_json({"error": "video field missing"}, 400); return
+            clips_dir = PROJECT_ROOT / project / f"phase_{phase}" / "clips"
+            clips_dir.mkdir(parents=True, exist_ok=True)
+            out_path = clips_dir / filename
+            out_path.write_bytes(video_item.file.read())
+            size_mb = round(out_path.stat().st_size / 1024 / 1024, 2)
+            print(f"  [CLIP] Uploaded: {project}/phase_{phase}/clips/{filename} ({size_mb} MB)")
+            self._send_json({"ok": True, "path": str(out_path), "size_mb": size_mb,
+                             "url": f"/media/{project}/{phase}/clips/{filename}"})
         elif path == "/api/run-step":
             length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(length)
@@ -880,6 +910,18 @@ class Handler(BaseHTTPRequestHandler):
                         "ext":     f.suffix.lower().lstrip("."),
                     })
 
+        # Raw clips in phase_N/clips/
+        clips = []
+        clips_dir = phase_dir / "clips"
+        if clips_dir.exists():
+            for f in sorted(clips_dir.iterdir()):
+                if f.suffix.lower() in (".mp4", ".mov", ".avi", ".mkv", ".webm"):
+                    clips.append({
+                        "name":    f.name,
+                        "size_mb": round(f.stat().st_size / 1024 / 1024, 2),
+                        "url":     f"/media/{project}/{phase}/clips/{f.name}",
+                    })
+
         output_dir = PROJECT_ROOT / project / "_output" / f"phase_{phase:02d}"
         output_files = []
         if output_dir.exists():
@@ -981,6 +1023,7 @@ class Handler(BaseHTTPRequestHandler):
             "steps_done": done_count,
             "steps_total": len(steps),
             "voiceover_files": voiceover_files,
+            "clips": clips,
             "voiceover_analysis": self._analyze_voiceover(vo_dir),
             "script_analysis":    script_analysis,
             "infographics_analysis": infographics_analysis,
@@ -1153,20 +1196,128 @@ class Handler(BaseHTTPRequestHandler):
         }
         self._send_json(status)
 
-    def _api_run_step(self, data: dict):
-        """Run a single generate_phase.py sub-step (--only <file>)."""
-        job_id  = uuid.uuid4().hex[:8]
-        project = data.get("project", "chain_clarity")
-        phase   = int(data.get("phase", 1))
-        topic   = data.get("topic", "")
-        outline = data.get("outline", "")
-        only    = data.get("only", "")
+    def _api_create_phase(self, data: dict):
+        """Scaffold a new phase directory and register it in the DB.
 
-        cmd = [sys.executable, str(BASE_DIR / "tools" / "generate_phase.py"),
-               "--project", project, "--phase", str(phase)]
-        if topic:   cmd += ["--topic",   topic]
-        if outline: cmd += ["--outline", outline]
-        if only:    cmd += ["--only",    only]
+        POST body: { "project": "ecoWorld", "phase": 7, "topic": "", "tags": "" }
+        """
+        project  = data.get("project", "").strip()
+        phase    = int(data.get("phase", 1))
+        topic    = data.get("topic", "").strip()
+        tags     = data.get("tags",  "").strip()
+
+        if not project:
+            self._send_json({"error": "project required"}, 400)
+            return
+        if phase < 1 or phase > 999:
+            self._send_json({"error": "phase must be 1–999"}, 400)
+            return
+
+        phase_dir = PROJECT_ROOT / project / f"phase_{phase}"
+        phase_dir.mkdir(parents=True, exist_ok=True)
+        # Create output folder too so the dashboard has somewhere to write
+        (PROJECT_ROOT / project / "_output" / f"phase_{phase:02d}").mkdir(parents=True, exist_ok=True)
+
+        # Write a minimal placeholder content_spec so the dashboard shows something
+        spec_path = phase_dir / "content_spec.json"
+        if not spec_path.exists():
+            import json as _json2
+            spec_path.write_text(_json2.dumps({
+                "title":       topic or f"Phase {phase}",
+                "status":      "pending",
+                "duration_min": 12,
+                "tags":        [t.strip() for t in tags.split(",") if t.strip()],
+                "youtube":     {},
+                "platform_cuts": {},
+            }, indent=2, ensure_ascii=False), encoding="utf-8")
+
+        print(f"  [PHASE] Scaffolded: {project}/phase_{phase}")
+
+        # ── Persist to DB (best-effort) ──────────────────────────────────────
+        db_ok = False
+        try:
+            from db.db import upsert_brand, upsert_phase, is_available as _db_ok
+            if _db_ok():
+                # Ensure brand exists in DB before inserting phase (FK)
+                bp = PROJECT_ROOT / project / "brand_profile.json"
+                if bp.exists():
+                    try:
+                        upsert_brand(json.loads(bp.read_text(encoding="utf-8")))
+                    except Exception:
+                        pass
+                db_ok = upsert_phase(project, phase, topic, tags)
+        except Exception as e:
+            print(f"  [PHASE DB] {e}")
+
+        self._send_json({
+            "ok":       True,
+            "project":  project,
+            "phase":    phase,
+            "db_saved": db_ok,
+            "url":      f"/phase/{project}/{phase}",
+        })
+
+    def _api_run_step(self, data: dict):
+        """Run a pipeline tool command.
+
+        cmd_type values:
+          generate      — generate_phase.py --only <file>  (default)
+          create_video  — tools/video/create_video.py
+          platform_cut  — tools/platform_cutter.py
+          text_content  — tools/text_content_generator.py
+          tts           — tools/tts/<engine>_voiceover.py
+          compliance    — tools/compliance_checker.py
+        """
+        job_id   = uuid.uuid4().hex[:8]
+        project  = data.get("project", "chain_clarity")
+        phase    = int(data.get("phase", 1))
+        cmd_type = data.get("cmd_type", "generate")
+
+        if cmd_type == "create_video":
+            cmd = [sys.executable,
+                   str(BASE_DIR / "tools" / "video" / "create_video.py"),
+                   "--project", project, "--phase", str(phase),
+                   "--burn-subs", "--shorts"]
+
+        elif cmd_type == "platform_cut":
+            # prefer a specific video path; fall back to the standard output location
+            video_path = data.get(
+                "video_path",
+                str(PROJECT_ROOT / project / "_output"
+                    / f"phase_{phase:02d}" / "youtube" / "final_1080p.mp4")
+            )
+            cmd = [sys.executable, str(BASE_DIR / "tools" / "platform_cutter.py"),
+                   "--project", project, "--phase", str(phase),
+                   "--video", video_path]
+
+        elif cmd_type == "text_content":
+            cmd = [sys.executable,
+                   str(BASE_DIR / "tools" / "text_content_generator.py"),
+                   "--project", project, "--phase", str(phase)]
+
+        elif cmd_type == "tts":
+            engine = data.get("engine", "edge")   # edge | kokoro | elevenlabs
+            tts_script = BASE_DIR / "tools" / "tts" / f"{engine}_voiceover.py"
+            if not tts_script.exists():
+                self._send_json({"error": f"TTS script not found: {tts_script}"}, 400)
+                return
+            cmd = [sys.executable, str(tts_script),
+                   "--project", project, "--phase", str(phase)]
+
+        elif cmd_type == "compliance":
+            cmd = [sys.executable, str(BASE_DIR / "tools" / "compliance_checker.py"),
+                   "--project", project, "--phase", str(phase)]
+
+        else:
+            # original behaviour: generate_phase.py --only <file>
+            topic   = data.get("topic", "")
+            outline = data.get("outline", "")
+            only    = data.get("only", "")
+            cmd = [sys.executable, str(BASE_DIR / "tools" / "generate_phase.py"),
+                   "--project", project, "--phase", str(phase)]
+            if topic:   cmd += ["--topic",   topic]
+            if outline: cmd += ["--outline", outline]
+            if only:    cmd += ["--only",    only]
 
         q: queue.Queue = queue.Queue()
         jobs[job_id] = {"status": "running", "output": [], "q": q, "cmd": cmd}

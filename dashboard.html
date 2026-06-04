@@ -1741,7 +1741,7 @@
     </div>
 
     <!-- ======== NEW PROJECT PANEL ======== -->
-    <div class="section">
+    <div class="section" id="section-new-project">
       <div class="section-header">
         <h2>New Video Project</h2>
         <span class="badge badge-teal">Quick Start</span>
@@ -1775,7 +1775,7 @@
             </div>
             <div class="form-group">
               <label>Phase Number</label>
-              <input class="form-input" id="inp-phase" type="number" value="6" min="1" max="99" placeholder="e.g. 6" oninput="updateCommand()">
+              <input class="form-input" id="inp-phase" type="number" value="6" min="1" max="999" placeholder="e.g. 6" oninput="updateCommand()">
             </div>
             <div class="form-group" style="grid-column:1/-1;">
               <label>Video Topic</label>
@@ -3462,7 +3462,29 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMatrix();
   renderTTS();
   renderStepStars();
+
+  // ── Pre-fill from URL params: /?project=ecoWorld&phase=7 ──────────────
+  const _urlP = new URLSearchParams(window.location.search);
+  const _preProject = _urlP.get('project');
+  const _prePhase   = _urlP.get('phase');
+  if (_preProject) {
+    const el = document.getElementById('inp-project');
+    if (el) el.value = _preProject;
+  }
+  if (_prePhase) {
+    const el = document.getElementById('inp-phase');
+    if (el) el.value = _prePhase;
+  }
   updateCommand();
+  if (_preProject || _prePhase) {
+    // Scroll to the New Video Project section and focus topic
+    setTimeout(() => {
+      const sec = document.getElementById('section-new-project');
+      if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => { document.getElementById('inp-topic')?.focus(); }, 400);
+    }, 250);
+  }
+
   checkServer().then(() => { if (serverOnline) { loadProjects(); loadToolsStatus(); } });
   setInterval(() => { checkServer().then(() => { if (serverOnline && _explorerProjects.length === 0) loadProjects(); }); }, 5000);
 });

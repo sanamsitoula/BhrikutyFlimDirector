@@ -701,6 +701,20 @@ function handleStepAction(action, stepName) {
     }
   } else if (action === 'tab:infographics') {
     switchTab('infographics', document.querySelectorAll('.tab-btn')[3]);
+  } else if (action === 'run:video') {
+    switchTab('video', document.querySelectorAll('.tab-btn')[6]);
+    runToolCmd({project: PROJECT, phase: PHASE, cmd_type: 'create_video'});
+  } else if (action === 'run:cuts') {
+    switchTab('outputs', document.querySelectorAll('.tab-btn')[9]);
+    runToolCmd({project: PROJECT, phase: PHASE, cmd_type: 'platform_cut'});
+  } else if (action === 'run:text') {
+    switchTab('outputs', document.querySelectorAll('.tab-btn')[9]);
+    runToolCmd({project: PROJECT, phase: PHASE, cmd_type: 'text_content'});
+  } else if (action === 'run:voiceover') {
+    switchTab('audio', document.querySelectorAll('.tab-btn')[5]);
+  } else if (action === 'run:publish') {
+    switchTab('outputs', document.querySelectorAll('.tab-btn')[9]);
+    runPhase();
   } else if (action.startsWith('run:')) {
     showToast(`Run pipeline to generate: ${stepName}`);
     runPhase();
@@ -1087,26 +1101,40 @@ function renderOutputs(d) {
         <div id="${previewId}" class="output-preview"></div>`;
     }).join('');
 
-    // Generate command
+    // Generate command + run data per platform
     const proj = d.project, ph = d.phase;
+    const padPh = String(ph).padStart(2,'0');
     const genCmdMap = {
       youtube:        `python tools/video/create_video.py --project ${proj} --phase ${ph} --burn-subs`,
       youtube_shorts: `python tools/video/create_video.py --project ${proj} --phase ${ph} --shorts`,
-      tiktok:         `python tools/platform_cutter.py --project ${proj} --phase ${ph} --video _output/phase_${String(ph).padStart(2,'0')}/youtube/final_1080p.mp4`,
-      instagram:      `python tools/platform_cutter.py --project ${proj} --phase ${ph} --video _output/phase_${String(ph).padStart(2,'0')}/youtube/final_1080p.mp4`,
+      tiktok:         `python tools/platform_cutter.py --project ${proj} --phase ${ph} --video _output/phase_${padPh}/youtube/final_1080p.mp4`,
+      instagram:      `python tools/platform_cutter.py --project ${proj} --phase ${ph} --video _output/phase_${padPh}/youtube/final_1080p.mp4`,
       twitter:        `python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
       linkedin:       `python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
       blog:           `python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
       github:         `python tools/text_content_generator.py --project ${proj} --phase ${ph}`,
     };
+    const runCmdTypeMap = {
+      youtube: 'create_video', youtube_shorts: 'create_video',
+      tiktok: 'platform_cut', instagram: 'platform_cut',
+      twitter: 'text_content', linkedin: 'text_content',
+      blog: 'text_content', github: 'text_content',
+    };
     const genCmd = genCmdMap[slug] || '';
+    const runCmdType = runCmdTypeMap[slug] || '';
+    const platformRunJson = JSON.stringify({project: proj, phase: ph, cmd_type: runCmdType}).replace(/'/g,"&#39;");
 
     const pendingContent = `
-      <div style="color:var(--muted);font-size:11px;padding:6px 0 4px;">Not generated yet.</div>
+      <div style="color:var(--muted);font-size:11px;padding:4px 0;">Not generated yet.</div>
       <div class="output-generate-cmd">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
           <span style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Generate</span>
-          <button class="step-action-btn view" style="font-size:10px;padding:2px 7px;" onclick="navigator.clipboard.writeText('${esc(genCmd)}').then(()=>showToast('Copied!'))">📋</button>
+          <div style="display:flex;gap:4px;">
+            ${runCmdType ? `<button class="step-action-btn run" style="font-size:10px;padding:2px 8px;"
+                onclick='runToolCmd(${platformRunJson})'>▶ Run</button>` : ''}
+            <button class="step-action-btn view" style="font-size:10px;padding:2px 7px;"
+                onclick="navigator.clipboard.writeText('${esc(genCmd)}').then(()=>showToast('Copied!'))">📋</button>
+          </div>
         </div>
         <code style="font-size:10px;color:var(--teal);word-break:break-all;">${esc(genCmd)}</code>
       </div>`;
@@ -1723,30 +1751,131 @@ function renderAudio(d) {
 // VIDEO TAB
 // ─────────────────────────────────────────────────
 function renderVideo(d) {
-  const hasVideo = d.output_files && d.output_files.some(f => f.includes('.mp4'));
-  if (hasVideo) {
-    const mp4 = d.output_files.find(f => f.includes('.mp4'));
-    return `<video controls preload="metadata" style="width:100%;border-radius:8px;background:#000;">
-      <source src="/media/${PROJECT}/${PHASE}/${mp4}" type="video/mp4">
-      Your browser does not support the video element.
-    </video>`;
-  }
-  return `<div class="media-section">
-    <div class="media-placeholder">
-      <div class="icon">🎬</div>
-      <strong style="color:var(--text2);">No Video Found</strong><br>
-      <p style="margin-top:8px;">The final video hasn't been rendered yet.</p>
-      <p style="font-size:12px;color:var(--muted);margin-top:6px;">Steps needed: Voiceover → Video Assembly → Platform Cuts</p>
-      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
-        <button class="btn btn-ghost" onclick="runVoiceover()">🎧 1. Generate VO</button>
-        <button class="btn btn-gold" onclick="runPhase()">▶ 2. Full Pipeline</button>
+  const po    = d.platform_outputs || {};
+  const ytFiles     = (po.youtube        ?.files || []).filter(f => f.is_video);
+  const shortsFiles = (po.youtube_shorts ?.files || []).filter(f => f.is_video);
+  const ytVideo     = ytFiles[0];
+  const shortsVideo = shortsFiles[0];
+  const clips       = d.clips || [];
+  const proj = d.project || PROJECT;
+  const ph   = d.phase   || PHASE;
+
+  const createVideoRunData = JSON.stringify({project: proj, phase: ph, cmd_type: 'create_video'}).replace(/'/g,"&#39;");
+  const createVideoCmd = `python tools/video/create_video.py --project ${esc(proj)} --phase ${ph} --burn-subs --shorts`;
+
+  // ── Main YouTube player ──────────────────────────────────────────────────
+  const playerSection = ytVideo
+    ? `<div style="background:#000;border-radius:10px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border);">
+        <div style="padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);
+                    display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:12px;font-weight:700;color:var(--teal);">▶️ YouTube 1080p</span>
+          <span style="font-size:10px;font-family:'Courier New',monospace;color:var(--muted);">
+            ${esc(ytVideo.name)} · ${ytVideo.size_mb} MB
+          </span>
+          <div style="display:flex;gap:5px;margin-left:auto;">
+            <a href="${esc(ytVideo.media_url)}" download="${esc(ytVideo.name)}"
+               class="step-action-btn view" style="font-size:10px;padding:3px 9px;text-decoration:none;">⬇ Download</a>
+            <button class="step-action-btn run" style="font-size:10px;padding:3px 9px;"
+                    onclick='runToolCmd(${createVideoRunData})'>🔄 Re-render</button>
+          </div>
+        </div>
+        <video controls preload="metadata"
+               style="width:100%;max-height:480px;display:block;background:#000;">
+          <source src="${esc(ytVideo.media_url)}" type="video/mp4">
+        </video>
+      </div>`
+    : `<div class="media-section" style="margin-bottom:16px;">
+        <div class="media-placeholder">
+          <div class="icon">🎬</div>
+          <strong style="color:var(--text2);font-size:15px;">No Video Generated Yet</strong>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.7;">
+            Build a video from your infographic cards + voiceover — no raw footage needed.
+            Cards + audio are merged with ken-burns zoom and burned subtitles.
+          </p>
+          <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
+            <button class="btn btn-teal" onclick='runToolCmd(${createVideoRunData})'>🎬 Generate Video Now</button>
+            <button class="btn btn-ghost" onclick="switchTab('audio',document.querySelectorAll('.tab-btn')[5])">🎧 Check Audio First</button>
+          </div>
+          <div style="background:#06090F;border:1px solid var(--border);border-radius:7px;
+                      padding:10px 14px;margin-top:14px;text-align:left;max-width:540px;
+                      margin-left:auto;margin-right:auto;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+              <span style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);">Run manually</span>
+              <button class="copy-content-btn"
+                      onclick="navigator.clipboard.writeText('${esc(createVideoCmd)}').then(()=>showToast('Copied!'))">📋 Copy</button>
+            </div>
+            <code style="font-size:11px;color:var(--teal);word-break:break-all;">${esc(createVideoCmd)}</code>
+          </div>
+        </div>
+      </div>`;
+
+  // ── Shorts player ────────────────────────────────────────────────────────
+  const shortsSection = shortsVideo
+    ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;
+                  overflow:hidden;margin-bottom:16px;display:flex;align-items:stretch;">
+        <div style="flex:1;display:flex;flex-direction:column;">
+          <div style="padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);
+                      display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;font-weight:700;color:var(--gold);">📱 YouTube Shorts 9:16</span>
+            <span style="font-size:10px;color:var(--muted);">${shortsVideo.size_mb} MB</span>
+            <a href="${esc(shortsVideo.media_url)}" download="${esc(shortsVideo.name)}"
+               class="step-action-btn view" style="font-size:10px;padding:3px 9px;text-decoration:none;margin-left:auto;">⬇</a>
+          </div>
+          <div style="flex:1;background:#000;display:flex;justify-content:center;padding:8px;">
+            <video controls preload="metadata"
+                   style="max-height:300px;max-width:170px;display:block;background:#000;">
+              <source src="${esc(shortsVideo.media_url)}" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>` : '';
+
+  // ── Clips folder ─────────────────────────────────────────────────────────
+  const clipsSection = `
+    <div style="margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:8px;display:flex;align-items:center;">
+        📁 Source Clips
+        <code style="font-size:10px;font-weight:400;color:var(--muted);font-family:'Courier New',monospace;
+                     margin-left:6px;background:var(--bg);padding:1px 6px;border-radius:4px;">
+          phase_${ph}/clips/
+        </code>
+        <label class="step-action-btn view"
+               style="font-size:10px;padding:3px 9px;cursor:pointer;margin-left:auto;">
+          ⬆ Upload Clip
+          <input type="file" accept="video/*,.mp4,.mov,.mkv,.avi,.webm"
+                 style="display:none;" onchange="uploadClip(this)">
+        </label>
       </div>
-    </div>
-  </div>
-  <div style="margin-top:16px;">
-    <div class="section-title" style="margin-bottom:8px;">🎬 Clip Brief</div>
-    ${renderFileTab('clip_brief.md')}
-  </div>`;
+      ${clips.length
+        ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+            ${clips.map(c => `
+              <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;
+                           border-bottom:1px solid rgba(30,42,66,.5);">
+                <span style="font-size:14px;">🎬</span>
+                <span style="font-size:11px;color:var(--teal);font-family:'Courier New',monospace;
+                             flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                      title="${esc(c.name)}">${esc(c.name)}</span>
+                <span style="font-size:10px;color:var(--muted);flex-shrink:0;">${c.size_mb} MB</span>
+                <a href="${esc(c.url)}" target="_blank"
+                   class="step-action-btn view"
+                   style="font-size:10px;padding:2px 8px;text-decoration:none;flex-shrink:0;">▶ Play</a>
+              </div>`).join('')}
+          </div>`
+        : `<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;
+                       padding:14px 16px;text-align:center;">
+            <div style="color:var(--muted);font-size:12px;">No source clips yet.</div>
+            <div style="color:var(--text2);font-size:11px;margin-top:4px;line-height:1.6;">
+              Upload a screen recording or b-roll above — or click <strong style="color:var(--teal);">Generate Video</strong>
+              to auto-build from infographic cards + voiceover.
+            </div>
+          </div>`}
+    </div>`;
+
+  return playerSection + shortsSection + clipsSection + `
+    <div style="margin-top:8px;">
+      <div class="section-title" style="margin-bottom:8px;">🎬 Clip Brief</div>
+      ${renderFileTab('clip_brief.md')}
+    </div>`;
 }
 
 // ─────────────────────────────────────────────────
@@ -2039,6 +2168,60 @@ async function runPhase() {
 
 async function runVoiceover() {
   showToast('See Audio tab for TTS options (Edge TTS recommended — free, no API key)');
+}
+
+// ─────────────────────────────────────────────────
+// RUN TOOL — generic runner for any pipeline tool
+// ─────────────────────────────────────────────────
+async function runToolCmd(runData) {
+  const term = document.getElementById('mini-terminal');
+  const body = document.getElementById('mini-body');
+  if (!term || !body) return;
+  term.classList.add('open');
+  body.innerHTML = '';
+  document.getElementById('mini-badge').textContent = 'RUNNING';
+  document.getElementById('mini-badge').style.color = 'var(--gold)';
+  const label = runData.cmd_type || 'tool';
+  const proj  = runData.project || PROJECT;
+  const ph    = runData.phase   || PHASE;
+  appendMini(`$ ${label}  --project ${proj} --phase ${ph}\n\n`, 't-teal');
+  try {
+    const res = await fetch('/api/run-step', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({...runData, project: proj, phase: Number(ph)})
+    });
+    const { job_id } = await res.json();
+    streamJob(job_id);
+  } catch(e) {
+    appendMini(`[ERROR] ${e.message}\n`, 't-red');
+  }
+}
+
+// ─────────────────────────────────────────────────
+// UPLOAD CLIP
+// ─────────────────────────────────────────────────
+async function uploadClip(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('project',  PROJECT);
+  fd.append('phase',    String(PHASE));
+  fd.append('filename', file.name);
+  fd.append('video',    file);
+  showToast(`Uploading ${file.name}…`);
+  try {
+    const r = await fetch('/api/upload-clip', { method: 'POST', body: fd });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || r.status);
+    showToast(`✅ Clip uploaded: ${file.name} (${data.size_mb} MB)`);
+    const rd = await fetch(`/api/phase-data?project=${PROJECT}&phase=${PHASE}`);
+    if (rd.ok) { phaseData = await rd.json(); }
+    const panel = document.getElementById('tab-video');
+    if (panel && phaseData) panel.innerHTML = renderVideo(phaseData);
+  } catch(e) {
+    showToast(`❌ Upload failed: ${e.message}`);
+  }
+  input.value = '';
 }
 
 async function uploadAudio(input) {
