@@ -9,7 +9,7 @@ Install driver:
     pip install psycopg2-binary
 
 Apply schema:
-    psql -U postgres -d press_jemc -f db/schema.sql
+    psql -U postgres -d bhrikutyflimdirector -f db/schema.sql
 """
 
 import os
@@ -41,7 +41,7 @@ def _cfg() -> dict:
     return {
         "host":     os.environ.get("DB_HOST", "localhost"),
         "port":     int(os.environ.get("DB_PORT", "5432")),
-        "dbname":   os.environ.get("DB_NAME",  "press_jemc"),
+        "dbname":   os.environ.get("DB_NAME",  "bhrikutyflimdirector"),
         "user":     os.environ.get("DB_USER",  "postgres"),
         "password": os.environ.get("DB_PASSWORD", ""),
     }

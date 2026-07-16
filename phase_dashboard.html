@@ -2811,6 +2811,8 @@ function renderVideo(d) {
 
   const createVideoRunData = JSON.stringify({project: proj, phase: ph, cmd_type: 'create_video'}).replace(/'/g,"&#39;");
   const createVideoCmd = `python tools/video/create_video.py --project ${esc(proj)} --phase ${ph} --burn-subs --shorts`;
+  const remotionRunData = JSON.stringify({project: proj, phase: ph, cmd_type: 'remotion_compose'}).replace(/'/g,"&#39;");
+  const remotionCmd = `python tools/video/remotion_composer.py --project ${esc(proj)} --phase ${ph} --shorts`;
 
   // ── Main YouTube player ──────────────────────────────────────────────────
   const playerSection = ytVideo
@@ -2821,11 +2823,13 @@ function renderVideo(d) {
           <span style="font-size:10px;font-family:'Courier New',monospace;color:var(--muted);">
             ${esc(ytVideo.name)} · ${ytVideo.size_mb} MB
           </span>
-          <div style="display:flex;gap:5px;margin-left:auto;">
+          <div style="display:flex;gap:5px;margin-left:auto;flex-wrap:wrap;">
             <a href="${esc(ytVideo.media_url)}" download="${esc(ytVideo.name)}"
                class="step-action-btn view" style="font-size:10px;padding:3px 9px;text-decoration:none;">⬇ Download</a>
             <button class="step-action-btn run" style="font-size:10px;padding:3px 9px;"
-                    onclick='runToolCmd(${createVideoRunData})'>🔄 Re-render</button>
+                    onclick='runToolCmd(${remotionRunData})'>🎞️ Re-compose Remotion</button>
+            <button class="step-action-btn" style="font-size:10px;padding:3px 9px;background:var(--bg2);border:1px solid var(--border);border-radius:5px;cursor:pointer;color:var(--muted);"
+                    onclick='runToolCmd(${createVideoRunData})'>🔄 Render Cards</button>
           </div>
         </div>
         <video controls preload="metadata"
@@ -2837,19 +2841,52 @@ function renderVideo(d) {
         <div class="media-placeholder">
           <div class="icon">🎬</div>
           <strong style="color:var(--text2);font-size:15px;">No Video Generated Yet</strong>
-          <p style="font-size:12px;color:var(--muted);margin-top:8px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.7;">
-            Build a video from your infographic cards + voiceover — no raw footage needed.
-            Cards + audio are merged with ken-burns zoom and burned subtitles.
+          <p style="font-size:12px;color:var(--muted);margin-top:8px;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.7;">
+            Use Remotion scenes (already rendered) or build from infographic cards + voiceover.
           </p>
-          <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
-            <button class="btn btn-teal" onclick='runToolCmd(${createVideoRunData})'>🎬 Generate Video Now</button>
+
+          <!-- Remotion path (primary) -->
+          <div style="background:linear-gradient(135deg,#0e1a2e,#0a1520);border:1px solid rgba(0,212,170,.35);
+                      border-radius:10px;padding:14px 18px;margin:14px auto 0;max-width:540px;text-align:left;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="font-size:18px;">🎞️</span>
+              <span style="font-size:13px;font-weight:700;color:var(--teal);">Remotion Scenes</span>
+              <span style="font-size:10px;color:var(--muted);margin-left:auto;">D:/LearnRemotion/out</span>
+            </div>
+            <p style="font-size:11px;color:var(--text2);margin:0 0 10px;line-height:1.6;">
+              Stitch rendered EcoWorld scene MP4s + voiceover into the final video.
+              9 scenes detected in <code style="color:var(--teal);">LearnRemotion/out/</code>.
+            </p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-teal" style="font-size:12px;padding:7px 18px;"
+                      onclick='runToolCmd(${remotionRunData})'>🎞️ Compose from Remotion</button>
+              <div style="flex:1;min-width:200px;">
+                <div style="background:#06090F;border:1px solid var(--border);border-radius:6px;
+                            padding:6px 10px;display:flex;align-items:center;gap:6px;">
+                  <code style="font-size:10px;color:var(--teal);flex:1;word-break:break-all;">${esc(remotionCmd)}</code>
+                  <button class="copy-content-btn"
+                          onclick="navigator.clipboard.writeText('${esc(remotionCmd)}').then(()=>showToast('Copied!'))">📋</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div style="display:flex;align-items:center;gap:10px;margin:14px auto;max-width:540px;">
+            <div style="flex:1;height:1px;background:var(--border);"></div>
+            <span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">or build from cards</span>
+            <div style="flex:1;height:1px;background:var(--border);"></div>
+          </div>
+
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <button class="btn btn-ghost" onclick='runToolCmd(${createVideoRunData})'>🎬 Generate from Cards + Voiceover</button>
             <button class="btn btn-ghost" onclick="switchTab('audio',document.querySelectorAll('.tab-btn')[5])">🎧 Check Audio First</button>
           </div>
           <div style="background:#06090F;border:1px solid var(--border);border-radius:7px;
-                      padding:10px 14px;margin-top:14px;text-align:left;max-width:540px;
+                      padding:10px 14px;margin-top:10px;text-align:left;max-width:540px;
                       margin-left:auto;margin-right:auto;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
-              <span style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);">Run manually</span>
+              <span style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);">Cards pipeline cmd</span>
               <button class="copy-content-btn"
                       onclick="navigator.clipboard.writeText('${esc(createVideoCmd)}').then(()=>showToast('Copied!'))">📋 Copy</button>
             </div>
@@ -2922,6 +2959,17 @@ function renderVideo(d) {
 
   // ── Video tools panel ───────────────────────────────────────────────────
   const VIDEO_TOOLS = [
+    {
+      id: 'remotion_compose',
+      icon: '🎞️',
+      name: 'remotion_composer.py  ★ Remotion',
+      desc: 'Stitches pre-rendered Remotion scene videos + voiceover into the final 1080p output.',
+      how: 'Reads EcoWorld-Scene*.mp4 files from D:/claude_project/LearnRemotion/out, concatenates them in scene order, replaces audio with the project voiceover MP3, and exports final_1080p.mp4 + Shorts 9:16.',
+      outputs: ['_output/youtube/final_1080p.mp4', '_output/youtube_shorts/short_1080x1920.mp4'],
+      cmd: `python tools/video/remotion_composer.py --project ${esc(proj)} --phase ${ph} --shorts`,
+      requires: ['FFmpeg', 'Remotion scenes rendered in D:/claude_project/LearnRemotion/out', 'Voiceover MP3 in voiceover/'],
+      runData: JSON.stringify({project: proj, phase: ph, cmd_type: 'remotion_compose'}).replace(/'/g,"&#39;"),
+    },
     {
       id: 'create_video',
       icon: '🎬',

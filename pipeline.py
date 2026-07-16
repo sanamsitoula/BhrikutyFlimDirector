@@ -15,7 +15,8 @@ Usage (process existing phase — skip generation):
 Usage (only produce platform outputs):
   python pipeline.py --project chain_clarity --phase 4 --skip-generate --skip-voiceover --video path/to/final.mp4
 
-Requires: ANTHROPIC_API_KEY  (for generate + text content steps)
+Requires: at least one of ANTHROPIC_API_KEY / GEMINI_API_KEY / DASHSCOPE_API_KEY
+                            (for generate + text content steps — any one is sufficient)
           ffmpeg on PATH      (for platform cuts)
           Node.js             (for Remotion card renders)
 """
@@ -28,14 +29,9 @@ import argparse
 import time
 from pathlib import Path
 
-# Load .env file if present
-_env_path = Path(__file__).parent / ".env"
-if _env_path.exists():
-    for _line in _env_path.read_text(encoding="utf-8").splitlines():
-        _line = _line.strip()
-        if _line and not _line.startswith("#") and "=" in _line:
-            _k, _, _v = _line.partition("=")
-            os.environ.setdefault(_k.strip(), _v.strip())
+from core.config import load_dotenv, any_llm_provider_configured
+
+load_dotenv()
 
 PROJECT_ROOT = Path(__file__).parent / "youtube_scripts" / "setup" / "projects"
 TOOLS_DIR    = Path(__file__).parent / "tools"
@@ -117,15 +113,16 @@ def step_compliance_check(project: str, phase: int):
 
 
 def step_remotion_render(phase: int):
+    import shutil as _shutil
+    npm_exe = _shutil.which("npm") or _shutil.which("npm.cmd") or "npm"
+
     if not (REMOTION_DIR / "node_modules").exists():
         print("  [INFO] Installing Remotion dependencies...")
-        try:
-            result = subprocess.run(["npm", "install"], cwd=str(REMOTION_DIR))
-            if result.returncode != 0:
-                print("  [WARN] npm install failed — skipping Remotion render")
-                return False
-        except FileNotFoundError:
-            print("  [WARN] npm not found — skipping Remotion render (install Node.js to enable)")
+        result = subprocess.run(
+            f'"{npm_exe}" install', shell=True, cwd=str(REMOTION_DIR)
+        )
+        if result.returncode != 0:
+            print("  [WARN] npm install failed — skipping Remotion render")
             return False
 
     try:
@@ -190,6 +187,18 @@ def step_voiceover(project: str, phase: int):
     print("         pip install dashscope    (+ set DASHSCOPE_API_KEY in .env)")
     print("         Run with --skip-voiceover to bypass this step")
     return True
+
+
+def step_music(project: str, phase: int):
+    """Free-tier MusicProvider: fetch background music matching music_brief.md
+    (Jamendo — see tools/audio/music_provider.py). Skips gracefully (returns
+    True) if JAMENDO_CLIENT_ID isn't set or no brief exists yet — this step
+    must never fail the pipeline, only add music when it can."""
+    return run(
+        [sys.executable, str(TOOLS_DIR / "audio" / "music_provider.py"),
+         "--project", project, "--phase", str(phase)],
+        f"STEP 4b: Fetch background music (free tier) for phase {phase}"
+    )
 
 
 def step_text_content(project: str, phase: int):
@@ -273,6 +282,7 @@ def main():
                         default="auto", help="Script AI provider (default: auto = Anthropic then Gemini)")
     parser.add_argument("--skip-generate", action="store_true", help="Skip content file generation")
     parser.add_argument("--skip-voiceover", action="store_true", help="Skip voiceover generation")
+    parser.add_argument("--skip-music", action="store_true", help="Skip background-music fetch (free-tier MusicProvider)")
     parser.add_argument("--skip-remotion", action="store_true", help="Skip Remotion card render")
     parser.add_argument("--skip-text", action="store_true", help="Skip text content generation")
     args = parser.parse_args()
@@ -334,12 +344,20 @@ def main():
     else:
         steps_skipped.append("4: Voiceover generation (--skip-voiceover)")
 
+    # STEP 4b: Background music (free-tier MusicProvider, closes the
+    # music_brief.md-with-no-consumer gap — see B2V2Docs/roadmap.md Phase 1)
+    if not args.skip_music:
+        ok = step_music(args.project, args.phase)
+        (steps_run if ok else steps_skipped).append("4b: Background music")
+    else:
+        steps_skipped.append("4b: Background music (--skip-music)")
+
     # STEP 5: Text content
-    if not args.skip_text and "ANTHROPIC_API_KEY" in os.environ:
+    if not args.skip_text and any_llm_provider_configured():
         ok = step_text_content(args.project, args.phase)
         (steps_run if ok else steps_skipped).append("5: Text platform content")
     else:
-        steps_skipped.append("5: Text content (--skip-text or ANTHROPIC_API_KEY not set)")
+        steps_skipped.append("5: Text content (--skip-text or no LLM provider configured)")
 
     # STEP 6: Platform cuts
     video = args.video if args.video else None

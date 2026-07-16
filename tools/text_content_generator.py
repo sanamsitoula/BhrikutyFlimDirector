@@ -95,10 +95,16 @@ Target audience: {brand["target_audience"]}
 Platforms: {", ".join(brand["platforms"])}"""
 
 
+_GEMINI_QUOTA_DEAD = False  # set True once daily quota is confirmed exhausted
+
 def _call_gemini_txt(system_prompt: str, user_prompt: str) -> str:
-    import time, re as _re
+    global _GEMINI_QUOTA_DEAD
+    import time
+    if _GEMINI_QUOTA_DEAD:
+        raise RuntimeError("Gemini daily quota exhausted (skipping retries)")
+
     last_err = None
-    for attempt in range(4):
+    for attempt in range(3):
         try:
             r = _GEMINI_CLIENT.models.generate_content(
                 model=GEMINI_MODEL,
@@ -110,10 +116,15 @@ def _call_gemini_txt(system_prompt: str, user_prompt: str) -> str:
             last_err = e
             s = str(e)
             if "429" in s or "RESOURCE_EXHAUSTED" in s:
+                # Daily/tier quota exhausted — no point retrying, fail fast
+                if any(k in s for k in ("PerDay", "free_tier", "FreeTier", "daily", "limit: 20")):
+                    _GEMINI_QUOTA_DEAD = True
+                    print(f"  [GEMINI] Daily quota exhausted — skipping Gemini for this session.")
+                    raise last_err
                 import re as __re
                 m = __re.search(r'retryDelay[^0-9]*(\d+)', s)
-                wait = int(m.group(1)) + 5 if m else 65
-                print(f"  [GEMINI] Rate limit. Waiting {wait}s (attempt {attempt+1}/4)...")
+                wait = min(int(m.group(1)) + 5 if m else 30, 30)
+                print(f"  [GEMINI] Rate limit. Waiting {wait}s (attempt {attempt+1}/3)...")
                 time.sleep(wait)
             elif "503" in s or "UNAVAILABLE" in s:
                 time.sleep(2 ** (attempt + 1))
@@ -155,7 +166,9 @@ def _call_dashscope_txt(system_prompt: str, user_prompt: str) -> str:
 
 
 def call_claude(client, system_prompt: str, user_prompt: str) -> str:
-    """Call Anthropic; auto-fall back to Gemini then DashScope/Qwen."""
+    """Call Anthropic -> Gemini -> DashScope/Qwen in cascade order."""
+    tried = []
+
     if client is not None:
         try:
             msg = client.messages.create(
@@ -165,24 +178,32 @@ def call_claude(client, system_prompt: str, user_prompt: str) -> str:
             return msg.content[0].text
         except Exception as e:
             err = str(e).lower()
-            recoverable = any(k in err for k in _BILLING_ERRORS)
-            if recoverable:
+            if any(k in err for k in _BILLING_ERRORS):
+                tried.append(f"Anthropic: {str(e)[:200]}")
                 if _GEMINI_OK:
-                    print(f"  [WARN] Anthropic failed ({str(e)[:80]}). Switching to Gemini...")
+                    print(f"  [WARN] Anthropic unavailable (billing). Trying Gemini...")
                 elif _DS_OK:
-                    print(f"  [WARN] Anthropic failed ({str(e)[:80]}). Switching to Qwen...")
-                    return _call_dashscope_txt(system_prompt, user_prompt)
+                    print(f"  [WARN] Anthropic unavailable (billing). Trying Qwen...")
                 else:
                     raise
             else:
                 raise
-    # Gemini fallback
+
     if _GEMINI_OK:
-        return _call_gemini_txt(system_prompt, user_prompt)
-    # DashScope last resort
+        try:
+            return _call_gemini_txt(system_prompt, user_prompt)
+        except Exception as e:
+            tried.append(f"Gemini: {str(e)[:200]}")
+            if _DS_OK:
+                print(f"  [WARN] Gemini failed (quota). Trying DashScope/Qwen...")
+            else:
+                raise RuntimeError(
+                    "All providers failed:\n" + "\n".join(f"  - {p}" for p in tried)
+                )
+
     if _DS_OK:
-        print("  [INFO] Using Qwen (DashScope) for text content...")
         return _call_dashscope_txt(system_prompt, user_prompt)
+
     raise RuntimeError("No AI provider available. Set ANTHROPIC_API_KEY, GEMINI_API_KEY, or DASHSCOPE_API_KEY.")
 
 
@@ -200,7 +221,7 @@ Script excerpt (first section):
 Requirements:
 - 3 paragraphs: hook (2-3 sentences), what viewers will learn (3-4 bullets), CTA
 - Include chapter timestamps from content_spec if available
-- End with: "Subscribe to Chain Clarity for weekly blockchain breakdowns."
+- End with a subscribe CTA that uses the brand name from the system prompt
 - NO forbidden words
 - Professional, educational tone"""
     return call_claude(client, system, user)
@@ -238,7 +259,7 @@ def generate_linkedin_article(client, brand_ctx: str, spec: dict, script: str) -
     user = f"""Write an 800-word LinkedIn article about:
 
 Title: {spec['title']}
-Audience: professionals curious about blockchain technology
+Audience: use the target audience from the system prompt
 
 Script basis:
 {script[:2000]}
@@ -248,9 +269,9 @@ Structure:
 - 3-4 substantive sections with headers
 - Real data points and examples
 - Close: why this matters to professionals
-- CTA: link to full Chain Clarity video
+- CTA: link to the full video on YouTube
 
-Tone: Senior technologist writing for smart non-specialists.
+Tone: use the brand voice and sentence style from the system prompt.
 No forbidden words. No investment advice."""
     return call_claude(client, system, user)
 
@@ -274,7 +295,7 @@ Requirements:
 - Include the YouTube embed placeholder midway through
 - Real examples, data points from the script
 - FAQ section (3 questions + answers) at the end
-- CTA: subscribe to Chain Clarity
+- CTA: subscribe CTA using the brand name from the system prompt
 
 SEO: include primary keyword in H1, first paragraph, and at least 2 H2s.
 No forbidden words. No investment advice."""
@@ -301,17 +322,17 @@ Requirements:
 
 def generate_github_readme(client, brand_ctx: str, spec: dict, script: str) -> str:
     system = brand_ctx + "\n\nWrite a GitHub README in Markdown — no preamble."
-    user = f"""Write a GitHub README.md for the Chain Clarity content repository.
-This README should document Phase {spec['phase']}: {spec['title']}
+    user = f"""Write a GitHub README.md for this content series repository.
+This README documents Phase {spec['phase']}: {spec['title']}
 
 Include:
 - Project badge row: Phase {spec['phase']} | Status: Complete | Brand: Compliant
-- Brief overview (2-3 sentences)
+- Brief overview (2-3 sentences) using the brand name from the system prompt
 - What this phase covers (bullet list from script sections)
 - File structure table (script.md, infographics, subtitles, compliance)
 - Quick links: YouTube video (placeholder), full series
 - Brand guidelines note
-- Chain Clarity series table with all 5 phases (phases 1-3 complete, 4-5 complete)
+- Series table listing all phases
 
 Keep it clean, structured, and developer-friendly."""
     return call_claude(client, system, user)

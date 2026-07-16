@@ -65,7 +65,8 @@ _STEP_OUTPUTS = {
                                     "voiceover_brief.md", "music_brief.md",
                                     "infographics.md", "clip_brief.md", "content_spec.json"]),
     "tts":          ("voiceover", ["voiceover"]),
-    "create_video": ("video",     ["youtube", "youtube_shorts"]),   # inside _output/phase_NN/
+    "create_video":     ("video",     ["youtube", "youtube_shorts"]),   # inside _output/phase_NN/
+    "remotion_compose": ("video",     ["youtube", "youtube_shorts"]),
     "platform_cut": ("platform",  ["tiktok", "instagram", "twitter", "linkedin"]),
     "text_content": ("text",      ["blog", "github"]),
     "compliance":   ("compliance", ["compliance_report_auto.md"]),
@@ -1553,7 +1554,22 @@ class Handler(BaseHTTPRequestHandler):
         phase    = int(data.get("phase", 1))
         cmd_type = data.get("cmd_type", "generate")
 
-        if cmd_type == "create_video":
+        if cmd_type == "remotion_compose":
+            remotion_out = data.get(
+                "remotion_out",
+                os.environ.get("REMOTION_OUT_DIR", r"D:\claude_project\LearnRemotion\out")
+            )
+            cmd = [sys.executable,
+                   str(BASE_DIR / "tools" / "video" / "remotion_composer.py"),
+                   "--project", project, "--phase", str(phase),
+                   "--remotion-out", remotion_out,
+                   "--shorts"]
+            if data.get("burn_subs"):
+                cmd.append("--burn-subs")
+            if data.get("keep_audio"):
+                cmd.append("--keep-audio")
+
+        elif cmd_type == "create_video":
             cmd = [sys.executable,
                    str(BASE_DIR / "tools" / "video" / "create_video.py"),
                    "--project", project, "--phase", str(phase),

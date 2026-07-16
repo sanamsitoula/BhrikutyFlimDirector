@@ -137,14 +137,14 @@ def _brand_profile(slug: str, name: str, tagline: str, niche: str,
 
 
 def _brand_guidelines(profile: dict) -> str:
-    slug  = profile["brand_slug"]
-    name  = profile["brand_name"]
-    tag   = profile["tagline"]
-    niche = profile["niche"]
-    tone  = profile["tone_of_voice"]
-    colors = profile["colors"]
-    typo   = profile["typography"]
-    pillars = profile["content_pillars"]
+    slug  = profile.get("brand_slug", "")
+    name  = profile.get("brand_name", slug)
+    tag   = profile.get("tagline", "")
+    niche = profile.get("niche", "")
+    tone  = profile.get("tone_of_voice", {})
+    colors = profile.get("colors", {})
+    typo   = profile.get("typography", {})
+    pillars = profile.get("content_pillars", [])
     forbidden = ", ".join(tone.get("forbidden_words", []))
 
     return f"""# {name} — Brand Guidelines
@@ -183,11 +183,11 @@ def _brand_guidelines(profile: dict) -> str:
 
 | Role | Name | Hex | Usage |
 |------|------|-----|-------|
-| Primary | {colors["primary"]["name"]} | `{colors["primary"]["hex"]}` | {colors["primary"]["usage"]} |
-| Secondary | {colors["secondary"]["name"]} | `{colors["secondary"]["hex"]}` | {colors["secondary"]["usage"]} |
-| Neutral | {colors["neutral"]["name"]} | `{colors["neutral"]["hex"]}` | {colors["neutral"]["usage"]} |
-| Background | {colors["background"]["name"]} | `{colors["background"]["hex"]}` | {colors["background"]["usage"]} |
-| Highlight | {colors["highlight"]["name"]} | `{colors["highlight"]["hex"]}` | {colors["highlight"]["usage"]} |
+| Primary | {colors.get("primary",{}).get("name","")} | `{colors.get("primary",{}).get("hex","")}` | {colors.get("primary",{}).get("usage","")} |
+| Secondary | {colors.get("secondary",{}).get("name","")} | `{colors.get("secondary",{}).get("hex","")}` | {colors.get("secondary",{}).get("usage","")} |
+| Neutral | {colors.get("neutral",{}).get("name","")} | `{colors.get("neutral",{}).get("hex","")}` | {colors.get("neutral",{}).get("usage","")} |
+| Background | {colors.get("background",{}).get("name","")} | `{colors.get("background",{}).get("hex","")}` | {colors.get("background",{}).get("usage","")} |
+| Highlight | {colors.get("highlight",{}).get("name","")} | `{colors.get("highlight",{}).get("hex","")}` | {colors.get("highlight",{}).get("usage","")} |
 
 **Rule:** Use hex values only. Never use CSS color names (`red`, `blue`, etc.).
 
@@ -197,11 +197,11 @@ def _brand_guidelines(profile: dict) -> str:
 
 | Role | Font | Min Size |
 |------|------|----------|
-| Headings | {typo["heading_font"]} | {typo["min_header_size_px"]}px |
-| Body | {typo["body_font"]} | {typo["min_body_size_px"]}px |
-| Code | {typo["code_font"]} | — |
+| Headings | {typo.get("heading_font","Space Grotesk")} | {typo.get("min_header_size_px",72)}px |
+| Body | {typo.get("body_font","Inter")} | {typo.get("min_body_size_px",48)}px |
+| Code | {typo.get("code_font","JetBrains Mono")} | - |
 
-**Rule:** Always load fonts from Google Fonts CDN. Max {typo["max_words_per_line"]} words per line.
+**Rule:** Always load fonts from Google Fonts CDN. Max {typo.get("max_words_per_line",7)} words per line.
 
 ---
 
@@ -230,7 +230,7 @@ def _brand_guidelines(profile: dict) -> str:
 
 - **Instagram Post / YouTube Thumbnail card:** 1080×1080px
 - **Reels / Stories:** 1080×1920px
-- Background always: `{colors["background"]["hex"]}`
+- Background always: `{colors.get("background",{}).get("hex","")}`
 - All 5 brand colors must appear somewhere on each card
 - Text must pass WCAG AA contrast against background
 
@@ -390,8 +390,8 @@ python tools/text_content_generator.py --project {"{brand_slug}"} --phase {phase
 
 
 def _setup_guide(profile: dict) -> str:
-    slug = profile["brand_slug"]
-    name = profile["brand_name"]
+    slug = profile.get("brand_slug", "")
+    name = profile.get("brand_name", slug)
     return f"""# {name} — Setup & Next Steps
 
 Your brand **{name}** (`{slug}`) has been created. Follow these steps to produce your first video.

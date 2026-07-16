@@ -1,7 +1,7 @@
 -- =============================================================
 --  Bhrikuty Film Director — PostgreSQL Schema
---  Database : press_jemc
---  Run once : psql -U postgres -d press_jemc -f db/schema.sql
+--  Database : bhrikutyflimdirector
+--  Run once : psql -U postgres -d bhrikutyflimdirector -f db/schema.sql
 -- =============================================================
 
 -- ── Extensions ────────────────────────────────────────────────
@@ -107,6 +107,34 @@ CREATE TABLE IF NOT EXISTS content_specs (
     UNIQUE (brand_slug, phase_num)
 );
 
+-- ── Content views (dashboard view/action log) ──────────────────
+CREATE TABLE IF NOT EXISTS content_views (
+    id         SERIAL PRIMARY KEY,
+    brand_slug VARCHAR(100) NOT NULL,
+    phase_num  INTEGER      NOT NULL,
+    step_key   VARCHAR(200),
+    file_name  VARCHAR(500),
+    action     VARCHAR(500),
+    viewed_at  TIMESTAMP    DEFAULT NOW()
+);
+
+-- ── Asset versions (mirrors on-disk .versions/{step}/vN/ history) ──
+CREATE TABLE IF NOT EXISTS asset_versions (
+    id          SERIAL PRIMARY KEY,
+    brand_slug  VARCHAR(100) NOT NULL,
+    phase_num   INTEGER      NOT NULL,
+    step_key    VARCHAR(100) NOT NULL,
+    file_name   VARCHAR(500) NOT NULL,
+    version     INTEGER      NOT NULL DEFAULT 1,
+    file_path   TEXT,
+    media_url   TEXT,
+    file_size   BIGINT       DEFAULT 0,
+    extra       JSONB        DEFAULT '{}',
+    run_id      VARCHAR(64),
+    created_at  TIMESTAMP    DEFAULT NOW(),
+    UNIQUE (brand_slug, phase_num, file_name, version)
+);
+
 -- ── Auto-update updated_at ────────────────────────────────────
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
@@ -133,6 +161,8 @@ CREATE INDEX IF NOT EXISTS idx_pipeline_runs_brand ON pipeline_runs(brand_slug, 
 CREATE INDEX IF NOT EXISTS idx_gen_files_brand     ON generated_files(brand_slug, phase_num);
 CREATE INDEX IF NOT EXISTS idx_compliance_brand    ON compliance_logs(brand_slug, phase_num);
 CREATE INDEX IF NOT EXISTS idx_content_specs_brand ON content_specs(brand_slug, phase_num);
+CREATE INDEX IF NOT EXISTS idx_content_views_brand ON content_views(brand_slug, phase_num);
+CREATE INDEX IF NOT EXISTS idx_asset_versions_lookup ON asset_versions(brand_slug, phase_num, step_key);
 
 -- ── Seed: import existing file-based brands (run manually) ────
 -- INSERT INTO brands (slug, name) VALUES ('chain_clarity', 'Chain Clarity')

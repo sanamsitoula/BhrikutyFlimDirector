@@ -217,7 +217,7 @@ def apply_db_schema():
 
     host = cfg.get("DB_HOST", "localhost")
     port = cfg.get("DB_PORT", "5432")
-    name = cfg.get("DB_NAME", "press_jemc")
+    name = cfg.get("DB_NAME", "bhrikutyflimdirector")
     user = cfg.get("DB_USER", "postgres")
     pw   = cfg.get("DB_PASSWORD", "")
 
